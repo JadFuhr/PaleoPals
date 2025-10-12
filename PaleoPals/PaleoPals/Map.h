@@ -16,7 +16,7 @@ struct Layer
         : name(n), texture(std::move(tex)), sprite(std::move(spr)), depth(d) {
     }
 
-    // Delete default and copy constructors
+    // delete, default and copy constructors
     Layer() = delete;
     Layer(const Layer&) = delete;
     Layer& operator=(const Layer&) = delete;

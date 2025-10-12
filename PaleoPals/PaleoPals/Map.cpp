@@ -7,7 +7,7 @@ using json = nlohmann::json;
 
 Map::Map()
 {
-    // nothing to initialize here
+    
 }
 
 bool Map::loadFromConfig(const std::string& filepath)
@@ -38,7 +38,7 @@ bool Map::loadFromConfig(const std::string& filepath)
                 return false;
             }
 
-            sf::Sprite sprite;
+            sf::Sprite sprite{ texture };
             sprite.setTexture(texture);
             sprite.setPosition(sf::Vector2f(0.f, 0.f));
 
@@ -58,9 +58,7 @@ bool Map::loadFromConfig(const std::string& filepath)
 void Map::draw(sf::RenderWindow& window)
 {
     // Draw layers back to front by depth
-    std::sort(m_layers.begin(), m_layers.end(), [](const Layer& a, const Layer& b) {
-        return a.depth < b.depth;
-        });
+    std::sort(m_layers.begin(), m_layers.end(), [](const Layer& a, const Layer& b) { return a.depth < b.depth; });
 
     for (auto& layer : m_layers)
     {
