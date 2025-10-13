@@ -15,7 +15,6 @@ bool Map::loadFromConfig(const std::string& filepath)
         std::cerr << "Failed to open JSON config: " << filepath << std::endl;
         return false;
     }
-
     try
     {
         json config;
@@ -47,28 +46,55 @@ bool Map::loadFromConfig(const std::string& filepath)
     return true;
 }
 
-void Map::generateGrid(int rows, int cols, float tileSize)
+void Map::generateGrid(int rows, int cols, float tileSize, float windowWidth, float windowHeight)
 {
     m_tiles.clear();
+
+    float totalGridHeight = rows * tileSize;
+    float totalGridWidth = cols * tileSize;
+
+
+    // Start at the middle of the screen
+    float offsetY = windowHeight / 2.0f;
+
+    float offsetX = (windowWidth - totalGridWidth) / 2.0f;
 
     for (int row = 0; row < rows; ++row)
     {
         for (int col = 0; col < cols; ++col)
         {
-            // Pick layer based on depth (e.g. top rows = topsoil, deeper = bedrock)
-            int layerIndex = std::min(row / 4, (int)m_layerTypes.size() - 1); // adjust 4 to control layer thickness
+            int layerIndex = 0; // default topsoil
+
+            if (row == 0)
+            {
+                layerIndex = 0; // topsoil
+            }
+            else if (row < 7)
+            {
+                layerIndex = 1; // sediment (rows 1–6)
+            }               
+            else if (row < 12)
+            {
+                layerIndex = 2; // rock (rows 7–11)
+            }
+            else
+            {
+                layerIndex = 3; // bedrock (rows 12+)
+            }
+
+
             const LayerType& layerType = m_layerTypes[layerIndex];
 
-            Tile tile;
-            tile.sprite.setTexture(layerType.texture);
-            tile.sprite.setPosition(sf::Vector2f(col * tileSize, row * tileSize));
-            tile.sprite.setScale(sf::Vector2f(tileSize / layerType.texture.getSize().x, tileSize / layerType.texture.getSize().y));
-            tile.layerDepth = layerType.depth;
+            m_tiles.emplace_back(layerType.texture, sf::Vector2f(col * tileSize + offsetX, row * tileSize + offsetY), layerType.depth);
 
-            m_tiles.push_back(tile);
+            m_tiles.back().sprite.setScale(sf::Vector2f(tileSize / layerType.texture.getSize().x, tileSize / layerType.texture.getSize().y));
         }
     }
 }
+
+
+
+
 
 void Map::draw(sf::RenderWindow& window)
 {

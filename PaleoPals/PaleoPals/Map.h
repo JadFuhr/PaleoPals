@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <json.hpp>
+#include "constants.h"
 
 struct LayerType
 {
@@ -17,24 +18,24 @@ public:
     sf::Sprite sprite;
     int layerDepth = 0;
 
-    // Default constructor
-    Tile() = default;
-
-    // Constructor with parameters
+    // Constructor with parameters (mandatory)
     Tile(const sf::Texture& texture, const sf::Vector2f& pos, int depth)
-        : layerDepth(depth)
+        : sprite(texture), layerDepth(depth)
     {
-        sprite = sf::Sprite(texture);
         sprite.setPosition(pos);
     }
+
+    // Delete default constructor to avoid misuse
+    Tile() = delete;
 };
+
 
 class Map
 {
 public:
     Map();
     bool loadFromConfig(const std::string& filepath);
-    void generateGrid(int rows, int cols, float tileSize);
+    void generateGrid(int rows, int cols, float tileSize, float windowWidth, float windowHeight);
     void draw(sf::RenderWindow& window);
 
 private:

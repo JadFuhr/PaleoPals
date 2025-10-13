@@ -3,7 +3,8 @@
     "layers": [
       {"name": "Topsoil", "texture": "ASSETS/IMAGES/Terrain/Topsoil.png", "depth": 0},
       {"name": "Sediment", "texture": "ASSETS/IMAGES/Terrain/Sediment.png", "depth": 1},
-      {"name": "Bedrock", "texture": "ASSETS/IMAGES/Terrain/Bedrock.png", "depth": 2}
+      {"name": "Rock", "texture": "ASSETS/IMAGES/Terrain/Rock.png", "depth": 2},
+      {"name": "Bedrock", "texture": "ASSETS/IMAGES/Terrain/Bedrock.png", "depth": 3}
     ]
   }
 }

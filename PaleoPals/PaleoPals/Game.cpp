@@ -2,13 +2,15 @@
 
 #include "Game.h"
 #include "Map.h"
+#include "constants.h"
 #include <iostream>
+
 
 //------------------------------------------------------------
 // Constructor
 //------------------------------------------------------------
 Game::Game() :
-    m_window{ sf::VideoMode{ sf::Vector2u{800U, 600U}, 32U }, "PaleoPals" },
+    m_window{ sf::VideoMode{ sf::Vector2u{WINDOW_X, WINDOW_Y}, 32U }, "PaleoPals" },
     m_DELETEexitGame{ false }
 {
     setupTexts();   // load font and text
@@ -109,14 +111,14 @@ void Game::update(sf::Time t_deltaTime)
 //------------------------------------------------------------
 void Game::render()
 {
-    m_window.clear(ULTRAMARINE);
+    m_window.clear();
 
     // Draw the map first (background)
     m_map.draw(m_window);
 
     // Draw logo and text on top
-    m_window.draw(m_DELETElogoSprite);
-    m_window.draw(m_DELETEwelcomeMessage);
+   // m_window.draw(m_DELETElogoSprite);
+   // m_window.draw(m_DELETEwelcomeMessage);
 
     m_window.display();
 }
@@ -169,19 +171,18 @@ void Game::setupAudio()
 }
 
 //------------------------------------------------------------
-// Setup Map (NEW FUNCTION)
+// Setup Map
 //------------------------------------------------------------
 void Game::setupMap()
 {
-    if (!m_map.loadFromConfig("ASSETS/map.json"))
+    if (!m_map.loadFromConfig("ASSETS/CONFIG/map.json"))
     {
         std::cerr << "Failed to load map config file!\n";
     }
 
-    // You can tweak these values as needed:
-    int rows = 10;       // number of rows
-    int cols = 16;       // number of columns
-    float tileSize = 64; // each tile = 64×64 pixels
+    int cols = 75;
+    int rows = 19;
+    float tileSize = 24.0f; // 24x24 pixels per tile
 
-    m_map.generateGrid(rows, cols, tileSize);
+    m_map.generateGrid(rows, cols, tileSize, WINDOW_X, WINDOW_Y);
 }
