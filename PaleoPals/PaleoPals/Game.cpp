@@ -1,171 +1,187 @@
 /// author Jad Fuhr
 
 #include "Game.h"
+#include "Map.h"
 #include <iostream>
 
-
-
-/// <summary>
-/// default constructor
-/// </summary>
+//------------------------------------------------------------
+// Constructor
+//------------------------------------------------------------
 Game::Game() :
-	m_window{ sf::VideoMode{ sf::Vector2u{800U, 600U}, 32U }, "SFML Game 3.0" },
-	m_DELETEexitGame{false} //when true game will exit
+    m_window{ sf::VideoMode{ sf::Vector2u{800U, 600U}, 32U }, "PaleoPals" },
+    m_DELETEexitGame{ false }
 {
-	setupTexts(); // load font 
-	setupSprites(); // load texture
-	setupAudio(); // load sounds
+    setupTexts();   // load font and text
+    setupSprites(); // load logo sprite
+    setupAudio();   // load and play sound
+    setupMap();     // NEW: load and generate the map
 }
 
-/// <summary>
-/// default destructor we didn't dynamically allocate anything
-/// so we don't need to free it, but mthod needs to be here
-/// </summary>
+//------------------------------------------------------------
+// Destructor
+//------------------------------------------------------------
 Game::~Game()
 {
 }
 
-
-/// <summary>
-/// main game loop
-/// update 60 times per second,
-/// process update as often as possible and at least 60 times per second
-/// draw as often as possible but only updates are on time
-/// if updates run slow then don't render frames
-/// </summary>
+//------------------------------------------------------------
+// Main Game Loop
+//------------------------------------------------------------
 void Game::run()
-{	
-	sf::Clock clock;
-	sf::Time timeSinceLastUpdate = sf::Time::Zero;
-	const float fps{ 60.0f };
-	sf::Time timePerFrame = sf::seconds(1.0f / fps); // 60 fps
-	while (m_window.isOpen())
-	{
-		processEvents(); // as many as possible
-		timeSinceLastUpdate += clock.restart();
-		while (timeSinceLastUpdate > timePerFrame)
-		{
-			timeSinceLastUpdate -= timePerFrame;
-			processEvents(); // at least 60 fps
-			update(timePerFrame); //60 fps
-		}
-		render(); // as many as possible
-	}
+{
+    sf::Clock clock;
+    sf::Time timeSinceLastUpdate = sf::Time::Zero;
+    const float fps{ 60.0f };
+    sf::Time timePerFrame = sf::seconds(1.0f / fps); // 60 fps
+
+    while (m_window.isOpen())
+    {
+        processEvents();
+        timeSinceLastUpdate += clock.restart();
+
+        while (timeSinceLastUpdate > timePerFrame)
+        {
+            timeSinceLastUpdate -= timePerFrame;
+            processEvents();
+            update(timePerFrame);
+        }
+
+        render();
+    }
 }
-/// <summary>
-/// handle user and system events/ input
-/// get key presses/ mouse moves etc. from OS
-/// and user :: Don't do game update here
-/// </summary>
+
+//------------------------------------------------------------
+// Process Events (inputs, system events)
+//------------------------------------------------------------
 void Game::processEvents()
 {
-	
-	while (const std::optional newEvent = m_window.pollEvent())
-	{
-		if ( newEvent->is<sf::Event::Closed>()) // close window message 
-		{
-			m_DELETEexitGame = true;
-		}
-		if (newEvent->is<sf::Event::KeyPressed>()) //user pressed a key
-		{
-			processKeys(newEvent);
-		}
-	}
+    while (const std::optional newEvent = m_window.pollEvent())
+    {
+        if (newEvent->is<sf::Event::Closed>())
+        {
+            m_DELETEexitGame = true;
+        }
+        if (newEvent->is<sf::Event::KeyPressed>())
+        {
+            processKeys(newEvent);
+        }
+    }
 }
 
-
-/// <summary>
-/// deal with key presses from the user
-/// </summary>
-/// <param name="t_event">key press event</param>
+//------------------------------------------------------------
+// Handle key presses
+//------------------------------------------------------------
 void Game::processKeys(const std::optional<sf::Event> t_event)
 {
-	const sf::Event::KeyPressed *newKeypress = t_event->getIf<sf::Event::KeyPressed>();
-	if (sf::Keyboard::Key::Escape == newKeypress->code)
-	{
-		m_DELETEexitGame = true; 
-	}
+    const sf::Event::KeyPressed* newKeypress = t_event->getIf<sf::Event::KeyPressed>();
+    if (sf::Keyboard::Key::Escape == newKeypress->code)
+    {
+        m_DELETEexitGame = true;
+    }
 }
 
-/// <summary>
-/// Check if any keys are currently pressed
-/// </summary>
+//------------------------------------------------------------
+// Check continuous keyboard state
+//------------------------------------------------------------
 void Game::checkKeyboardState()
 {
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Escape))
-	{
-		m_DELETEexitGame = true; 
-	}
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Escape))
+    {
+        m_DELETEexitGame = true;
+    }
 }
 
-/// <summary>
-/// Update the game world
-/// </summary>
-/// <param name="t_deltaTime">time interval per frame</param>
+//------------------------------------------------------------
+// Update the game world
+//------------------------------------------------------------
 void Game::update(sf::Time t_deltaTime)
 {
-	checkKeyboardState();
-	if (m_DELETEexitGame)
-	{
-		m_window.close();
-	}
+    checkKeyboardState();
+
+    if (m_DELETEexitGame)
+    {
+        m_window.close();
+    }
 }
 
-/// <summary>
-/// draw the frame and then switch buffers
-/// </summary>
+//------------------------------------------------------------
+// Render everything
+//------------------------------------------------------------
 void Game::render()
 {
-	m_window.clear(ULTRAMARINE);
+    m_window.clear(ULTRAMARINE);
 
-	m_window.draw(m_DELETElogoSprite);
-	m_window.draw(m_DELETEwelcomeMessage);
-	
-	m_window.display();
+    // Draw the map first (background)
+    m_map.draw(m_window);
+
+    // Draw logo and text on top
+    m_window.draw(m_DELETElogoSprite);
+    m_window.draw(m_DELETEwelcomeMessage);
+
+    m_window.display();
 }
 
-/// <summary>
-/// load the font and setup the text message for screen
-/// </summary>
+//------------------------------------------------------------
+// Load the font and setup text
+//------------------------------------------------------------
 void Game::setupTexts()
 {
-	if (!m_jerseyFont.openFromFile("ASSETS\\FONTS\\Jersey20-Regular.ttf"))
-	{
-		std::cout << "problem loading arial black font" << std::endl;
-	}
-	m_DELETEwelcomeMessage.setFont(m_jerseyFont);
-	m_DELETEwelcomeMessage.setString("SFML Game");
-	m_DELETEwelcomeMessage.setPosition(sf::Vector2f{ 205.0f, 240.0f });
-	m_DELETEwelcomeMessage.setCharacterSize(96U);
-	m_DELETEwelcomeMessage.setOutlineColor(sf::Color::Black);
-	m_DELETEwelcomeMessage.setFillColor(sf::Color::Red);
-	m_DELETEwelcomeMessage.setOutlineThickness(2.0f);
+    if (!m_jerseyFont.openFromFile("ASSETS/FONTS/Jersey20-Regular.ttf"))
+    {
+        std::cout << "Problem loading font\n";
+    }
 
+    m_DELETEwelcomeMessage.setFont(m_jerseyFont);
+    m_DELETEwelcomeMessage.setString("PaleoPals");
+    m_DELETEwelcomeMessage.setPosition(sf::Vector2f{ 205.0f, 240.0f });
+    m_DELETEwelcomeMessage.setCharacterSize(96U);
+    m_DELETEwelcomeMessage.setOutlineColor(sf::Color::Black);
+    m_DELETEwelcomeMessage.setFillColor(sf::Color::Red);
+    m_DELETEwelcomeMessage.setOutlineThickness(2.0f);
 }
 
-/// <summary>
-/// load the texture and setup the sprite for the logo
-/// </summary>
+//------------------------------------------------------------
+// Load texture and setup logo sprite
+//------------------------------------------------------------
 void Game::setupSprites()
 {
-	if (!m_DELETElogoTexture.loadFromFile("ASSETS\\IMAGES\\SFML-LOGO.png"))
-	{
-		// simple error message if previous call fails
-		std::cout << "problem loading logo" << std::endl;
-	}
-	
-	m_DELETElogoSprite.setTexture(m_DELETElogoTexture,true);// to reset the dimensions of texture
-	m_DELETElogoSprite.setPosition(sf::Vector2f{ 150.0f, 50.0f });
+    if (!m_DELETElogoTexture.loadFromFile("ASSETS/IMAGES/SFML-LOGO.png"))
+    {
+        std::cout << "Problem loading logo\n";
+    }
+
+    m_DELETElogoSprite.setTexture(m_DELETElogoTexture, true);
+    m_DELETElogoSprite.setPosition(sf::Vector2f{ 150.0f, 50.0f });
 }
 
-/// <summary>
-/// load sound file and assign buffers
-/// </summary>
+//------------------------------------------------------------
+// Load audio
+//------------------------------------------------------------
 void Game::setupAudio()
 {
-	if (!m_DELETEsoundBuffer.loadFromFile("ASSETS\\AUDIO\\beep.wav"))
-	{
-		std::cout << "Error loading beep sound" << std::endl;
-	}
-	m_DELETEsound.play(); // test sound
+    if (!m_DELETEsoundBuffer.loadFromFile("ASSETS/AUDIO/beep.wav"))
+    {
+        std::cout << "Error loading beep sound\n";
+    }
+
+    m_DELETEsound.setBuffer(m_DELETEsoundBuffer);
+    m_DELETEsound.play();
+}
+
+//------------------------------------------------------------
+// Setup Map (NEW FUNCTION)
+//------------------------------------------------------------
+void Game::setupMap()
+{
+    if (!m_map.loadFromConfig("ASSETS/map.json"))
+    {
+        std::cerr << "Failed to load map config file!\n";
+    }
+
+    // You can tweak these values as needed:
+    int rows = 10;       // number of rows
+    int cols = 16;       // number of columns
+    float tileSize = 64; // each tile = 64×64 pixels
+
+    m_map.generateGrid(rows, cols, tileSize);
 }

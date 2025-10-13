@@ -5,10 +5,7 @@
 
 using json = nlohmann::json;
 
-Map::Map()
-{
-    
-}
+Map::Map() {}
 
 bool Map::loadFromConfig(const std::string& filepath)
 {
@@ -28,22 +25,17 @@ bool Map::loadFromConfig(const std::string& filepath)
 
         for (auto& layerNode : layers)
         {
-            std::string name = layerNode["name"].get<std::string>();
-            int depth = layerNode["depth"].get<int>();
-            sf::Texture texture;
+            LayerType layer;
+            layer.name = layerNode["name"].get<std::string>();
+            layer.depth = layerNode["depth"].get<int>();
 
-            if (!texture.loadFromFile(layerNode["texture"].get<std::string>()))
+            if (!layer.texture.loadFromFile(layerNode["texture"].get<std::string>()))
             {
-                std::cerr << "Failed to load texture for layer: " << name << std::endl;
+                std::cerr << "Failed to load texture for layer: " << layer.name << std::endl;
                 return false;
             }
 
-            sf::Sprite sprite{ texture };
-            sprite.setTexture(texture);
-            sprite.setPosition(sf::Vector2f(0.f, 0.f));
-
-            // Move into the vector to avoid copying non-copyable SFML objects
-            m_layers.emplace_back(Layer{ name, std::move(texture), std::move(sprite), depth });
+            m_layerTypes.push_back(std::move(layer));
         }
     }
     catch (const std::exception& e)
@@ -55,13 +47,33 @@ bool Map::loadFromConfig(const std::string& filepath)
     return true;
 }
 
+void Map::generateGrid(int rows, int cols, float tileSize)
+{
+    m_tiles.clear();
+
+    for (int row = 0; row < rows; ++row)
+    {
+        for (int col = 0; col < cols; ++col)
+        {
+            // Pick layer based on depth (e.g. top rows = topsoil, deeper = bedrock)
+            int layerIndex = std::min(row / 4, (int)m_layerTypes.size() - 1); // adjust 4 to control layer thickness
+            const LayerType& layerType = m_layerTypes[layerIndex];
+
+            Tile tile;
+            tile.sprite.setTexture(layerType.texture);
+            tile.sprite.setPosition(sf::Vector2f(col * tileSize, row * tileSize));
+            tile.sprite.setScale(sf::Vector2f(tileSize / layerType.texture.getSize().x, tileSize / layerType.texture.getSize().y));
+            tile.layerDepth = layerType.depth;
+
+            m_tiles.push_back(tile);
+        }
+    }
+}
+
 void Map::draw(sf::RenderWindow& window)
 {
-    // Draw layers back to front by depth
-    std::sort(m_layers.begin(), m_layers.end(), [](const Layer& a, const Layer& b) { return a.depth < b.depth; });
-
-    for (auto& layer : m_layers)
+    for (auto& tile : m_tiles)
     {
-        window.draw(layer.sprite);
+        window.draw(tile.sprite);
     }
 }

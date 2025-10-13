@@ -4,26 +4,29 @@
 #include <vector>
 #include <json.hpp>
 
-struct Layer
+struct LayerType
 {
     std::string name;
     sf::Texture texture;
-    sf::Sprite sprite;
     int depth;
+};
 
-    // Constructor using move semantics
-    Layer(const std::string& n, sf::Texture&& tex, sf::Sprite&& spr, int d)
-        : name(n), texture(std::move(tex)), sprite(std::move(spr)), depth(d) {
+class Tile
+{
+public:
+    sf::Sprite sprite;
+    int layerDepth = 0;
+
+    // Default constructor
+    Tile() = default;
+
+    // Constructor with parameters
+    Tile(const sf::Texture& texture, const sf::Vector2f& pos, int depth)
+        : layerDepth(depth)
+    {
+        sprite = sf::Sprite(texture);
+        sprite.setPosition(pos);
     }
-
-    // delete, default and copy constructors
-    Layer() = delete;
-    Layer(const Layer&) = delete;
-    Layer& operator=(const Layer&) = delete;
-
-    // Allow move
-    Layer(Layer&&) = default;
-    Layer& operator=(Layer&&) = default;
 };
 
 class Map
@@ -31,8 +34,10 @@ class Map
 public:
     Map();
     bool loadFromConfig(const std::string& filepath);
+    void generateGrid(int rows, int cols, float tileSize);
     void draw(sf::RenderWindow& window);
 
 private:
-    std::vector<Layer> m_layers;
+    std::vector<LayerType> m_layerTypes; // list of all available terrain textures
+    std::vector<Tile> m_tiles;           // grid of tiles created from those textures
 };
