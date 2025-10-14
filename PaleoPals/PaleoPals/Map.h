@@ -9,18 +9,18 @@ struct LayerType
 {
     std::string name;
     sf::Texture texture;
-    int depth;
+    int hardness;
 };
 
 class Tile
 {
 public:
     sf::Sprite sprite;
-    int layerDepth = 0;
+    int layerHardness = 0;
 
     // Constructor 
-    Tile(const sf::Texture& texture, const sf::Vector2f& pos, int depth)
-        : sprite(texture), layerDepth(depth)
+    Tile(const sf::Texture& texture, const sf::Vector2f& pos, int hardness)
+        : sprite(texture), layerHardness(hardness)
     {
         sprite.setPosition(pos);
     }

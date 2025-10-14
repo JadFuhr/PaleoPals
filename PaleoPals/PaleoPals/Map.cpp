@@ -26,7 +26,7 @@ bool Map::loadFromConfig(const std::string& filepath)
         {
             LayerType layer;
             layer.name = layerNode["name"].get<std::string>();
-            layer.depth = layerNode["depth"].get<int>();
+            layer.hardness = layerNode["hardness"].get<int>();
 
             if (!layer.texture.loadFromFile(layerNode["texture"].get<std::string>()))
             {
@@ -85,7 +85,7 @@ void Map::generateGrid(int rows, int cols, float tileSize, float windowWidth, fl
 
             const LayerType& layerType = m_layerTypes[layerIndex];
 
-            m_tiles.emplace_back(layerType.texture, sf::Vector2f(col * tileSize + offsetX, row * tileSize + offsetY), layerType.depth);
+            m_tiles.emplace_back(layerType.texture, sf::Vector2f(col * tileSize + offsetX, row * tileSize + offsetY), layerType.hardness);
 
             m_tiles.back().sprite.setScale(sf::Vector2f(tileSize / layerType.texture.getSize().x, tileSize / layerType.texture.getSize().y));
         }
@@ -157,14 +157,14 @@ void Map::updateHover(const sf::RenderWindow& window, float tileSize, int cols)
             std::string tileName = "Unknown";
             for (const auto& layer : m_layerTypes)
             {
-                if (layer.depth == hoveredTile.layerDepth)
+                if (layer.hardness == hoveredTile.layerHardness)
                 {
                     tileName = layer.name;
                     break;
                 }
             }
 
-            std::cout << "Tile type: " << tileName << std::endl;
+            std::cout << "Tile type: " << tileName  << ", " << tileSize << " px " << std::endl;
         }
 
         // Draw outline on hovered tile
