@@ -93,13 +93,100 @@ void Map::generateGrid(int rows, int cols, float tileSize, float windowWidth, fl
 }
 
 
-
-
-
 void Map::draw(sf::RenderWindow& window)
 {
     for (auto& tile : m_tiles)
     {
         window.draw(tile.sprite);
+    }
+}
+
+
+void Map::toggleDebugMode()
+{
+    m_debugMode = !m_debugMode;
+
+    if (m_debugMode)
+    {
+        std::cout << "Debug mode ON\n";
+    }
+    else
+    {
+        std::cout << "Debug mode OFF\n";
+    }
+}
+
+
+void Map::updateHover(const sf::RenderWindow& window, float tileSize, int cols)
+{
+    if (!m_debugMode) return; // (only if debug is activated)
+
+    sf::Vector2i mousePixel = sf::Mouse::getPosition(window);
+    sf::Vector2f mouseWorld = window.mapPixelToCoords(mousePixel);
+
+    // Compute grid starting offsets (like generateGrid)
+    int rows = static_cast<int>(m_tiles.size() / cols);
+    float totalGridHeight = rows * tileSize;
+    float totalGridWidth = cols * tileSize;
+    float offsetY = WINDOW_Y / 2.0f;
+    float offsetX = (WINDOW_X - totalGridWidth) / 2.0f;
+
+    
+    float localX = mouseWorld.x - offsetX;
+    float localY = mouseWorld.y - offsetY;
+
+    // Skip if outside the grid bounds
+    if (localX < 0 || localY < 0 || localX >= totalGridWidth || localY >= totalGridHeight)
+    {
+        m_hoveredIndex = -1;
+        return;
+    }
+
+    // Calculate which tile the mouse is over
+    int tileX = static_cast<int>(localX / tileSize);
+    int tileY = static_cast<int>(localY / tileSize);
+    int index = tileY * cols + tileX;
+
+    if (index >= 0 && index < static_cast<int>(m_tiles.size()))
+    {
+        if (index != m_hoveredIndex)
+        {
+            m_hoveredIndex = index;
+
+            const Tile& hoveredTile = m_tiles[m_hoveredIndex];
+            std::string tileName = "Unknown";
+            for (const auto& layer : m_layerTypes)
+            {
+                if (layer.depth == hoveredTile.layerDepth)
+                {
+                    tileName = layer.name;
+                    break;
+                }
+            }
+
+            std::cout << "Tile type: " << tileName << std::endl;
+        }
+
+        // Draw outline on hovered tile
+        const Tile& hoveredTile = m_tiles[m_hoveredIndex];
+        m_hoverOutline.setSize(sf::Vector2f(tileSize, tileSize));
+        m_hoverOutline.setPosition(hoveredTile.sprite.getPosition());
+        m_hoverOutline.setFillColor(sf::Color::Transparent);
+        m_hoverOutline.setOutlineColor(sf::Color::White);
+        m_hoverOutline.setOutlineThickness(1.f);
+    }
+    else
+    {
+        m_hoveredIndex = -1;
+    }
+}
+
+
+
+void Map::drawDebug(sf::RenderWindow& window)
+{
+    if (m_debugMode && m_hoveredIndex != -1)
+    {
+        window.draw(m_hoverOutline);
     }
 }

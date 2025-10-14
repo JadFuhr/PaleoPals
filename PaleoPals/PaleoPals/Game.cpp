@@ -76,9 +76,15 @@ void Game::processEvents()
 void Game::processKeys(const std::optional<sf::Event> t_event)
 {
     const sf::Event::KeyPressed* newKeypress = t_event->getIf<sf::Event::KeyPressed>();
+
     if (sf::Keyboard::Key::Escape == newKeypress->code)
     {
         m_DELETEexitGame = true;
+    }
+
+    if (sf::Keyboard::Key::F3 == newKeypress->code)
+    {
+        m_map.toggleDebugMode();
     }
 }
 
@@ -100,7 +106,10 @@ void Game::update(sf::Time t_deltaTime)
 {
     checkKeyboardState();
 
+    m_map.updateHover(m_window, 24.0f, 75); 
+
     if (m_DELETEexitGame)
+
     {
         m_window.close();
     }
@@ -115,6 +124,7 @@ void Game::render()
 
     // Draw the map first (background)
     m_map.draw(m_window);
+    m_map.drawDebug(m_window);
 
     // Draw logo and text on top
    // m_window.draw(m_DELETElogoSprite);

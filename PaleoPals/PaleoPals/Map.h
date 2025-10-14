@@ -38,7 +38,15 @@ public:
     void generateGrid(int rows, int cols, float tileSize, float windowWidth, float windowHeight);
     void draw(sf::RenderWindow& window);
 
+    void updateHover(const sf::RenderWindow& window, float tileSize, int cols);
+    void drawDebug(sf::RenderWindow& window);
+    void toggleDebugMode(); 
+
 private:
     std::vector<LayerType> m_layerTypes; // list of all available terrain textures
     std::vector<Tile> m_tiles;           // grid of tiles created from those textures
+
+    int m_hoveredIndex = -1;
+    sf::RectangleShape m_hoverOutline;
+    bool m_debugMode = false; // toggle debug mode 
 };
