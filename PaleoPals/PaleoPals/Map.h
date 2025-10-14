@@ -18,14 +18,14 @@ public:
     sf::Sprite sprite;
     int layerDepth = 0;
 
-    // Constructor with parameters (mandatory)
+    // Constructor 
     Tile(const sf::Texture& texture, const sf::Vector2f& pos, int depth)
         : sprite(texture), layerDepth(depth)
     {
         sprite.setPosition(pos);
     }
 
-    // Delete default constructor to avoid misuse
+    // Delete default constructor 
     Tile() = delete;
 };
 
