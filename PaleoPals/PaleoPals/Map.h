@@ -19,8 +19,13 @@ public:
     int layerDepth = 0;
 
     // Constructor 
+<<<<<<< HEAD
     Tile(const sf::Texture& texture, const sf::Vector2f& pos, int depth)
         : sprite(texture), layerDepth(depth)
+=======
+    Tile(const sf::Texture& texture, const sf::Vector2f& pos, int hardnessValue)
+        : sprite(texture), layerHardness(hardnessValue)
+>>>>>>> 50951e8c5b2c085504a983e469fd46015225b3e8
     {
         sprite.setPosition(pos);
     }

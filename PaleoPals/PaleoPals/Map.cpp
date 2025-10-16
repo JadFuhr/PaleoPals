@@ -73,7 +73,7 @@ void Map::generateGrid(int rows, int cols, float tileSize, float windowWidth, fl
             {
                 layerIndex = 1; // sediment (rows 1–6)
             }               
-            else if (row < 12)
+            else if (row < 14)
             {
                 layerIndex = 2; // rock (rows 7–11)
             }
@@ -119,7 +119,7 @@ void Map::toggleDebugMode()
 
 void Map::updateHover(const sf::RenderWindow& window, float tileSize, int cols)
 {
-    if (!m_debugMode) return; // (only if debug is activated)
+    if (!m_debugMode) return; // (only if debug is active)
 
     sf::Vector2i mousePixel = sf::Mouse::getPosition(window);
     sf::Vector2f mouseWorld = window.mapPixelToCoords(mousePixel);
@@ -155,6 +155,8 @@ void Map::updateHover(const sf::RenderWindow& window, float tileSize, int cols)
 
             const Tile& hoveredTile = m_tiles[m_hoveredIndex];
             std::string tileName = "Unknown";
+            int tileHardness = hoveredTile.layerHardness;
+
             for (const auto& layer : m_layerTypes)
             {
                 if (layer.depth == hoveredTile.layerDepth)
@@ -164,7 +166,7 @@ void Map::updateHover(const sf::RenderWindow& window, float tileSize, int cols)
                 }
             }
 
-            std::cout << "Tile type: " << tileName  << ", " << tileSize << " px " << std::endl;
+            std::cout << "Tile type: " << tileName << " | Hardness: " << tileHardness << std::endl;
         }
 
         // Draw outline on hovered tile
