@@ -19,8 +19,8 @@ public:
     int layerHardness = 0;
 
     // Constructor 
-    Tile(const sf::Texture& texture, const sf::Vector2f& pos, int hardness)
-        : sprite(texture), layerHardness(hardness)
+    Tile(const sf::Texture& texture, const sf::Vector2f& pos, int hardnessValue)
+        : sprite(texture), layerHardness(hardnessValue)
     {
         sprite.setPosition(pos);
     }
