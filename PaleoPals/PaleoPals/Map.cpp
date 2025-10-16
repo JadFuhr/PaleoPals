@@ -26,7 +26,7 @@ bool Map::loadFromConfig(const std::string& filepath)
         {
             LayerType layer;
             layer.name = layerNode["name"].get<std::string>();
-            layer.hardness = layerNode["hardness"].get<int>();
+            layer.depth = layerNode["depth"].get<int>();
 
             if (!layer.texture.loadFromFile(layerNode["texture"].get<std::string>()))
             {
@@ -85,7 +85,7 @@ void Map::generateGrid(int rows, int cols, float tileSize, float windowWidth, fl
 
             const LayerType& layerType = m_layerTypes[layerIndex];
 
-            m_tiles.emplace_back(layerType.texture, sf::Vector2f(col * tileSize + offsetX, row * tileSize + offsetY), layerType.hardness);
+            m_tiles.emplace_back(layerType.texture, sf::Vector2f(col * tileSize + offsetX, row * tileSize + offsetY), layerType.depth);
 
             m_tiles.back().sprite.setScale(sf::Vector2f(tileSize / layerType.texture.getSize().x, tileSize / layerType.texture.getSize().y));
         }
@@ -157,7 +157,7 @@ void Map::updateHover(const sf::RenderWindow& window, float tileSize, int cols)
             std::string tileName = "Unknown";
             for (const auto& layer : m_layerTypes)
             {
-                if (layer.hardness == hoveredTile.layerHardness)
+                if (layer.depth == hoveredTile.layerDepth)
                 {
                     tileName = layer.name;
                     break;
