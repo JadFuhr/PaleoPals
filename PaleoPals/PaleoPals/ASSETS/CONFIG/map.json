@@ -6,5 +6,12 @@
       {"name": "Rock", "texture": "ASSETS/IMAGES/Terrain/Rock.png", "hardness": 50},
       {"name": "Bedrock", "texture": "ASSETS/IMAGES/Terrain/Bedrock.png", "hardness": 100}
     ]
+  },
+
+  "museum":{
+    "texture": "ASSETS/IMAGES/Sprites/Buildings/Museum.png",
+    "frameWidth": 320,
+    "frameHeight": 112,
+    "position": {"x": 800, "y": 400}
   }
 }
