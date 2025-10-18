@@ -7,15 +7,16 @@
 
 class Museum {
 public:
+	Museum();
 
 	bool loadFromConfig(const nlohmann::json& data);
 	void updateHover(const sf::RenderWindow& window);
-	void draw(sf::RenderWindow& window);
+	void drawMuseum(sf::RenderWindow& window);
 
 private:
 
 	sf::Texture m_texture;
-	sf::Sprite m_sprite;
+	sf::Sprite m_sprite{ m_texture };
 	sf::Vector2f m_position;
 	int m_frameWidth = 0;
 	int m_frameHeight = 0;

@@ -4,6 +4,8 @@
 #include <vector>
 #include <json.hpp>
 #include "constants.h"
+#include "Museum.h"
+
 
 struct LayerType
 {
@@ -43,6 +45,10 @@ public:
     void drawDebug(sf::RenderWindow& window);
     void toggleDebugMode(); 
 
+    // update museum sprite
+
+    void updateMuseum(sf::RenderWindow& window);
+
 private:
     std::vector<LayerType> m_layerTypes; // list of all available terrain textures
     std::vector<Tile> m_tiles;           // grid of tiles created from those textures
@@ -50,4 +56,6 @@ private:
     int m_hoveredIndex = -1;
     sf::RectangleShape m_hoverOutline;
     bool m_debugMode = false; // toggle debug mode 
+
+    Museum m_museum;
 };

@@ -5,11 +5,12 @@
 
 using json = nlohmann::json;
 
-Map::Map() {}
+Map::Map(){}
 
 bool Map::loadFromConfig(const std::string& filepath)
 {
     std::ifstream file(filepath);
+
     if (!file.is_open())
     {
         std::cerr << "Failed to open JSON config: " << filepath << std::endl;
@@ -36,6 +37,15 @@ bool Map::loadFromConfig(const std::string& filepath)
 
             m_layerTypes.push_back(std::move(layer));
         }
+        if (config.contains("museum"))
+        {
+            if (!m_museum.loadFromConfig(config["museum"]))  
+            {
+                std::cerr << "Failed to load museum\n";
+                return false;
+            }
+        }
+
     }
     catch (const std::exception& e)
     {
@@ -99,6 +109,8 @@ void Map::draw(sf::RenderWindow& window)
     {
         window.draw(tile.sprite);
     }
+
+    m_museum.drawMuseum(window);
 }
 
 
@@ -116,10 +128,17 @@ void Map::toggleDebugMode()
     }
 }
 
+void Map::updateMuseum(sf::RenderWindow& window)
+{
+    m_museum.updateHover(window);
+}
+
 
 void Map::updateHover(const sf::RenderWindow& window, float tileSize, int cols)
 {
     if (!m_debugMode) return; // (only if debug is active)
+
+  
 
     sf::Vector2i mousePixel = sf::Mouse::getPosition(window);
     sf::Vector2f mouseWorld = window.mapPixelToCoords(mousePixel);

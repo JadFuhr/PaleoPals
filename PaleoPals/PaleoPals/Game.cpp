@@ -107,6 +107,7 @@ void Game::update(sf::Time t_deltaTime)
     checkKeyboardState();
 
     m_map.updateHover(m_window, 24.0f, 75); 
+    m_map.updateMuseum(m_window);
 
     if (m_DELETEexitGame)
 
@@ -124,6 +125,7 @@ void Game::render()
 
     // Draw the map first (background)
     m_map.draw(m_window);
+    
     m_map.drawDebug(m_window);
 
     // Draw logo and text on top

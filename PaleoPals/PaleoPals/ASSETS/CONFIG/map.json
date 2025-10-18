@@ -10,8 +10,8 @@
 
   "museum":{
     "texture": "ASSETS/IMAGES/Sprites/Buildings/Museum.png",
-    "frameWidth": 320,
+    "frameWidth": 160,
     "frameHeight": 112,
-    "position": {"x": 800, "y": 400}
+    "position": {"x": 1600, "y": 338}
   }
 }
