@@ -9,8 +9,8 @@ class Museum {
 public:
 	Museum();
 
-	bool loadFromConfig(const nlohmann::json& data);
-	void updateHover(const sf::RenderWindow& window);
+	bool loadMuseumFromConfig(const nlohmann::json& data);
+	void updateMuseumHover(const sf::RenderWindow& window);
 	void drawMuseum(sf::RenderWindow& window);
 
 private:

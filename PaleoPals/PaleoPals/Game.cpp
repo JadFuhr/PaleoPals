@@ -13,9 +13,9 @@ Game::Game() :
     m_window{ sf::VideoMode{ sf::Vector2u{WINDOW_X, WINDOW_Y}, 32U }, "PaleoPals" },
     m_DELETEexitGame{ false }
 {
-    setupTexts();   // load font and text
-    setupSprites(); // load logo sprite
-    setupAudio();   // load and play sound
+    //setupTexts();   // load font and text
+    //setupSprites(); // load logo sprite
+    //setupAudio();   // load and play sound
     setupMap();     // NEW: load and generate the map
 }
 
@@ -108,6 +108,7 @@ void Game::update(sf::Time t_deltaTime)
 
     m_map.updateHover(m_window, 24.0f, 75); 
     m_map.updateMuseum(m_window);
+    m_map.updateTrader(m_window);
 
     if (m_DELETEexitGame)
 
@@ -123,9 +124,8 @@ void Game::render()
 {
     m_window.clear();
 
-    // Draw the map first (background)
-    m_map.draw(m_window);
-    
+    // Draw the map and assets included in that 
+    m_map.drawMap(m_window);
     m_map.drawDebug(m_window);
 
     // Draw logo and text on top
@@ -187,7 +187,7 @@ void Game::setupAudio()
 //------------------------------------------------------------
 void Game::setupMap()
 {
-    if (!m_map.loadFromConfig("ASSETS/CONFIG/map.json"))
+    if (!m_map.loadMapFromConfig("ASSETS/CONFIG/map.json"))
     {
         std::cerr << "Failed to load map config file!\n";
     }

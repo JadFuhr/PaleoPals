@@ -11,7 +11,14 @@
   "museum":{
     "texture": "ASSETS/IMAGES/Sprites/Buildings/Museum.png",
     "frameWidth": 160,
-    "frameHeight": 112,
+    "frameHeight": 113,
     "position": {"x": 1600, "y": 338}
+  },
+
+  "trader":{
+    "texture": "ASSETS/IMAGES/Sprites/Buildings/Trader.png",
+    "frameWidth": 161,
+    "frameHeight": 91,
+    "position": {"x": 25, "y": 358}
   }
 }

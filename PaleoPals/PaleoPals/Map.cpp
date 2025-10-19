@@ -7,7 +7,7 @@ using json = nlohmann::json;
 
 Map::Map(){}
 
-bool Map::loadFromConfig(const std::string& filepath)
+bool Map::loadMapFromConfig(const std::string& filepath)
 {
     std::ifstream file(filepath);
 
@@ -39,9 +39,17 @@ bool Map::loadFromConfig(const std::string& filepath)
         }
         if (config.contains("museum"))
         {
-            if (!m_museum.loadFromConfig(config["museum"]))  
+            if (!m_museum.loadMuseumFromConfig(config["museum"]))  
             {
                 std::cerr << "Failed to load museum\n";
+                return false;
+            }
+        }
+        if (config.contains("trader"))
+        {
+            if (!m_trader.loadTraderFromConfig(config["trader"]))
+            {
+                std::cerr << "Failed to load trader\n";
                 return false;
             }
         }
@@ -103,7 +111,7 @@ void Map::generateGrid(int rows, int cols, float tileSize, float windowWidth, fl
 }
 
 
-void Map::draw(sf::RenderWindow& window)
+void Map::drawMap(sf::RenderWindow& window)
 {
     for (auto& tile : m_tiles)
     {
@@ -111,6 +119,7 @@ void Map::draw(sf::RenderWindow& window)
     }
 
     m_museum.drawMuseum(window);
+    m_trader.drawTrader(window);
 }
 
 
@@ -130,7 +139,12 @@ void Map::toggleDebugMode()
 
 void Map::updateMuseum(sf::RenderWindow& window)
 {
-    m_museum.updateHover(window);
+    m_museum.updateMuseumHover(window);
+}
+
+void Map::updateTrader(sf::RenderWindow& window)
+{
+    m_trader.updateTraderHover(window);
 }
 
 

@@ -27,7 +27,7 @@ private:
     void setupTexts();
     void setupSprites();
     void setupAudio();
-    void setupMap(); // NEW: loads and generates the map grid
+    void setupMap(); // loads and generates the map grid
 
     Map m_map;
 

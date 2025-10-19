@@ -5,7 +5,7 @@
 #include <json.hpp>
 #include "constants.h"
 #include "Museum.h"
-
+#include "Trader.h"
 
 struct LayerType
 {
@@ -37,9 +37,9 @@ class Map
 {
 public:
     Map();
-    bool loadFromConfig(const std::string& filepath);
+    bool loadMapFromConfig(const std::string& filepath);
     void generateGrid(int rows, int cols, float tileSize, float windowWidth, float windowHeight);
-    void draw(sf::RenderWindow& window);
+    void drawMap(sf::RenderWindow& window);
 
     void updateHover(const sf::RenderWindow& window, float tileSize, int cols);
     void drawDebug(sf::RenderWindow& window);
@@ -48,6 +48,7 @@ public:
     // update museum sprite
 
     void updateMuseum(sf::RenderWindow& window);
+    void updateTrader(sf::RenderWindow& window);
 
 private:
     std::vector<LayerType> m_layerTypes; // list of all available terrain textures
@@ -58,4 +59,5 @@ private:
     bool m_debugMode = false; // toggle debug mode 
 
     Museum m_museum;
+    Trader m_trader;
 };

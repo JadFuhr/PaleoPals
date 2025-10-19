@@ -1,17 +1,20 @@
-#include "Museum.h"
+#include "Trader.h"
 #include <iostream>
 #include <SFML/Graphics/Rect.hpp>
 
-Museum::Museum() = default;
 
-bool Museum::loadMuseumFromConfig(const nlohmann::json& data)
+Trader::Trader() = default;
+
+bool Trader::loadTraderFromConfig(const nlohmann::json& data)
 {
 
     if (!m_texture.loadFromFile(data["texture"].get<std::string>()))
     {
-        std::cerr << "Failed to load museum texture" << std::endl;
+        std::cerr << "Failed to load trader texture" << std::endl;
         return false;
     }
+
+
 
     m_frameWidth = data["frameWidth"].get<int>();
     m_frameHeight = data["frameHeight"].get<int>();
@@ -23,10 +26,10 @@ bool Museum::loadMuseumFromConfig(const nlohmann::json& data)
     m_sprite.setPosition(m_position);
 
 
-	return true;
+    return true;
 }
 
-void Museum::updateMuseumHover(const sf::RenderWindow& window)
+void Trader::updateTraderHover(const sf::RenderWindow& window)
 {
     sf::Vector2i mousePixel = sf::Mouse::getPosition(window);
     sf::Vector2f mouseWorld = window.mapPixelToCoords(mousePixel);
@@ -40,12 +43,10 @@ void Museum::updateMuseumHover(const sf::RenderWindow& window)
     {
         m_sprite.setTextureRect(sf::IntRect({ 0,0 }, { m_frameWidth,m_frameHeight }));
     }
- 
 }
 
-
-
-void Museum::drawMuseum(sf::RenderWindow& window)
+void Trader::drawTrader(sf::RenderWindow& window)
 {
-	window.draw(m_sprite);
+    window.draw(m_sprite);
+    //std::cout << "trader drawn" << std::endl;
 }
