@@ -39,6 +39,9 @@ public:
     Map();
     bool loadMapFromConfig(const std::string& filepath);
     void generateGrid(int rows, int cols, float tileSize, float windowWidth, float windowHeight);
+
+   // void updateIfNeeded(float playerY);
+
     void drawMap(sf::RenderWindow& window);
 
     void updateHover(const sf::RenderWindow& window, float tileSize, int cols);
@@ -50,8 +53,21 @@ public:
     void updateMuseum(sf::RenderWindow& window);
     void updateTrader(sf::RenderWindow& window);
 
+    int getRowCount() const { return m_rows; }
+    int getColumnCount() const { return m_cols; }
+    float getTileSize() const { return m_tileSize; }
+
 private:
-    std::vector<LayerType> m_layerTypes; // list of all available terrain textures
+    int m_rowsGenerated = 0;      // How many rows are currently generated
+    float m_tileSize = 0.f;
+
+    float m_windowWidth = 0.f;
+    float m_windowHeight = 0.f;
+
+    int m_rows = 0;
+    int m_cols = 0;
+
+    std::vector<LayerType> m_layerTypes; // list of all terrain textures
     std::vector<Tile> m_tiles;           // grid of tiles created from those textures
 
     int m_hoveredIndex = -1;

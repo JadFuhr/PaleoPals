@@ -66,17 +66,22 @@ bool Map::loadMapFromConfig(const std::string& filepath)
 
 void Map::generateGrid(int rows, int cols, float tileSize, float windowWidth, float windowHeight)
 {
-    m_tiles.clear();
+    if (m_rowsGenerated == 0)
+    {
+        m_tiles.clear();
+        m_tileSize = tileSize;
+        m_windowHeight = windowHeight;
+        m_windowWidth = windowWidth;
+    }
 
+    float offsetY = m_windowHeight / 2.0f;
+    float offsetX = (m_windowWidth - (cols * tileSize)) / 2.0f;
     float totalGridHeight = rows * tileSize;
     float totalGridWidth = cols * tileSize;
 
-    float offsetY = windowHeight / 2.0f;
-    float offsetX = (windowWidth - totalGridWidth) / 2.0f;
-
     std::srand(static_cast<unsigned>(std::time(nullptr)));
 
-    for (int row = 0; row < rows; ++row)
+    for (int row = m_rowsGenerated; row < m_rowsGenerated + rows; ++row)
     {
         for (int col = 0; col < cols; ++col)
         {
@@ -88,48 +93,61 @@ void Map::generateGrid(int rows, int cols, float tileSize, float windowWidth, fl
             }
             else
             {
-                // Probability changes with depth
-                float depthRatio = static_cast<float>(row) / static_cast<float>(rows);
-
+                float depthRatio = static_cast<float>(row) / 500.f; // 500 = arbitrary "depth scale"
                 float randVal = static_cast<float>(std::rand()) / RAND_MAX;
 
                 if (depthRatio < 0.2f)
                 {
                     // near top: mostly sediment
-                    if (randVal < 0.7f) layerIndex = 1; // sediment
-                    else {
+                    if (randVal < 0.7f)
+                    {
+                        layerIndex = 1; // sediment
+                    }
+                    else
+                    {
                         layerIndex = 2;
                     }
                 }
                 else if (depthRatio < 0.6f)
                 {
                     // middle section: mix of sediment and rock
-                    if (randVal < 0.5f) layerIndex = 2; // rock
-                    else layerIndex = 1; // sediment
+                    if (randVal < 0.5f)
+                    {
+                        layerIndex = 2; // rock
+                    }
+                    else
+                    {
+                        layerIndex = 1; // sediment
+                    }
                 }
                 else
                 {
                     // deep section: mostly rock and bedrock
-                    if (randVal < 0.8f) layerIndex = 3; // bedrock
-                    else layerIndex = 2; // rock
+                    if (randVal < 0.8f)
+                    {
+                        layerIndex = 3; // bedrock
+                    }
+                    else
+                    {
+                        layerIndex = 2; // rock
+                    }
                 }
             }
 
             const LayerType& layerType = m_layerTypes[layerIndex];
 
-            Tile newTile(layerType.texture,
-                sf::Vector2f(col * tileSize + offsetX, row * tileSize + offsetY),
-                layerType.hardness);
+            float yPos = row * tileSize + offsetY;
+            float xPos = col * tileSize + offsetX;
 
-            newTile.sprite.setScale(sf::Vector2f(
-                tileSize / layerType.texture.getSize().x,
-                tileSize / layerType.texture.getSize().y));
+            Tile newTile(layerType.texture, sf::Vector2f(col * tileSize + offsetX, row * tileSize + offsetY), layerType.hardness);
+
+            newTile.sprite.setScale(sf::Vector2f(tileSize / layerType.texture.getSize().x, tileSize / layerType.texture.getSize().y));
 
             m_tiles.emplace_back(std::move(newTile));
         }
     }
+    m_rowsGenerated += rows;
 }
-
 
 
 void Map::drawMap(sf::RenderWindow& window)
