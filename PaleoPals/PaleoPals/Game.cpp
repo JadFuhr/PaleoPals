@@ -10,7 +10,7 @@
 // Constructor
 //------------------------------------------------------------
 Game::Game() :
-    m_window{ sf::VideoMode{ sf::Vector2u{WINDOW_X, WINDOW_Y}, 32U }, "PaleoPals" },
+    m_window{ sf::VideoMode{sf::Vector2u{WINDOW_X, WINDOW_Y},32 }, "PaleoPals" },
     m_DELETEexitGame{ false }
 {
     //setupTexts();   // load font and text

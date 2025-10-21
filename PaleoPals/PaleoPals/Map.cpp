@@ -71,44 +71,65 @@ void Map::generateGrid(int rows, int cols, float tileSize, float windowWidth, fl
     float totalGridHeight = rows * tileSize;
     float totalGridWidth = cols * tileSize;
 
-
-    // Start at the middle of the screen
     float offsetY = windowHeight / 2.0f;
-
     float offsetX = (windowWidth - totalGridWidth) / 2.0f;
+
+    std::srand(static_cast<unsigned>(std::time(nullptr)));
 
     for (int row = 0; row < rows; ++row)
     {
         for (int col = 0; col < cols; ++col)
         {
-            int layerIndex = 0; // default topsoil
+            int layerIndex = 0; // Default = Topsoil
 
             if (row == 0)
             {
-                layerIndex = 0; // topsoil
-            }
-            else if (row < 7)
-            {
-                layerIndex = 1; // sediment (rows 1–6)
-            }               
-            else if (row < 14)
-            {
-                layerIndex = 2; // rock (rows 7–11)
+                layerIndex = 0; // Always topsoil
             }
             else
             {
-                layerIndex = 3; // bedrock (rows 12+)
-            }
+                // Probability changes with depth
+                float depthRatio = static_cast<float>(row) / static_cast<float>(rows);
 
+                float randVal = static_cast<float>(std::rand()) / RAND_MAX;
+
+                if (depthRatio < 0.2f)
+                {
+                    // near top: mostly sediment
+                    if (randVal < 0.7f) layerIndex = 1; // sediment
+                    else {
+                        layerIndex = 2;
+                    }
+                }
+                else if (depthRatio < 0.6f)
+                {
+                    // middle section: mix of sediment and rock
+                    if (randVal < 0.5f) layerIndex = 2; // rock
+                    else layerIndex = 1; // sediment
+                }
+                else
+                {
+                    // deep section: mostly rock and bedrock
+                    if (randVal < 0.8f) layerIndex = 3; // bedrock
+                    else layerIndex = 2; // rock
+                }
+            }
 
             const LayerType& layerType = m_layerTypes[layerIndex];
 
-            m_tiles.emplace_back(layerType.texture, sf::Vector2f(col * tileSize + offsetX, row * tileSize + offsetY), layerType.hardness);
+            Tile newTile(layerType.texture,
+                sf::Vector2f(col * tileSize + offsetX, row * tileSize + offsetY),
+                layerType.hardness);
 
-            m_tiles.back().sprite.setScale(sf::Vector2f(tileSize / layerType.texture.getSize().x, tileSize / layerType.texture.getSize().y));
+            newTile.sprite.setScale(sf::Vector2f(
+                tileSize / layerType.texture.getSize().x,
+                tileSize / layerType.texture.getSize().y));
+
+            m_tiles.emplace_back(std::move(newTile));
         }
     }
 }
+
 
 
 void Map::drawMap(sf::RenderWindow& window)
