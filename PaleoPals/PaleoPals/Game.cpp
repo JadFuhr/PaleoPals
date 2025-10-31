@@ -2,7 +2,6 @@
 
 #include "Game.h"
 #include "Map.h"
-#include "constants.h"
 #include <iostream>
 
 
@@ -13,10 +12,8 @@ Game::Game() :
     m_window{ sf::VideoMode{sf::Vector2u{WINDOW_X, WINDOW_Y},32 }, "PaleoPals" },
     m_DELETEexitGame{ false }
 {
-    //setupTexts();   // load font and text
-    //setupSprites(); // load logo sprite
-    //setupAudio();   // load and play sound
-    setupMap();     // NEW: load and generate the map
+    setupMap();
+    m_menu.initMenu();
 }
 
 //------------------------------------------------------------
@@ -63,9 +60,17 @@ void Game::processEvents()
         {
             m_DELETEexitGame = true;
         }
-        if (newEvent->is<sf::Event::KeyPressed>())
+        else if (newEvent->is<sf::Event::KeyPressed>())
         {
             processKeys(newEvent);
+        }
+        else if (newEvent->is<sf::Event::MouseButtonPressed>())
+        {
+            // Handle mouse clicks for menu
+            if (m_currentState == GameState::MainMenu)
+            {
+                m_currentState = m_menu.handleClick(m_window);
+            }
         }
     }
 }
@@ -76,11 +81,6 @@ void Game::processEvents()
 void Game::processKeys(const std::optional<sf::Event> t_event)
 {
     const sf::Event::KeyPressed* newKeypress = t_event->getIf<sf::Event::KeyPressed>();
-
-    if (sf::Keyboard::Key::Escape == newKeypress->code)
-    {
-        m_DELETEexitGame = true;
-    }
 
     if (sf::Keyboard::Key::F3 == newKeypress->code)
     {
@@ -95,7 +95,10 @@ void Game::checkKeyboardState()
 {
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Escape))
     {
-        m_DELETEexitGame = true;
+        if (m_currentState == GameState::MainMenu)
+        {
+            m_currentState = GameState::Exit;
+        }
     }
 }
 
@@ -106,15 +109,27 @@ void Game::update(sf::Time t_deltaTime)
 {
     checkKeyboardState();
 
-    m_map.updateHover(m_window, 24.0f, 75); 
-    m_map.updateMuseum(m_window);
-    m_map.updateTrader(m_window);
-
-    if (m_DELETEexitGame)
-
+    switch (m_currentState)
     {
+    case GameState::MainMenu:
+        m_menu.update(m_window);
+        break;
+
+    case GameState::Gameplay:
+        m_map.updateHover(m_window, 24.0f, 75);
+        m_map.updateMuseum(m_window);
+        m_map.updateTrader(m_window);
+        break;
+
+    case GameState::Exit:
         m_window.close();
+        break;
+
+    default:
+        break;
     }
+
+
 }
 
 //------------------------------------------------------------
@@ -122,65 +137,30 @@ void Game::update(sf::Time t_deltaTime)
 //------------------------------------------------------------
 void Game::render()
 {
+
     m_window.clear();
 
-    // Draw the map and assets included in that 
-    m_map.drawMap(m_window);
-    m_map.drawDebug(m_window);
+   
 
-    // Draw logo and text on top
-   // m_window.draw(m_DELETElogoSprite);
-   // m_window.draw(m_DELETEwelcomeMessage);
+    switch (m_currentState)
+    {
+    case GameState::MainMenu:
+        //std::cout << "current state menu" << std::endl;
+        m_menu.draw(m_window);
+        break;
+
+    case GameState::Gameplay:
+        m_map.drawMap(m_window);
+        break;
+
+    case GameState::Exit:
+        m_window.close();
+        break;
+    }
 
     m_window.display();
 }
 
-//------------------------------------------------------------
-// Load the font and setup text
-//------------------------------------------------------------
-void Game::setupTexts()
-{
-    if (!m_jerseyFont.openFromFile("ASSETS/FONTS/Jersey20-Regular.ttf"))
-    {
-        std::cout << "Problem loading font\n";
-    }
-
-    m_DELETEwelcomeMessage.setFont(m_jerseyFont);
-    m_DELETEwelcomeMessage.setString("PaleoPals");
-    m_DELETEwelcomeMessage.setPosition(sf::Vector2f{ 205.0f, 240.0f });
-    m_DELETEwelcomeMessage.setCharacterSize(96U);
-    m_DELETEwelcomeMessage.setOutlineColor(sf::Color::Black);
-    m_DELETEwelcomeMessage.setFillColor(sf::Color::Red);
-    m_DELETEwelcomeMessage.setOutlineThickness(2.0f);
-}
-
-//------------------------------------------------------------
-// Load texture and setup logo sprite
-//------------------------------------------------------------
-void Game::setupSprites()
-{
-    if (!m_DELETElogoTexture.loadFromFile("ASSETS/IMAGES/SFML-LOGO.png"))
-    {
-        std::cout << "Problem loading logo\n";
-    }
-
-    m_DELETElogoSprite.setTexture(m_DELETElogoTexture, true);
-    m_DELETElogoSprite.setPosition(sf::Vector2f{ 150.0f, 50.0f });
-}
-
-//------------------------------------------------------------
-// Load audio
-//------------------------------------------------------------
-void Game::setupAudio()
-{
-    if (!m_DELETEsoundBuffer.loadFromFile("ASSETS/AUDIO/beep.wav"))
-    {
-        std::cout << "Error loading beep sound\n";
-    }
-
-    m_DELETEsound.setBuffer(m_DELETEsoundBuffer);
-    m_DELETEsound.play();
-}
 
 //------------------------------------------------------------
 // Setup Map
@@ -198,3 +178,83 @@ void Game::setupMap()
 
     m_map.generateGrid(rows, cols, tileSize, WINDOW_X, WINDOW_Y);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//------------------------------------------------------------
+// Load the font and setup text
+//------------------------------------------------------------
+//void Game::setupTexts()
+//{
+//    if (!m_jerseyFont.openFromFile("ASSETS/FONTS/Jersey20-Regular.ttf"))
+//    {
+//        std::cout << "Problem loading font\n";
+//    }
+//
+//    m_DELETEwelcomeMessage.setFont(m_jerseyFont);
+//    m_DELETEwelcomeMessage.setString("PaleoPals");
+//    m_DELETEwelcomeMessage.setPosition(sf::Vector2f{ 205.0f, 240.0f });
+//    m_DELETEwelcomeMessage.setCharacterSize(96U);
+//    m_DELETEwelcomeMessage.setOutlineColor(sf::Color::Black);
+//    m_DELETEwelcomeMessage.setFillColor(sf::Color::Red);
+//    m_DELETEwelcomeMessage.setOutlineThickness(2.0f);
+//}
+
+//------------------------------------------------------------
+// Load texture and setup logo sprite
+//------------------------------------------------------------
+//void Game::setupSprites()
+//{
+//    if (!m_DELETElogoTexture.loadFromFile("ASSETS/IMAGES/SFML-LOGO.png"))
+//    {
+//        std::cout << "Problem loading logo\n";
+//    }
+//
+//    m_DELETElogoSprite.setTexture(m_DELETElogoTexture, true);
+//    m_DELETElogoSprite.setPosition(sf::Vector2f{ 150.0f, 50.0f });
+//}
+
+//------------------------------------------------------------
+// Load audio
+//------------------------------------------------------------
+//void Game::setupAudio()
+//{
+//    if (!m_DELETEsoundBuffer.loadFromFile("ASSETS/AUDIO/beep.wav"))
+//    {
+//        std::cout << "Error loading beep sound\n";
+//    }
+//
+//    m_DELETEsound.setBuffer(m_DELETEsoundBuffer);
+//    m_DELETEsound.play();
+//}
