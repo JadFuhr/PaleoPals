@@ -56,11 +56,8 @@ void Game::processEvents()
 {
     while (const std::optional newEvent = m_window.pollEvent())
     {
-        if (newEvent->is<sf::Event::Closed>())
-        {
-            m_DELETEexitGame = true;
-        }
-        else if (newEvent->is<sf::Event::KeyPressed>())
+
+        if (newEvent->is<sf::Event::KeyPressed>())
         {
             processKeys(newEvent);
         }
@@ -82,9 +79,12 @@ void Game::processKeys(const std::optional<sf::Event> t_event)
 {
     const sf::Event::KeyPressed* newKeypress = t_event->getIf<sf::Event::KeyPressed>();
 
-    if (sf::Keyboard::Key::F3 == newKeypress->code)
+    if (m_currentState == GameState::Gameplay)
     {
-        m_map.toggleDebugMode();
+        if (sf::Keyboard::Key::F3 == newKeypress->code)
+        {
+            m_map.toggleDebugMode();
+        }
     }
 }
 
@@ -93,13 +93,21 @@ void Game::processKeys(const std::optional<sf::Event> t_event)
 //------------------------------------------------------------
 void Game::checkKeyboardState()
 {
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Escape))
+    if (m_currentState == GameState::MainMenu)
     {
-        if (m_currentState == GameState::MainMenu)
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Escape))
         {
             m_currentState = GameState::Exit;
         }
     }
+    if (m_currentState == GameState::Gameplay)
+    {
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::M))
+        {
+            m_currentState = GameState::MainMenu;
+        }
+    }
+
 }
 
 //------------------------------------------------------------
@@ -151,10 +159,9 @@ void Game::render()
 
     case GameState::Gameplay:
         m_map.drawMap(m_window);
+        m_map.drawDebug(m_window);
         break;
-
-    case GameState::Exit:
-        m_window.close();
+    default:
         break;
     }
 

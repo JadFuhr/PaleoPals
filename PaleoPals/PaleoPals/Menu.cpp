@@ -12,9 +12,10 @@ void Menu::initMenu()
     sf::Vector2u texSize = m_backgroundTexture.getSize(); //360x180
 
     m_backgroundSprite.setTexture(m_backgroundTexture);
+    m_backgroundSprite.setTextureRect(sf::IntRect({ 0,0 }, { 360,180 }));
     m_backgroundSprite.setPosition(sf::Vector2f(0, 0));
     m_backgroundSprite.setScale(sf::Vector2f(WINDOW_X / texSize.x, WINDOW_Y / texSize.y));
-    m_backgroundSprite.setColor(sf::Color::Red);
+    //m_backgroundSprite.setColor(sf::Color::Red);
 
     if (!m_startButtonTexture.loadFromFile("ASSETS/IMAGES/Screens/StartButton.png"))
         std::cout << "Failed to load start button texture\n";
@@ -71,10 +72,14 @@ GameState Menu::handleClick(const sf::RenderWindow& window)
     sf::Vector2f mouse = window.mapPixelToCoords(sf::Mouse::getPosition(window));
 
     if (m_startButton.getGlobalBounds().contains(mouse))
+    {
         return GameState::Gameplay;
+    }
 
     if (m_quitButton.getGlobalBounds().contains(mouse))
+    {
         return GameState::Exit;
+    }
 
     return GameState::MainMenu;
 }
