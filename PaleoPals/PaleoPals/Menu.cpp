@@ -49,15 +49,23 @@ void Menu::update(const sf::RenderWindow& window)
 
     // Start hover
     if (m_startButton.getGlobalBounds().contains(mouse))
+    {
         m_startButton.setTextureRect(sf::IntRect({ 92,0 }, { 92,34 }));
+    }
     else
+    {
         m_startButton.setTextureRect(sf::IntRect({ 0,0 }, { 92,34 }));
+    }
 
     // Quit hover
     if (m_quitButton.getGlobalBounds().contains(mouse))
+    {
         m_quitButton.setTextureRect(sf::IntRect({ 92,0 }, {92,34 }));
+    }
     else
+    {
         m_quitButton.setTextureRect(sf::IntRect({ 0,0 }, { 92,34 }));
+    }
 }
 
 void Menu::draw(sf::RenderWindow& window)

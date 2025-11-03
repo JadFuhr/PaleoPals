@@ -14,6 +14,7 @@ Game::Game() :
 {
     setupMap();
     m_menu.initMenu();
+    m_pause.initPauseMenu();
 }
 
 //------------------------------------------------------------
@@ -68,7 +69,12 @@ void Game::processEvents()
             {
                 m_currentState = m_menu.handleClick(m_window);
             }
+            else if (m_currentState == GameState::Paused)
+            {
+                m_currentState = m_pause.handlePauseMenuClick(m_window);
+            }
         }
+
     }
 }
 
@@ -79,9 +85,26 @@ void Game::processKeys(const std::optional<sf::Event> t_event)
 {
     const sf::Event::KeyPressed* newKeypress = t_event->getIf<sf::Event::KeyPressed>();
 
-    if (m_currentState == GameState::Gameplay)
+    if (newKeypress)
     {
-        if (sf::Keyboard::Key::F3 == newKeypress->code)
+        if (newKeypress->code == sf::Keyboard::Key::Escape)
+        {
+            if (m_currentState == GameState::Gameplay)
+            {
+                m_currentState = GameState::Paused; // Pause the game
+            }
+            else if (m_currentState == GameState::Paused)
+            {
+                m_currentState = GameState::Gameplay; // Resume the game
+            }
+            else if (m_currentState == GameState::MainMenu)
+            {
+                m_currentState = GameState::Exit; // Quit if pressed on main menu
+            }
+        }
+
+        // Keep F3 toggle for debug mode
+        if (m_currentState == GameState::Gameplay && newKeypress->code == sf::Keyboard::Key::F3)
         {
             m_map.toggleDebugMode();
         }
@@ -129,6 +152,10 @@ void Game::update(sf::Time t_deltaTime)
         m_map.updateTrader(m_window);
         break;
 
+    case GameState::Paused:
+        m_pause.updatePauseMenu(m_window);
+        break;
+
     case GameState::Exit:
         m_window.close();
         break;
@@ -161,6 +188,10 @@ void Game::render()
         m_map.drawMap(m_window);
         m_map.drawDebug(m_window);
         break;
+    case GameState::Paused:
+        m_map.drawMap(m_window);
+        m_map.drawDebug(m_window);
+        m_pause.drawPauseMenu(m_window);
     default:
         break;
     }

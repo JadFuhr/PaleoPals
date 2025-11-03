@@ -1,4 +1,6 @@
 #pragma once
+#ifndef MENU_H
+#define MENU_H
 #include <SFML/Graphics.hpp>
 #include "constants.h"
 
@@ -22,3 +24,4 @@ private:
     sf::Texture m_quitButtonTexture;
     sf::Sprite m_quitButton{m_quitButtonTexture};
 };
+#endif

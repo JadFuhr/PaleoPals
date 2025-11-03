@@ -8,6 +8,7 @@
 #include <optional> 
 #include "Map.h"
 #include "Menu.h"
+#include "Paused.h"
 #include <json.hpp>
 #include <fstream>
 #include "constants.h"
@@ -35,6 +36,7 @@ private:
 
     Map m_map;
     Menu m_menu;
+    PauseMenu m_pause;
 
     sf::RenderWindow m_window; // main SFML window
 
