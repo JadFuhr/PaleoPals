@@ -1,4 +1,7 @@
 #pragma once
+#ifndef MAP_H
+#define MAP_H
+
 #include <SFML/Graphics.hpp>
 #include <string>
 #include <vector>
@@ -77,3 +80,4 @@ private:
     Museum m_museum;
     Trader m_trader;
 };
+#endif // !MAP_H
