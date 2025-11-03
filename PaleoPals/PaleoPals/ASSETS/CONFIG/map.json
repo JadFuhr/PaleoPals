@@ -20,5 +20,118 @@
     "frameWidth": 161,
     "frameHeight": 91,
     "position": {"x": 25, "y": 358}
-  }
+  },
+
+  "dinosaurs": [
+    {
+      "name": "Tyrannosaurus rex",
+      "category": "Carnivore",
+      "background": "ASSETS/IMAGES/Fossils/Carnivore/Tyrannosaurus_Rex/Tyrannosaurus_Base.png",
+      "pieces": [
+        { "id": "Tyrannosaurus_Skull", "texture": "ASSETS/IMAGES/Fossils/Carnivore/Tyrannosaurus_Rex/Tyrannosaurus_Skull.png" },
+        { "id": "Tyrannosaurus_Torso", "texture": "ASSETS/IMAGES/Fossils/Carnivore/Tyrannosaurus_Rex/Tyrannosaurus_Torso.png" },
+        { "id": "Tyrannosaurus_Pelvis", "texture": "ASSETS/IMAGES/Fossils/Carnivore/Tyrannosaurus_Rex/Tyrannosaurus_Pelvis.png" },
+        { "id": "Tyrannosaurus_Tail", "texture": "ASSETS/IMAGES/Fossils/Carnivore/Tyrannosaurus_Rex/Tyrannosaurus_Tail.png" }
+      ]
+    },
+    {
+      "name": "Allosaurus fragilis",
+      "category": "Carnivore",
+      "background": "ASSETS/IMAGES/Fossils/Carnivore/Allosaurus_Anax/Allosaurus_Base.png",
+      "pieces": [
+        { "id": "Allosaurus_Skull", "texture": "ASSETS/IMAGES/Fossils/Carnivore/Allosaurus_Anax/Allosaurus_Skull.png" },
+        { "id": "Allosaurus_Torso", "texture": "ASSETS/IMAGES/Fossils/Carnivore/Allosaurus_Anax/Allosaurus_Torso.png" },
+        { "id": "Allosaurus_Pelvis", "texture": "ASSETS/IMAGES/Fossils/Carnivore/Allosaurus_Anax/Allosaurus_Pelvis.png" },
+        { "id": "Allosaurus_Tail", "texture": "ASSETS/IMAGES/Fossils/Carnivore/Allosaurus_Anax/Allosaurus_Tail.png" }
+      ]
+    },
+    {
+      "name": "Spinosaurus aegyptiacus",
+      "category": "Carnivore",
+      "background": "ASSETS/IMAGES/Fossils/Carnivore/Spinosaurus_Aegyptiacus/Spinosaurus_Base.png",
+      "pieces": [
+        { "id": "Spinosaurus_Skull", "texture": "ASSETS/IMAGES/Fossils/Carnivore/Spinosaurus_Aegyptiacus/Spinosaurus_Skull.png" },
+        { "id": "Spinosaurus_Torso", "texture": "ASSETS/IMAGES/Fossils/Carnivore/Spinosaurus_Aegyptiacus/Spinosaurus_Torso.png" },
+        { "id": "Spinosaurus_Pelvis", "texture": "ASSETS/IMAGES/Fossils/Carnivore/Spinosaurus_Aegyptiacus/Spinosaurus_Pelvis.png" },
+        { "id": "Spinosaurus_Tail", "texture": "ASSETS/IMAGES/Fossils/Carnivore/Spinosaurus_Aegyptiacus/Spinosaurus_Tail.png" }
+      ]
+    },
+    {
+      "name": "Maip macrothorax",
+      "category": "Carnivore",
+      "background": "ASSETS/IMAGES/Fossils/Carnivore/Maip_Macrothotax/Maip_Base.png",
+      "pieces": [
+        { "id": "Maip_Skull", "texture": "ASSETS/IMAGES/Fossils/Carnivore/Maip_Macrothotax/Maip_Skull.png" },
+        { "id": "Maip_Torso", "texture": "ASSETS/IMAGES/Fossils/Carnivore/Maip_Macrothotax/Maip_Torso.png" },
+        { "id": "Maip_Pelvis", "texture": "ASSETS/IMAGES/Fossils/Carnivore/Maip_Macrothotax/Maip_Pelvis.png" },
+        { "id": "Maip_Tail", "texture": "ASSETS/IMAGES/Fossils/Carnivore/Maip_Macrothotax/Maip_Tail.png" }
+      ]
+    },
+    {
+      "name": "Triceratops horridus",
+      "category": "Herbivore",
+      "background": "ASSETS/IMAGES/Fossils/Herbivore/Triceratops_Horridus/Triceratops_Base.png",
+      "pieces": [
+        { "id": "Triceratops_Skull", "texture": "ASSETS/IMAGES/Fossils/Herbivore/Triceratops_Horridus/Triceratops_Skull.png" },
+        { "id": "Triceratops_Torso", "texture": "ASSETS/IMAGES/Fossils/Herbivore/Triceratops_Horridus/Triceratops_Torso.png" },
+        { "id": "Triceratops_Pelvis", "texture": "ASSETS/IMAGES/Fossils/Herbivore/Triceratops_Horridus/Triceratops_Pelvis.png" },
+        { "id": "Triceratops_Tail", "texture": "ASSETS/IMAGES/Fossils/Herbivore/Triceratops_Horridus/Triceratops_Tail.png" }
+      ]
+    },
+    {
+      "name": "Dreadnoughtus schrani",
+      "category": "Herbivore",
+      "background": "ASSETS/IMAGES/Fossils/Herbivore/Dreadnoughtus_Schrani/Dreadnoughtus_Base.png",
+      "pieces": [
+        { "id": "Dreadnoughtus_Skull", "texture": "ASSETS/IMAGES/Fossils/Herbivore/Dreadnoughtus_Schrani/Dreadnoughtus_Skull.png" },
+        { "id": "Dreadnoughtus_Torso", "texture": "ASSETS/IMAGES/Fossils/Herbivore/Dreadnoughtus_Schrani/Dreadnoughtus_Torso.png" },
+        { "id": "Dreadnoughtus_Pelvis", "texture": "ASSETS/IMAGES/Fossils/Herbivore/Dreadnoughtus_Schrani/Dreadnoughtus_Pelvis.png" },
+        { "id": "Dreadnoughtus_Tail", "texture": "ASSETS/IMAGES/Fossils/Herbivore/Dreadnoughtus_Schrani/Dreadnoughtus_Tail.png" }
+      ]
+    },
+    {
+      "name": "Ankylosaurus magniventris",
+      "category": "Herbivore",
+      "background": "ASSETS/IMAGES/Fossils/Herbivore/Ankylosaurus_Magniventris/Ankylosaurus_Base.png",
+      "pieces": [
+        { "id": "Ankylosaurus_Skull", "texture": "ASSETS/IMAGES/Fossils/Herbivore/Ankylosaurus_Magniventris/Ankylosaurus_Skull.png" },
+        { "id": "Ankylosaurus_Torso", "texture": "ASSETS/IMAGES/Fossils/Herbivore/Ankylosaurus_Magniventris/Ankylosaurus_Torso.png" },
+        { "id": "Ankylosaurus_Pelvis", "texture": "ASSETS/IMAGES/Fossils/Herbivore/Ankylosaurus_Magniventris/Ankylosaurus_Pelvis.png" },
+        { "id": "Ankylosaurus_Tail", "texture": "ASSETS/IMAGES/Fossils/Herbivore/Ankylosaurus_Magniventris/Ankylosaurus_Tail.png" }
+      ]
+    },
+    {
+      "name": "Therizinosaurus cheloniformis",
+      "category": "Herbivore",
+      "background": "ASSETS/IMAGES/Fossils/Herbivore/Therizinosaurus_Cheloniformis/Therizinosaurus_Base.png",
+      "pieces": [
+        { "id": "Therizinosaurus_Skull", "texture": "ASSETS/IMAGES/Fossils/Herbivore/Therizinosaurus_Cheloniformis/Therizinosaurus_Skull.png" },
+        { "id": "Therizinosaurus_Torso", "texture": "ASSETS/IMAGES/Fossils/Herbivore/Therizinosaurus_Cheloniformis/Therizinosaurus_Torso.png" },
+        { "id": "Therizinosaurus_Pelvis", "texture": "ASSETS/IMAGES/Fossils/Herbivore/Therizinosaurus_Cheloniformis/Therizinosaurus_Pelvis.png" },
+        { "id": "Therizinosaurus_Tail", "texture": "ASSETS/IMAGES/Fossils/Herbivore/Therizinosaurus_Cheloniformis/Therizinosaurus_Tail.png" }
+      ]
+    },
+    {
+      "name": "Pteranodon longiceps",
+      "category": "Pterosaur",
+      "background": "ASSETS/IMAGES/Fossils/Pterasaur/Pteranodon_Longiceps/Pteranodon_Base.png",
+      "pieces": [
+        { "id": "Pteranodon_Skull", "texture": "ASSETS/IMAGES/Fossils/Pterasaur/Pteranodon_Longiceps/Pteranodon_Skull.png" },
+        { "id": "Pteranodon_Torso", "texture": "ASSETS/IMAGES/Fossils/Pterasaur/Pteranodon_Longiceps/Pteranodon_Torso.png" },
+        { "id": "Pteranodon_Pelvis", "texture": "ASSETS/IMAGES/Fossils/Pterasaur/Pteranodon_Longiceps/Pteranodon_Pelvis.png" },
+        { "id": "Pteranodon_Tail", "texture": "ASSETS/IMAGES/Fossils/Pterasaur/Pteranodon_Longiceps/Pteranodon_Tail.png" }
+      ]
+    },
+    {
+      "name": "Quetzalcoatlus northropi",
+      "category": "Pterosaur",
+      "background": "ASSETS/IMAGES/Fossils/Pterasaur/Quetzalcoatlus_Northropi/Quetzalcoatlus_Base.png",
+      "pieces": [
+        { "id": "Quetzalcoatlus_Skull", "texture": "ASSETS/IMAGES/Fossils/Pterasaur/Quetzalcoatlus_Northropi/Quetzalcoatlus_Skull.png" },
+        { "id": "Quetzalcoatlus_Torso", "texture": "ASSETS/IMAGES/Fossils/Pterasaur/Quetzalcoatlus_Northropi/Quetzalcoatlus_Torso.png" },
+        { "id": "Quetzalcoatlus_Pelvis", "texture": "ASSETS/IMAGES/Fossils/Pterasaur/Quetzalcoatlus_Northropi/Quetzalcoatlus_Pelvis.png" },
+        { "id": "Quetzalcoatlus_Tail", "texture": "ASSETS/IMAGES/Fossils/Pterasaur/Quetzalcoatlus_Northropi/Quetzalcoatlus_Tail.png" }
+      ]
+    }
+  ]
 }

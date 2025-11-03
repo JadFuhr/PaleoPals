@@ -24,7 +24,9 @@
     <ClCompile Include="Map.cpp" />
     <ClCompile Include="Menu.cpp" />
     <ClCompile Include="Museum.cpp" />
+    <ClCompile Include="Paleontologist.cpp" />
     <ClCompile Include="Paused.cpp" />
+    <ClCompile Include="Researcher.cpp" />
     <ClCompile Include="Trader.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -33,7 +35,9 @@
     <ClInclude Include="Map.h" />
     <ClInclude Include="Menu.h" />
     <ClInclude Include="Museum.h" />
+    <ClInclude Include="Paleontologist.h" />
     <ClInclude Include="Paused.h" />
+    <ClInclude Include="Researcher.h" />
     <ClInclude Include="Trader.h" />
   </ItemGroup>
   <ItemGroup>
