@@ -1,6 +1,6 @@
 #pragma once
-#ifndef PAUSED_HPP
-#define PAUSED_HPP
+#ifndef PAUSED_H
+#define PAUSED_H
 
 #include <SFML/Graphics.hpp>
 #include "constants.h"
@@ -29,4 +29,4 @@ private:
     sf::Sprite m_quitButton{ m_quitButtonTexture };
 };
 
-#endif // !PAUSED_HPP
+#endif // !PAUSED_H

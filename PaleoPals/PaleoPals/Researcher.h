@@ -3,6 +3,8 @@
 #define RESEARCHER_H
 
 #include<SFML/Graphics.hpp>
+#include "constants.h"
+#include "Behaviours.h"
 
 class Researcher
 {

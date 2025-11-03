@@ -40,6 +40,12 @@
     <Filter Include="Source Files\Workers">
       <UniqueIdentifier>{6f1df4a1-2b38-4b85-9f27-a75976cf71e7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Behaviours">
+      <UniqueIdentifier>{4234ff95-761e-4563-8d59-b0e3e91cf859}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Behaviours">
+      <UniqueIdentifier>{b155791e-3bee-44f3-baae-958bc7d39e94}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Game.cpp">
@@ -69,6 +75,9 @@
     <ClCompile Include="Paused.cpp">
       <Filter>Source Files\Menus</Filter>
     </ClCompile>
+    <ClCompile Include="Behaviours.cpp">
+      <Filter>Source Files\Behaviours</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="constants.h">
@@ -97,6 +106,9 @@
     </ClInclude>
     <ClInclude Include="Researcher.h">
       <Filter>Header Files\Workers</Filter>
+    </ClInclude>
+    <ClInclude Include="Behaviours.h">
+      <Filter>Header Files\Behaviours</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
