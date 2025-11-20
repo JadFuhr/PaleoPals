@@ -4,6 +4,7 @@
 
 Museum::Museum() = default;
 
+
 bool Museum::loadMuseumFromConfig(const nlohmann::json& data)
 {
 
@@ -26,7 +27,7 @@ bool Museum::loadMuseumFromConfig(const nlohmann::json& data)
 	return true;
 }
 
-void Museum::updateMuseumHover(const sf::RenderWindow& window)
+void Museum::updateMuseumHover (const sf::RenderWindow& window)
 {
     sf::Vector2i mousePixel = sf::Mouse::getPosition(window);
     sf::Vector2f mouseWorld = window.mapPixelToCoords(mousePixel);

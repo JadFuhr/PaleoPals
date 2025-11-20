@@ -32,13 +32,17 @@ private:
     //void setupSprites();
    //void setupAudio();
     void setupMap(); // loads and generates the map grid
-
+    void moveCamera(sf::Time t_deltaTime);
 
     Map m_map;
     Menu m_menu;
     PauseMenu m_pause;
+    Museum m_museum;
 
     sf::RenderWindow m_window; // main SFML window
+    sf::View m_cameraView;
+
+    float cameraSpeed = 300.0f;
 
     GameState m_currentState{ GameState::MainMenu };
 

@@ -96,7 +96,7 @@ void Map::generateGrid(int rows, int cols, float tileSize, float windowWidth, fl
                 float depthRatio = static_cast<float>(row) / 500.f; // 500 = arbitrary "depth scale"
                 float randVal = static_cast<float>(std::rand()) / RAND_MAX;
 
-                if (depthRatio < 0.2f)
+                if (depthRatio < 0.1f)
                 {
                     // near top: mostly sediment
                     if (randVal < 0.7f)
@@ -108,7 +108,7 @@ void Map::generateGrid(int rows, int cols, float tileSize, float windowWidth, fl
                         layerIndex = 2;
                     }
                 }
-                else if (depthRatio < 0.6f)
+                else if (depthRatio < 0.3f)
                 {
                     // middle section: mix of sediment and rock
                     if (randVal < 0.5f)
@@ -123,7 +123,7 @@ void Map::generateGrid(int rows, int cols, float tileSize, float windowWidth, fl
                 else
                 {
                     // deep section: mostly rock and bedrock
-                    if (randVal < 0.8f)
+                    if (randVal < 0.7f)
                     {
                         layerIndex = 3; // bedrock
                     }

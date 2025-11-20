@@ -12,9 +12,14 @@ Game::Game() :
     m_window{ sf::VideoMode{sf::Vector2u{WINDOW_X, WINDOW_Y},32 }, "PaleoPals" },
     m_DELETEexitGame{ false }
 {
+    m_cameraView.setSize(sf::Vector2f(WINDOW_X, WINDOW_Y));
+    m_cameraView.setCenter(sf::Vector2f(WINDOW_X / 2, WINDOW_Y / 2));
+    m_window.setView(m_cameraView);
+
     setupMap();
     m_menu.initMenu();
     m_pause.initPauseMenu();
+
 }
 
 //------------------------------------------------------------
@@ -138,6 +143,8 @@ void Game::checkKeyboardState()
 //------------------------------------------------------------
 void Game::update(sf::Time t_deltaTime)
 {
+  
+
     checkKeyboardState();
 
     switch (m_currentState)
@@ -147,6 +154,8 @@ void Game::update(sf::Time t_deltaTime)
         break;
 
     case GameState::Gameplay:
+        moveCamera(t_deltaTime);
+
         m_map.updateHover(m_window, 24.0f, 75);
         m_map.updateMuseum(m_window);
         m_map.updateTrader(m_window);
@@ -181,16 +190,25 @@ void Game::render()
     {
     case GameState::MainMenu:
         //std::cout << "current state menu" << std::endl;
+        m_window.setView(m_window.getDefaultView());
+
         m_menu.draw(m_window);
         break;
 
     case GameState::Gameplay:
+        m_window.setView(m_cameraView);
+
         m_map.drawMap(m_window);
         m_map.drawDebug(m_window);
         break;
     case GameState::Paused:
+        m_window.setView(m_cameraView);
+
         m_map.drawMap(m_window);
         m_map.drawDebug(m_window);
+
+        m_window.setView(m_window.getDefaultView());
+
         m_pause.drawPauseMenu(m_window);
     default:
         break;
@@ -211,10 +229,28 @@ void Game::setupMap()
     }
 
     int cols = 75;
-    int rows = 19;
+    int rows = 200;
     float tileSize = 24.0f; // 24x24 pixels per tile
 
     m_map.generateGrid(rows, cols, tileSize, WINDOW_X, WINDOW_Y);
+}
+
+void Game::moveCamera(sf::Time t_deltaTime)
+{
+
+    float moveAmount = cameraSpeed * t_deltaTime.asSeconds();
+
+
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W))
+    {
+        m_cameraView.move(sf::Vector2f(0, -moveAmount));
+    }
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S))
+    {
+        m_cameraView.move(sf::Vector2f(0, moveAmount));
+    }
+
+
 }
 
 
