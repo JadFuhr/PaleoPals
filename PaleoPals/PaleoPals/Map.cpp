@@ -205,7 +205,7 @@ void Map::setupBackground()
     m_backgroundSprite.setTexture(m_backgroundTexture);
     
 
-    m_backgroundSprite.setTextureRect(sf::IntRect({ 0, 0 }, { WINDOW_X, WINDOW_Y }));
+    m_backgroundSprite.setTextureRect(sf::IntRect({ 0, 0 }, { WINDOW_X, BACKGROUND_LENGTH }));
 
     // Position background at (0,0)
 	m_backgroundSprite.setPosition(sf::Vector2f(0.f, 0.f));
@@ -238,6 +238,52 @@ void Map::toggleDebugMode()
     {
         std::cout << "Debug mode OFF\n";
     }
+}
+
+void Map::handleMouseHold(const sf::RenderWindow& window, float tileSize, int cols)
+{
+
+    if (!m_debugMode) return; // Only work in debug mode
+
+    if (!sf::Mouse::isButtonPressed(sf::Mouse::Button::Left))
+    {
+        return;
+    }
+
+    sf::Vector2i mousePixel = sf::Mouse::getPosition(window);
+    sf::Vector2f mouseWorld = window.mapPixelToCoords(mousePixel);
+
+    // Compute grid starting offsets (same as updateHover)
+    int rows = static_cast<int>(m_tiles.size() / cols);
+    float totalGridHeight = rows * tileSize;
+    float totalGridWidth = cols * tileSize;
+    float offsetY = WINDOW_Y / 2.0f;
+    float offsetX = (WINDOW_X - totalGridWidth) / 2.0f;
+
+    float localX = mouseWorld.x - offsetX;
+    float localY = mouseWorld.y - offsetY;
+
+    // Skip if outside the grid bounds
+    if (localX < 0 || localY < 0 || localX >= totalGridWidth || localY >= totalGridHeight)
+    {
+        return;
+    }
+
+    // Calculate which tile was clicked
+    int tileX = static_cast<int>(localX / tileSize);
+    int tileY = static_cast<int>(localY / tileSize);
+    int index = tileY * cols + tileX;
+
+    if (index >= 0 && index < static_cast<int>(m_tiles.size()))
+    {
+        // Only remove if not already transparent (avoid spam console messages)
+        if (m_tiles[index].sprite.getColor() != sf::Color::Transparent)
+        {
+            m_tiles[index].sprite.setColor(sf::Color::Transparent);
+            std::cout << "Tile at index " << index << " removed\n";
+        }
+    }
+
 }
 
 void Map::updateMuseum(sf::RenderWindow& window)

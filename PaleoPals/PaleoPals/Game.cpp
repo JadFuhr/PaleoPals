@@ -157,7 +157,7 @@ void Game::update(sf::Time t_deltaTime)
         moveCamera(t_deltaTime);
 
         //m_map.updateIfNeeded(m_cameraView.getCenter().y, 50);
-
+        m_map.handleMouseHold(m_window, 24, 75);
         m_map.updateHover(m_window, 24.0f, 75);
         m_map.updateMuseum(m_window);
         m_map.updateTrader(m_window);
@@ -231,7 +231,7 @@ void Game::setupMap()
     }
 
     int cols = 75;
-    int totalRows = 200;
+    int totalRows = 40;
     float tileSize = 24.0f; // 24x24 pixels per tile
 
     //m_map.setMapDimensions(totalRows, cols, tileSize, WINDOW_X, WINDOW_Y);

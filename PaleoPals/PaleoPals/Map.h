@@ -54,6 +54,8 @@ public:
     void drawDebug(sf::RenderWindow& window);
     void toggleDebugMode(); 
 
+	void handleMouseHold(const sf::RenderWindow& window, float tileSize, int cols);
+
     // update museum sprite
 
     void updateMuseum(sf::RenderWindow& window);
