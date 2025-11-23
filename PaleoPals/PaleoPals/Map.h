@@ -42,8 +42,11 @@ public:
     Map();
     bool loadMapFromConfig(const std::string& filepath);
     void generateGrid(int rows, int cols, float tileSize, float windowWidth, float windowHeight);
-
-   // void updateIfNeeded(float playerY);
+    int determineLayerAtDepth(int row, int totalRows);
+	void setupBackground();
+    //void setMapDimensions(int totalRows, int cols, float tileSize, float windowWidth, float windowHeight);
+    //void updateIfNeeded(float cameraY, int batchSize);
+    //bool hasMoreRowsToGenerate() const { return m_rowsGenerated < m_totalRows; }
 
     void drawMap(sf::RenderWindow& window);
 
@@ -61,8 +64,14 @@ public:
     float getTileSize() const { return m_tileSize; }
 
 private:
+
+	sf::Texture m_backgroundTexture;
+    sf::Sprite m_backgroundSprite{ m_backgroundTexture };
+
     int m_rowsGenerated = 0;      // How many rows are currently generated
     float m_tileSize = 0.f;
+    //int m_totalRows = 0;  // the TOTAL intended depth
+    //int m_batchSize = 50; // how many rows to generate at once
 
     float m_windowWidth = 0.f;
     float m_windowHeight = 0.f;

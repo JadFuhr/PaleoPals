@@ -156,6 +156,8 @@ void Game::update(sf::Time t_deltaTime)
     case GameState::Gameplay:
         moveCamera(t_deltaTime);
 
+        //m_map.updateIfNeeded(m_cameraView.getCenter().y, 50);
+
         m_map.updateHover(m_window, 24.0f, 75);
         m_map.updateMuseum(m_window);
         m_map.updateTrader(m_window);
@@ -229,10 +231,15 @@ void Game::setupMap()
     }
 
     int cols = 75;
-    int rows = 200;
+    int totalRows = 200;
     float tileSize = 24.0f; // 24x24 pixels per tile
 
-    m_map.generateGrid(rows, cols, tileSize, WINDOW_X, WINDOW_Y);
+    //m_map.setMapDimensions(totalRows, cols, tileSize, WINDOW_X, WINDOW_Y);
+    //int initialBatch = 20;
+
+	m_map.setupBackground();
+
+    m_map.generateGrid(totalRows, cols, tileSize, WINDOW_X, WINDOW_Y);
 }
 
 void Game::moveCamera(sf::Time t_deltaTime)
