@@ -9,6 +9,7 @@
 #include "constants.h"
 #include "Museum.h"
 #include "Trader.h"
+#include "Fossil.h"
 
 struct LayerType
 {
@@ -65,6 +66,9 @@ public:
     int getColumnCount() const { return m_cols; }
     float getTileSize() const { return m_tileSize; }
 
+    //fossil system
+    FossilManager& getFossilManager() { return m_fossilManager; }
+
 private:
 
 	sf::Texture m_backgroundTexture;
@@ -90,5 +94,7 @@ private:
 
     Museum m_museum;
     Trader m_trader;
+
+    FossilManager m_fossilManager;  
 };
 #endif // !MAP_H

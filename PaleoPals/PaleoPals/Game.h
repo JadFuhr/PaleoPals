@@ -42,7 +42,7 @@ private:
     sf::RenderWindow m_window; // main SFML window
     sf::View m_cameraView;
 
-    float cameraSpeed = 100.0f;
+    float cameraSpeed = 400.0f;
 
     GameState m_currentState{ GameState::MainMenu };
 

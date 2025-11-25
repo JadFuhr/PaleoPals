@@ -53,6 +53,11 @@ bool Map::loadMapFromConfig(const std::string& filepath)
                 return false;
             }
         }
+        if (!m_fossilManager.loadFossilsFromConfig(filepath))
+        {
+            std::cerr << "Failed to load fossils\n";
+            return false;
+        }
 
     }
     catch (const std::exception& e)
@@ -102,6 +107,15 @@ void Map::generateGrid(int rows, int cols, float tileSize, float windowWidth, fl
     }
 
 	m_rowsGenerated += rows;
+
+    //gen fossils
+
+    if (m_rowsGenerated >= m_rows)
+    {
+        m_fossilManager.generateFossils(m_rows, m_cols, m_tileSize, windowWidth, windowHeight);
+
+        std::cout << "fossils generated" << std::endl;
+    }
 }
 
 int Map::determineLayerAtDepth(int row, int totalRows)
@@ -216,6 +230,8 @@ void Map::drawMap(sf::RenderWindow& window)
 {
     window.draw(m_backgroundSprite);
 
+    m_fossilManager.drawFossils(window);
+
     for (auto& tile : m_tiles)
     {
         window.draw(tile.sprite);
@@ -280,10 +296,20 @@ void Map::handleMouseHold(const sf::RenderWindow& window, float tileSize, int co
         if (m_tiles[index].sprite.getColor() != sf::Color::Transparent)
         {
             m_tiles[index].sprite.setColor(sf::Color::Transparent);
-            std::cout << "Tile at index " << index << " removed\n";
+
+            FossilPiece* fossil = m_fossilManager.getFossilAtTile(tileY, tileX);
+
+            if (fossil != nullptr)
+            {
+                fossil->isDiscovered = true;
+                std::cout << "FOSSIL DISCOVERED! " << fossil->fossilId << " from " << fossil->dinosaurName << "\n";
+            }
+            else
+            {
+                std::cout << "Tile at index " << index << " removed\n";
+            }
         }
     }
-
 }
 
 void Map::updateMuseum(sf::RenderWindow& window)
