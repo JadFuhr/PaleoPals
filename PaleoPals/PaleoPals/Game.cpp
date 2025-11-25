@@ -231,7 +231,7 @@ void Game::setupMap()
     }
 
     int cols = 75;
-    int totalRows = 40;
+    int totalRows = 200;
     float tileSize = 24.0f; // 24x24 pixels per tile
 
     //m_map.setMapDimensions(totalRows, cols, tileSize, WINDOW_X, WINDOW_Y);

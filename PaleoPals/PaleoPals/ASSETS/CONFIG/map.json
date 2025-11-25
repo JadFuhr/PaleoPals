@@ -59,12 +59,12 @@
     {
       "name": "Maip macrothorax",
       "category": "Carnivore",
-      "background": "ASSETS/IMAGES/Fossils/Carnivore/Maip_Macrothotax/Maip_Base.png",
+      "background": "ASSETS/IMAGES/Fossils/Carnivore/Maip_Macrothorax/Maip_Base.png",
       "pieces": [
-        { "id": "Maip_Skull", "texture": "ASSETS/IMAGES/Fossils/Carnivore/Maip_Macrothotax/Maip_Skull.png" },
-        { "id": "Maip_Torso", "texture": "ASSETS/IMAGES/Fossils/Carnivore/Maip_Macrothotax/Maip_Torso.png" },
-        { "id": "Maip_Pelvis", "texture": "ASSETS/IMAGES/Fossils/Carnivore/Maip_Macrothotax/Maip_Pelvis.png" },
-        { "id": "Maip_Tail", "texture": "ASSETS/IMAGES/Fossils/Carnivore/Maip_Macrothotax/Maip_Tail.png" }
+        { "id": "Maip_Skull", "texture": "ASSETS/IMAGES/Fossils/Carnivore/Maip_Macrothorax/Maip_Skull.png" },
+        { "id": "Maip_Torso", "texture": "ASSETS/IMAGES/Fossils/Carnivore/Maip_Macrothorax/Maip_Torso.png" },
+        { "id": "Maip_Pelvis", "texture": "ASSETS/IMAGES/Fossils/Carnivore/Maip_Macrothorax/Maip_Pelvis.png" },
+        { "id": "Maip_Tail", "texture": "ASSETS/IMAGES/Fossils/Carnivore/Maip_Macrothorax/Maip_Tail.png" }
       ]
     },
     {
