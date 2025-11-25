@@ -114,23 +114,23 @@
     {
       "name": "Pteranodon longiceps",
       "category": "Pterosaur",
-      "background": "ASSETS/IMAGES/Fossils/Pterasaur/Pteranodon_Longiceps/Pteranodon_Base.png",
+      "background": "ASSETS/IMAGES/Fossils/Pterosaur/Pteranodon_Longiceps/Pteranodon_Base.png",
       "pieces": [
-        { "id": "Pteranodon_Skull", "texture": "ASSETS/IMAGES/Fossils/Pterasaur/Pteranodon_Longiceps/Pteranodon_Skull.png" },
-        { "id": "Pteranodon_Torso", "texture": "ASSETS/IMAGES/Fossils/Pterasaur/Pteranodon_Longiceps/Pteranodon_Torso.png" },
-        { "id": "Pteranodon_Pelvis", "texture": "ASSETS/IMAGES/Fossils/Pterasaur/Pteranodon_Longiceps/Pteranodon_Pelvis.png" },
-        { "id": "Pteranodon_Tail", "texture": "ASSETS/IMAGES/Fossils/Pterasaur/Pteranodon_Longiceps/Pteranodon_Tail.png" }
+        { "id": "Pteranodon_Skull", "texture": "ASSETS/IMAGES/Fossils/Pterosaur/Pteranodon_Longiceps/Pteranodon_Skull.png" },
+        { "id": "Pteranodon_Torso", "texture": "ASSETS/IMAGES/Fossils/Pterosaur/Pteranodon_Longiceps/Pteranodon_Torso.png" },
+        { "id": "Pteranodon_Pelvis", "texture": "ASSETS/IMAGES/Fossils/Pterosaur/Pteranodon_Longiceps/Pteranodon_Pelvis.png" },
+        { "id": "Pteranodon_Tail", "texture": "ASSETS/IMAGES/Fossils/Pterosaur/Pteranodon_Longiceps/Pteranodon_Tail.png" }
       ]
     },
     {
       "name": "Quetzalcoatlus northropi",
       "category": "Pterosaur",
-      "background": "ASSETS/IMAGES/Fossils/Pterasaur/Quetzalcoatlus_Northropi/Quetzalcoatlus_Base.png",
+      "background": "ASSETS/IMAGES/Fossils/Pterosaur/Quetzalcoatlus_Northropi/Quetzalcoatlus_Base.png",
       "pieces": [
-        { "id": "Quetzalcoatlus_Skull", "texture": "ASSETS/IMAGES/Fossils/Pterasaur/Quetzalcoatlus_Northropi/Quetzalcoatlus_Skull.png" },
-        { "id": "Quetzalcoatlus_Torso", "texture": "ASSETS/IMAGES/Fossils/Pterasaur/Quetzalcoatlus_Northropi/Quetzalcoatlus_Torso.png" },
-        { "id": "Quetzalcoatlus_Pelvis", "texture": "ASSETS/IMAGES/Fossils/Pterasaur/Quetzalcoatlus_Northropi/Quetzalcoatlus_Pelvis.png" },
-        { "id": "Quetzalcoatlus_Tail", "texture": "ASSETS/IMAGES/Fossils/Pterasaur/Quetzalcoatlus_Northropi/Quetzalcoatlus_Tail.png" }
+        { "id": "Quetzalcoatlus_Skull", "texture": "ASSETS/IMAGES/Fossils/Pterosaur/Quetzalcoatlus_Northropi/Quetzalcoatlus_Skull.png" },
+        { "id": "Quetzalcoatlus_Torso", "texture": "ASSETS/IMAGES/Fossils/Pterosaur/Quetzalcoatlus_Northropi/Quetzalcoatlus_Torso.png" },
+        { "id": "Quetzalcoatlus_Pelvis", "texture": "ASSETS/IMAGES/Fossils/Pterosaur/Quetzalcoatlus_Northropi/Quetzalcoatlus_Pelvis.png" },
+        { "id": "Quetzalcoatlus_Tail", "texture": "ASSETS/IMAGES/Fossils/Pterosaur/Quetzalcoatlus_Northropi/Quetzalcoatlus_Tail.png" }
       ]
     }
   ]

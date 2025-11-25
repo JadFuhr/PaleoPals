@@ -76,22 +76,36 @@ void FossilManager::generateFossils(int totalRows, int totalCols, float tileSize
     std::mt19937 gen(rd());
 
     // We'll skip the first few rows (topsoil area) and place fossils deeper
-    int minRow = 3; // Start placing fossils from row 3 onwards
+    int minRow = 6; // Start placing fossils from row 3 onwards
 
     std::uniform_int_distribution<> rowDist(minRow, totalRows - 1);
     std::uniform_int_distribution<> colDist(0, totalCols - 1);
 
-    // Place each fossil piece randomly
+    // First, load all textures into the vector
     for (const auto& dino : m_dinosaurData)
     {
         for (const auto& piece : dino.pieces)
         {
-            // Load texture
             sf::Texture texture;
             if (!texture.loadFromFile(piece.texturePath))
             {
                 std::cerr << "Failed to load fossil texture: " << piece.texturePath << std::endl;
                 continue;
+            }
+            m_fossilTextures.push_back(std::move(texture));
+        }
+    }
+
+    // Now create fossil pieces using the stored textures
+    size_t textureIndex = 0;
+    for (const auto& dino : m_dinosaurData)
+    {
+        for (const auto& piece : dino.pieces)
+        {
+            if (textureIndex >= m_fossilTextures.size())
+            {
+                std::cerr << "Texture index out of range\n";
+                break;
             }
 
             // Find a unique position for this fossil
@@ -109,6 +123,7 @@ void FossilManager::generateFossils(int totalRows, int totalCols, float tileSize
             if (attempts >= maxAttempts)
             {
                 std::cerr << "Could not find free position for " << piece.id << std::endl;
+                textureIndex++;
                 continue;
             }
 
@@ -116,24 +131,26 @@ void FossilManager::generateFossils(int totalRows, int totalCols, float tileSize
             float xPos = col * tileSize + offsetX + (tileSize / 2.0f);
             float yPos = row * tileSize + offsetY + (tileSize / 2.0f);
 
-            // Store texture (needed to keep texture alive)
-            m_fossilTextures.push_back(std::move(texture));
-            const sf::Texture& texRef = m_fossilTextures.back();
+            // Get reference to the stored texture
+            const sf::Texture& texRef = m_fossilTextures[textureIndex];
 
             // Create fossil piece
-            FossilPiece fossil(texRef, sf::Vector2f(xPos, yPos),
-                piece.id, dino.name, dino.category, row, col);
+            FossilPiece fossil(texRef, sf::Vector2f(xPos, yPos), piece.id, dino.name, dino.category, row, col);
 
             // Scale fossil to fit within tile (slightly smaller than tile)
-            float scaleX = (tileSize * 0.8f) / texRef.getSize().x;
-            float scaleY = (tileSize * 0.8f) / texRef.getSize().y;
-            float scale = std::min(scaleX, scaleY);
-            fossil.sprite.setScale(sf::Vector2f(scale, scale));
+            //float scaleX = (tileSize * 0.8f) / texRef.getSize().x;
+
+            //float scaleY = (tileSize * 0.8f) / texRef.getSize().y;
+
+            //float scale = std::min(scaleX, scaleY);
+
+            fossil.sprite.setScale(sf::Vector2f(0.15, 0.15));
 
             // Center the sprite origin
             fossil.sprite.setOrigin(sf::Vector2f(texRef.getSize().x / 2.0f, texRef.getSize().y / 2.0f));
 
             m_fossilPieces.push_back(std::move(fossil));
+            textureIndex++;
         }
     }
 
