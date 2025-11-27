@@ -75,18 +75,19 @@ void FossilManager::generateFossils(int totalRows, int totalCols, float tileSize
     std::random_device rd;
     std::mt19937 gen(rd());
 
-    // We'll skip the first few rows (topsoil area) and place fossils deeper
-    int minRow = 6; // Start placing fossils from row 3 onwards
+    // skip first few rows 
+    int minRow = 6; // place fossils from row 6 onwards
 
     std::uniform_int_distribution<> rowDist(minRow, totalRows - 1);
     std::uniform_int_distribution<> colDist(0, totalCols - 1);
 
-    // First, load all textures into the vector
+    // load all textures into the vector
     for (const auto& dino : m_dinosaurData)
     {
         for (const auto& piece : dino.pieces)
         {
             sf::Texture texture;
+
             if (!texture.loadFromFile(piece.texturePath))
             {
                 std::cerr << "Failed to load fossil texture: " << piece.texturePath << std::endl;
@@ -96,8 +97,9 @@ void FossilManager::generateFossils(int totalRows, int totalCols, float tileSize
         }
     }
 
-    // Now create fossil pieces using the stored textures
+    // create fossil pieces using stored textures
     size_t textureIndex = 0;
+
     for (const auto& dino : m_dinosaurData)
     {
         for (const auto& piece : dino.pieces)
@@ -109,6 +111,7 @@ void FossilManager::generateFossils(int totalRows, int totalCols, float tileSize
             }
 
             // Find a unique position for this fossil
+
             int row, col;
             int attempts = 0;
             const int maxAttempts = 100;
@@ -118,7 +121,8 @@ void FossilManager::generateFossils(int totalRows, int totalCols, float tileSize
                 row = rowDist(gen);
                 col = colDist(gen);
                 attempts++;
-            } while (isPositionOccupied(row, col) && attempts < maxAttempts);
+            } 
+            while (isPositionOccupied(row, col) && attempts < maxAttempts);
 
             if (attempts >= maxAttempts)
             {
@@ -163,6 +167,7 @@ void FossilManager::drawFossils(sf::RenderWindow& window)
     {
         // Only draw undiscovered fossils (they'll be hidden until dug up)
         // For now, we'll make them semi-transparent so you can see them during testing
+
         if (!fossil.isDiscovered)
         {
             // Make fossils slightly visible for testing (change alpha to 0 in final game)
