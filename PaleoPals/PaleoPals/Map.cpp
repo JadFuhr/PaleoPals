@@ -72,7 +72,6 @@ bool Map::loadMapFromConfig(const std::string& filepath)
 void Map::generateGrid(int rows, int cols, float tileSize, float windowWidth, float windowHeight)
 {
 
-
     if (m_rowsGenerated == 0)
     {
         m_tiles.clear();
@@ -225,7 +224,6 @@ void Map::setupBackground()
 	m_backgroundSprite.setPosition(sf::Vector2f(0.f, 0.f));
 }
 
-
 void Map::drawMap(sf::RenderWindow& window)
 {
     window.draw(m_backgroundSprite);
@@ -240,7 +238,6 @@ void Map::drawMap(sf::RenderWindow& window)
     m_museum.drawMuseum(window);
     m_trader.drawTrader(window);
 }
-
 
 void Map::toggleDebugMode()
 {
@@ -304,10 +301,6 @@ void Map::handleMouseHold(const sf::RenderWindow& window, float tileSize, int co
                 fossil->isDiscovered = true;
                 std::cout << "FOSSIL DISCOVERED! " << fossil->fossilId << " from " << fossil->dinosaurName << "\n";
             }
-            else
-            {
-                std::cout << "Tile at index " << index << " removed\n";
-            }
         }
     }
 }
@@ -321,7 +314,6 @@ void Map::updateTrader(sf::RenderWindow& window)
 {
     m_trader.updateTraderHover(window);
 }
-
 
 void Map::updateHover(const sf::RenderWindow& window, float tileSize, int cols)
 {
@@ -374,7 +366,7 @@ void Map::updateHover(const sf::RenderWindow& window, float tileSize, int cols)
                 }
             }
 
-            std::cout << "Tile type: " << tileName << " | Hardness: " << tileHardness << std::endl;
+            //std::cout << "Tile type: " << tileName << " | Hardness: " << tileHardness << std::endl;
         }
 
         // Draw outline on hovered tile
@@ -390,8 +382,6 @@ void Map::updateHover(const sf::RenderWindow& window, float tileSize, int cols)
         m_hoveredIndex = -1;
     }
 }
-
-
 
 void Map::drawDebug(sf::RenderWindow& window)
 {
