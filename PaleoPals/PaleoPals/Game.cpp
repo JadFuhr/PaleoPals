@@ -161,6 +161,15 @@ void Game::update(sf::Time t_deltaTime)
         m_map.updateHover(m_window, 24.0f, 75);
         m_map.updateMuseum(m_window);
         m_map.updateTrader(m_window);
+
+        try
+        {
+            m_paleontologist.update(t_deltaTime, m_map);
+        }
+        catch (const std::exception& e)
+        {
+            std::cerr << "Exception updating paleontologist: " << e.what() << "\n";
+        }
         break;
 
     case GameState::Paused:
@@ -174,8 +183,6 @@ void Game::update(sf::Time t_deltaTime)
     default:
         break;
     }
-
-
 }
 
 //------------------------------------------------------------
@@ -185,8 +192,6 @@ void Game::render()
 {
 
     m_window.clear();
-
-   
 
     switch (m_currentState)
     {
@@ -201,6 +206,7 @@ void Game::render()
         m_window.setView(m_cameraView);
 
         m_map.drawMap(m_window);
+		m_paleontologist.draw(m_window);
         m_map.drawDebug(m_window);
         break;
     case GameState::Paused:
@@ -231,17 +237,19 @@ void Game::setupMap()
     }
 
     int cols = 75;
-
     int totalRows = 30;
-
     float tileSize = 24.0f; // 24x24 pixels per tile
 
-    //m_map.setMapDimensions(totalRows, cols, tileSize, WINDOW_X, WINDOW_Y);
-    //int initialBatch = 20;
-
 	m_map.setupBackground();
-
     m_map.generateGrid(totalRows, cols, tileSize, WINDOW_X, WINDOW_Y);
+
+    // Setup paleontologist at surface
+    std::cout << "Setting up paleontologist...\n";
+
+    m_paleontologist.setPosition(sf::Vector2f(WINDOW_X / 2.0f, WINDOW_Y / 2.0f - 20.0f));
+    m_paleontologist.setSpeed(60.0f);
+
+    std::cout << "Paleontologist position: " << m_paleontologist.getPosition().x << ", " << m_paleontologist.getPosition().y << "\n";
 }
 
 void Game::moveCamera(sf::Time t_deltaTime)

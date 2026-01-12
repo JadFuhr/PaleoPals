@@ -45,9 +45,9 @@ public:
     void generateGrid(int rows, int cols, float tileSize, float windowWidth, float windowHeight);
     int determineLayerAtDepth(int row, int totalRows);
 	void setupBackground();
-    //void setMapDimensions(int totalRows, int cols, float tileSize, float windowWidth, float windowHeight);
-    //void updateIfNeeded(float cameraY, int batchSize);
-    //bool hasMoreRowsToGenerate() const { return m_rowsGenerated < m_totalRows; }
+    
+    void removeTile(int row, int col);
+    int getTileHardness(int row, int col) const;
 
     void drawMap(sf::RenderWindow& window);
 

@@ -133,7 +133,7 @@ void FossilManager::generateFossils(int totalRows, int totalCols, float tileSize
     }
 
     // CREATE FOSSIL PIECES
-    // Now that all textures are safely stored, create the actual fossil sprites
+    // all textures are safely stored, create the actual fossil sprites
     size_t textureIndex = 0; // Track which texture we're currently using
 
     for (const auto& dino : m_dinosaurData)

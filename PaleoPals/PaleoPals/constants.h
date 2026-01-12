@@ -10,6 +10,8 @@ enum class GameState
 {
     MainMenu,
     Gameplay,
+    Museum,
+    Trader,
     Paused,
     Settings,
     Exit

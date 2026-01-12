@@ -224,6 +224,47 @@ void Map::setupBackground()
 	m_backgroundSprite.setPosition(sf::Vector2f(0.f, 0.f));
 }
 
+void Map::removeTile(int row, int col)
+{
+    if (row < 0 || col < 0 || row >= m_rows || col >= m_cols)
+    {
+        return;
+    }
+
+    int index = row * m_cols + col;
+
+    if (index >= 0 && index < static_cast<int>(m_tiles.size()))
+    {
+        m_tiles[index].sprite.setColor(sf::Color::Transparent);
+
+        // Check for fossil discovery
+        FossilPiece* fossil = m_fossilManager.getFossilAtTile(row, col);
+        if (fossil != nullptr && !fossil->isDiscovered)
+        {
+            fossil->isDiscovered = true;
+            std::cout << "FOSSIL DISCOVERED! " << fossil->fossilId
+                << " from " << fossil->dinosaurName << "\n";
+        }
+    }
+}
+
+int Map::getTileHardness(int row, int col) const
+{
+    if (row < 0 || col < 0 || row >= m_rows || col >= m_cols)
+    {
+        return 0;
+    }
+
+    int index = row * m_cols + col;
+
+    if (index >= 0 && index < static_cast<int>(m_tiles.size()))
+    {
+        return m_tiles[index].layerHardness;
+    }
+
+    return 0;
+}
+
 void Map::drawMap(sf::RenderWindow& window)
 {
     window.draw(m_backgroundSprite);
