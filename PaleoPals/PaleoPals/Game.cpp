@@ -67,7 +67,7 @@ void Game::processEvents()
         {
             processKeys(newEvent);
         }
-        else if (newEvent->is<sf::Event::MouseButtonPressed>())
+        else if (newEvent->is<sf::Event::MouseButtonPressed>() )
         {
             // Handle mouse clicks for menu
             if (m_currentState == GameState::MainMenu)
@@ -77,6 +77,18 @@ void Game::processEvents()
             else if (m_currentState == GameState::Paused)
             {
                 m_currentState = m_pause.handlePauseMenuClick(m_window);
+            }
+            else if (m_currentState == GameState::Gameplay)
+            {
+                // Spawn a new paleontologist at mouse position when clicking in gameplay
+                sf::Vector2i mousePixel = sf::Mouse::getPosition(m_window);
+                sf::Vector2f worldPos = m_window.mapPixelToCoords(mousePixel);
+
+                // Create and add a new paleontologist instance at the clicked world position
+                auto newPaleo = std::make_unique<Paleontologist>();
+                newPaleo->setPosition(worldPos);
+                newPaleo->setSpeed(60.0f);
+                m_paleontologists.push_back(std::move(newPaleo));
             }
         }
 
@@ -143,7 +155,6 @@ void Game::checkKeyboardState()
 //------------------------------------------------------------
 void Game::update(sf::Time t_deltaTime)
 {
-  
 
     checkKeyboardState();
 
@@ -164,7 +175,11 @@ void Game::update(sf::Time t_deltaTime)
 
         try
         {
-            m_paleontologist.update(t_deltaTime, m_map);
+            // Update all paleontologists
+            for (auto& p : m_paleontologists)
+            {
+                if (p) p->update(t_deltaTime, m_map);
+            }
         }
         catch (const std::exception& e)
         {
@@ -206,7 +221,13 @@ void Game::render()
         m_window.setView(m_cameraView);
 
         m_map.drawMap(m_window);
-		m_paleontologist.draw(m_window);
+
+        // Draw paleontologists
+        for (auto& p : m_paleontologists)
+        {
+            if (p) p->draw(m_window);
+        }
+
         m_map.drawDebug(m_window);
         break;
     case GameState::Paused:
@@ -217,6 +238,12 @@ void Game::render()
 
         m_window.setView(m_window.getDefaultView());
 
+        // Draw paleontologists while paused too
+        for (auto& p : m_paleontologists)
+        {
+            if (p) p->draw(m_window);
+        }
+
         m_pause.drawPauseMenu(m_window);
     default:
         break;
@@ -224,7 +251,6 @@ void Game::render()
 
     m_window.display();
 }
-
 
 //------------------------------------------------------------
 // Setup Map
@@ -240,16 +266,19 @@ void Game::setupMap()
     int totalRows = 30;
     float tileSize = 24.0f; // 24x24 pixels per tile
 
-	m_map.setupBackground();
+    m_map.setupBackground();
     m_map.generateGrid(totalRows, cols, tileSize, WINDOW_X, WINDOW_Y);
 
     // Setup paleontologist at surface
     std::cout << "Setting up paleontologist...\n";
 
-    m_paleontologist.setPosition(sf::Vector2f(WINDOW_X / 2.0f, WINDOW_Y / 2.0f - 20.0f));
-    m_paleontologist.setSpeed(60.0f);
+    // Create an initial paleontologist and add to the vector
+    auto initialPaleo = std::make_unique<Paleontologist>();
+    initialPaleo->setPosition(sf::Vector2f(WINDOW_X / 2.0f, WINDOW_Y / 2.0f - 20.0f));
+    initialPaleo->setSpeed(60.0f);
+    m_paleontologists.push_back(std::move(initialPaleo));
 
-    std::cout << "Paleontologist position: " << m_paleontologist.getPosition().x << ", " << m_paleontologist.getPosition().y << "\n";
+    std::cout << "Initial paleontologist created. Total paleontologists: " << m_paleontologists.size() << "\n";
 }
 
 void Game::moveCamera(sf::Time t_deltaTime)

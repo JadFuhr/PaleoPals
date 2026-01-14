@@ -89,12 +89,14 @@ void PauseMenu::updatePauseMenu(const sf::RenderWindow& window)
 
 void PauseMenu::drawPauseMenu(sf::RenderWindow& window)
 {
+
     window.draw(m_pauseSprite);
 
     // Draw buttons
     window.draw(m_resumeButton);
     window.draw(m_settingsButton);
     window.draw(m_quitButton);
+
 }
 
 GameState PauseMenu::handlePauseMenuClick(const sf::RenderWindow& window)

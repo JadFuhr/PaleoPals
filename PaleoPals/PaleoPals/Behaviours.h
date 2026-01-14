@@ -103,6 +103,18 @@ private:
     bool m_hasPath = false;
     bool m_returningToSurface = false;
 
+    // Mining state for each tile while digging
+    bool m_isMiningTile = false;
+    float m_miningProgress = 0.0f;
+    float m_currentTileDuration = 1.0f;
+
+    // Track the last tile that was mined so we can place/remove a ladder support
+    sf::Vector2i m_lastMinedTile{ -1, -1 };
+    bool m_hasLastMinedTile = false;
+
+    // Track all mined tiles (stack) so ladders can be removed as the agent climbs back up
+    std::vector<sf::Vector2i> m_minedTiles;
+
     bool findNearestFossil(Paleontologist* agent, Map& map);
     std::vector<sf::Vector2i> findPath(sf::Vector2i start, sf::Vector2i goal, Map& map);
     float heuristic(sf::Vector2i a, sf::Vector2i b);
@@ -122,6 +134,7 @@ private:
     float m_miningProgress = 0.0f;
     float m_miningDuration = 1.0f;
     sf::Vector2i m_targetTile;
+    bool m_returningToSurface = false; // when true, move agent back up smoothly
 };
 
 //------------------------------------------------------------
@@ -132,7 +145,7 @@ class BehaviorManager
 public:
     BehaviorManager();
     void update(Paleontologist* agent, sf::Time deltaTime, Map& map);
-    void changeState(BehaviorState newState);
+    void changeState(BehaviorState newState, Paleontologist* agent);
     BehaviorState getCurrentState() const { return m_currentState; }
 
 private:

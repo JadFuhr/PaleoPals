@@ -46,20 +46,20 @@ void BehaviorManager::update(Paleontologist* agent, sf::Time deltaTime, Map& map
 
     if (nextState != m_currentState)
     {
-        changeState(nextState);
+        changeState(nextState, agent);
     }
 }
 
-void BehaviorManager::changeState(BehaviorState newState)
+void BehaviorManager::changeState(BehaviorState newState, Paleontologist* agent)
 {
     if (m_currentBehavior)
     {
-        m_currentBehavior->exit(nullptr);
+        m_currentBehavior->exit(agent);
     }
 
     m_currentState = newState;
     m_currentBehavior = m_behaviors[static_cast<int>(newState)].get();
-    m_currentBehavior->enter(nullptr);
+    m_currentBehavior->enter(agent);
 
     std::cout << "AI State changed to: " << static_cast<int>(newState) << std::endl;
 }
@@ -199,6 +199,8 @@ void SearchingBehavior::enter(Paleontologist* agent)
     m_currentPathIndex = 0;
     m_path.clear();
     m_returningToSurface = false;
+    m_isMiningTile = false;
+    m_miningProgress = 0.0f;
 
     if (agent)
     {
@@ -245,7 +247,12 @@ BehaviorState SearchingBehavior::update(Paleontologist* agent, sf::Time deltaTim
 
         // Create straight down path to fossil depth
         m_path.clear();
-        for (int row = agentRow + 1; row <= m_targetTile.y; ++row)
+
+        // Ensure we include the topsoil row if the fossil is at row 0
+        int startRow = std::min(agentRow, m_targetTile.y);
+        int endRow = m_targetTile.y;
+
+        for (int row = startRow; row <= endRow; ++row)
         {
             m_path.push_back(sf::Vector2i(agentCol, row));
         }
@@ -269,9 +276,46 @@ BehaviorState SearchingBehavior::update(Paleontologist* agent, sf::Time deltaTim
         sf::Vector2f direction = m_surfacePosition - agentPos;
         float distance = std::sqrt(direction.x * direction.x + direction.y * direction.y);
 
+        // Remove ladders for mined tiles as the agent climbs above them
+        if (!m_minedTiles.empty())
+        {
+            float tileSize = map.getTileSize();
+            float offsetY = WINDOW_Y / 2.0f;
+
+            // While there are mined tiles and the agent has climbed above the last one, remove ladder
+            while (!m_minedTiles.empty())
+            {
+                sf::Vector2i last = m_minedTiles.back();
+                float ladderTileWorldY = last.y * tileSize + offsetY + (tileSize / 2.0f);
+
+                // If agent Y is less (higher on screen) than the ladder tile Y minus some margin, remove it
+                if (agentPos.y < ladderTileWorldY - (tileSize * 0.2f))
+                {
+                    map.removeLadder(last.y, last.x);
+                    std::cout << "AI: Removed ladder at (" << last.x << ", " << last.y << ") as agent climbed past it\n";
+                    m_minedTiles.pop_back();
+                }
+                else
+                {
+                    break;
+                }
+            }
+        }
+
         if (distance < 5.0f)
         {
             // Back at surface, go idle
+            // Ensure we clean up any remaining ladder supports when fully surfaced
+            if (!m_minedTiles.empty())
+            {
+                for (const auto& t : m_minedTiles)
+                {
+                    map.removeLadder(t.y, t.x);
+                }
+                m_minedTiles.clear();
+                std::cout << "AI: Cleared remaining ladders on final surfacing\n";
+            }
+
             std::cout << "AI: Returned to surface\n";
             return BehaviorState::Idle;
         }
@@ -282,7 +326,7 @@ BehaviorState SearchingBehavior::update(Paleontologist* agent, sf::Time deltaTim
         return BehaviorState::SearchingForFossil;
     }
 
-    // Follow the path downward
+    // Follow the path downward, mining each tile based on its hardness
     if (m_currentPathIndex < static_cast<int>(m_path.size()))
     {
         sf::Vector2i targetTile = m_path[m_currentPathIndex];
@@ -290,9 +334,21 @@ BehaviorState SearchingBehavior::update(Paleontologist* agent, sf::Time deltaTim
         float offsetX = (WINDOW_X - (map.getColumnCount() * tileSize)) / 2.0f;
         float offsetY = WINDOW_Y / 2.0f;
 
+        // If the tile is topsoil (row 0), mine it from the surface Y instead of forcing the agent deep
+        float targetYPos;
+        float surfaceY = (WINDOW_Y / 2.0f) - 20.0f;
+        if (targetTile.y == 0)
+        {
+            targetYPos = surfaceY; // stay at surface level for topsoil
+        }
+        else
+        {
+            targetYPos = targetTile.y * tileSize + offsetY + tileSize / 2.0f;
+        }
+
         sf::Vector2f targetPos(
             targetTile.x * tileSize + offsetX + tileSize / 2.0f,
-            targetTile.y * tileSize + offsetY + tileSize / 2.0f
+            targetYPos
         );
 
         sf::Vector2f agentPos = agent->getPosition();
@@ -301,23 +357,69 @@ BehaviorState SearchingBehavior::update(Paleontologist* agent, sf::Time deltaTim
 
         if (distance < 10.0f)
         {
-            m_currentPathIndex++;
+            // We're at the tile centre (or surface for topsoil). Start or continue mining this tile.
+            if (!m_isMiningTile)
+            {
+                int tileHardness = map.getTileHardness(targetTile.y, targetTile.x);
 
-            // Mine this tile as we pass through it
-            map.removeTile(targetTile.y, targetTile.x);
+                if (tileHardness == 0)
+                {
+                    // Already mined; skip
+                    m_currentPathIndex++;
+                }
+                else
+                {
+                    m_isMiningTile = true;
+                    m_miningProgress = 0.0f;
+                    // Match mining duration formula used in MiningBehavior
+                    m_currentTileDuration = 0.8f + (tileHardness * 0.4f);
+
+                    std::cout << "AI: Starting to mine tile (" << targetTile.x << ", " << targetTile.y << ") duration=" << m_currentTileDuration << " hardness=" << tileHardness << "\n";
+                }
+            }
+            else
+            {
+                // Progress mining
+                m_miningProgress += deltaTime.asSeconds();
+                agent->setMiningProgress(m_miningProgress / m_currentTileDuration);
+
+                if (m_miningProgress >= m_currentTileDuration)
+                {
+                    map.removeTile(targetTile.y, targetTile.x);
+                    std::cout << "AI: Mined tile (" << targetTile.x << ", " << targetTile.y << ")\n";
+
+                    // Place ladder support on the tile we just mined (only for underground tiles)
+                    if (targetTile.y > 0)
+                    {
+                        map.addLadder(targetTile.y, targetTile.x);
+                        m_lastMinedTile = targetTile;
+                        m_hasLastMinedTile = true;
+
+                        // Push onto mined tiles stack so we can remove ladders in LIFO order
+                        m_minedTiles.push_back(targetTile);
+                    }
+
+                    // Reset mining flags and move to next tile
+                    m_isMiningTile = false;
+                    agent->setMiningProgress(0.0f);
+                    m_currentPathIndex++;
+                }
+            }
         }
         else
         {
+            // Move toward the tile center
             direction /= distance;
             agent->move(direction * agent->getSpeed() * deltaTime.asSeconds());
         }
     }
     else
     {
-        // Reached the fossil depth, start mining
-        agent->setTargetTile(m_targetTile);
-        std::cout << "AI: Reached fossil depth, starting mining\n";
-        return BehaviorState::Mining;
+        // Reached the fossil depth (all tiles above have been mined). Return to surface.
+        std::cout << "AI: Reached target depth, returning to surface\n";
+        m_returningToSurface = true;
+        agent->setMiningProgress(0.0f);
+        return BehaviorState::SearchingForFossil;
     }
 
     return BehaviorState::SearchingForFossil;
@@ -358,7 +460,7 @@ bool SearchingBehavior::findNearestFossil(Paleontologist* agent, Map& map)
     int colsToCheck = map.getColumnCount();
 
     // Scan through the grid looking for fossils (limited search)
-    for (int row = 1; row < rowsToCheck; ++row) // Start at row 1 (skip topsoil)
+    for (int row = 0; row < rowsToCheck; ++row) // Start at row 0 (allow topsoil mining)
     {
         for (int col = 0; col < colsToCheck; ++col)
         {
@@ -467,6 +569,30 @@ BehaviorState MiningBehavior::update(Paleontologist* agent, sf::Time deltaTime, 
         return BehaviorState::Idle;
     }
 
+    // If we're in the returning-to-surface phase, move agent up smoothly
+    if (m_returningToSurface)
+    {
+        sf::Vector2f agentPos = agent->getPosition();
+        float surfaceY = (WINDOW_Y / 2.0f) - 20.0f;
+        sf::Vector2f targetPos(agentPos.x, surfaceY);
+
+        sf::Vector2f direction = targetPos - agentPos;
+        float distance = std::sqrt(direction.x * direction.x + direction.y * direction.y);
+
+        if (distance < 5.0f)
+        {
+            // Snap to surface and finish
+            agent->setPosition(sf::Vector2f(agentPos.x, surfaceY));
+            m_returningToSurface = false;
+            agent->setMiningProgress(0.0f);
+            return BehaviorState::Idle;
+        }
+
+        direction /= distance;
+        agent->move(direction * agent->getSpeed() * 2.0f * deltaTime.asSeconds()); // faster when returning
+        return BehaviorState::Mining;
+    }
+
     // Safety check for valid tile
     if (m_targetTile.x < 0 || m_targetTile.y < 0)
     {
@@ -481,12 +607,9 @@ BehaviorState MiningBehavior::update(Paleontologist* agent, sf::Time deltaTime, 
     {
         std::cout << "AI: Tile already mined or invalid, returning to surface\n";
 
-        // Return to surface
-        sf::Vector2f agentPos = agent->getPosition();
-        float surfaceY = (WINDOW_Y / 2.0f) - 20.0f;
-        agent->setPosition(sf::Vector2f(agentPos.x, surfaceY));
-
-        return BehaviorState::Idle;
+        // Start smooth return to surface instead of teleporting
+        m_returningToSurface = true;
+        return BehaviorState::Mining;
     }
 
     // Base mining time is 0.8 seconds, + 0.4s per hardness level
@@ -501,15 +624,14 @@ BehaviorState MiningBehavior::update(Paleontologist* agent, sf::Time deltaTime, 
         std::cout << "AI: Mined tile (" << m_targetTile.x << ", " << m_targetTile.y
             << ") with hardness " << tileHardness << "\n";
 
-        // After mining, return to surface
+        // After mining, start smooth return to surface
         std::cout << "AI: Finished mining, returning to surface\n";
 
-        // Move agent back to surface quickly
-        sf::Vector2f agentPos = agent->getPosition();
-        float surfaceY = (WINDOW_Y / 2.0f) - 20.0f;
-        agent->setPosition(sf::Vector2f(agentPos.x, surfaceY));
+        m_miningProgress = 0.0f;
+        m_returningToSurface = true;
+        agent->setMiningProgress(0.0f);
 
-        return BehaviorState::Idle;
+        return BehaviorState::Mining;
     }
 
     // Visual feedback - update progress bar

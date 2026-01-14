@@ -44,8 +44,8 @@ public:
     bool loadMapFromConfig(const std::string& filepath);
     void generateGrid(int rows, int cols, float tileSize, float windowWidth, float windowHeight);
     int determineLayerAtDepth(int row, int totalRows);
-	void setupBackground();
-    
+    void setupBackground();
+
     void removeTile(int row, int col);
     int getTileHardness(int row, int col) const;
 
@@ -53,9 +53,9 @@ public:
 
     void updateHover(const sf::RenderWindow& window, float tileSize, int cols);
     void drawDebug(sf::RenderWindow& window);
-    void toggleDebugMode(); 
+    void toggleDebugMode();
 
-	void handleMouseHold(const sf::RenderWindow& window, float tileSize, int cols);
+    void handleMouseHold(const sf::RenderWindow& window, float tileSize, int cols);
 
     // update museum sprite
 
@@ -71,7 +71,7 @@ public:
 
 private:
 
-	sf::Texture m_backgroundTexture;
+    sf::Texture m_backgroundTexture;
     sf::Sprite m_backgroundSprite{ m_backgroundTexture };
 
     int m_rowsGenerated = 0;      // How many rows are currently generated
@@ -95,6 +95,15 @@ private:
     Museum m_museum;
     Trader m_trader;
 
-    FossilManager m_fossilManager;  
+    FossilManager m_fossilManager;
+
+    // Ladder supports: store indices of tiles that have ladder/support squares
+    std::vector<bool> m_ladders; // parallel to m_tiles, true means ladder present
+
+public:
+    void addLadder(int row, int col);
+    void removeLadder(int row, int col);
+    bool hasLadder(int row, int col) const;
 };
+
 #endif // !MAP_H

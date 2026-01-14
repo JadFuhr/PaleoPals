@@ -135,8 +135,10 @@ void Paleontologist::draw(sf::RenderWindow& window)
 {
     window.draw(m_sprite);
 
-    // Draw mining progress bar if mining
-    if (getCurrentState() == BehaviorState::Mining && m_miningProgress > 0.0f)
+    // Draw mining progress bar if mining OR searching (digging down)
+    BehaviorState currentState = getCurrentState();
+    if ((currentState == BehaviorState::Mining || currentState == BehaviorState::SearchingForFossil)
+        && m_miningProgress > 0.0f)
     {
         window.draw(m_progressBarBackground);
         window.draw(m_progressBar);

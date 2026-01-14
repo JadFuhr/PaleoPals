@@ -5,7 +5,7 @@
 
 using json = nlohmann::json;
 
-Map::Map(){}
+Map::Map() {}
 
 bool Map::loadMapFromConfig(const std::string& filepath)
 {
@@ -39,7 +39,7 @@ bool Map::loadMapFromConfig(const std::string& filepath)
         }
         if (config.contains("museum"))
         {
-            if (!m_museum.loadMuseumFromConfig(config["museum"]))  
+            if (!m_museum.loadMuseumFromConfig(config["museum"]))
             {
                 std::cerr << "Failed to load museum\n";
                 return false;
@@ -78,8 +78,8 @@ void Map::generateGrid(int rows, int cols, float tileSize, float windowWidth, fl
         m_tileSize = tileSize;
         m_windowHeight = windowHeight;
         m_windowWidth = windowWidth;
-		m_rows = rows;
-		m_cols = cols;
+        m_rows = rows;
+        m_cols = cols;
     }
 
     float offsetY = m_windowHeight / 2.0f;
@@ -91,21 +91,24 @@ void Map::generateGrid(int rows, int cols, float tileSize, float windowWidth, fl
     {
         for (int col = 0; col < cols; ++col)
         {
-			int layerIndex = determineLayerAtDepth(row, m_rows);
+            int layerIndex = determineLayerAtDepth(row, m_rows);
 
-			const LayerType& layer = m_layerTypes[layerIndex];
+            const LayerType& layer = m_layerTypes[layerIndex];
 
-			float yPos = row * tileSize + offsetY;
-			float xPos = col * tileSize + offsetX;
+            float yPos = row * tileSize + offsetY;
+            float xPos = col * tileSize + offsetX;
 
-			Tile newTile(layer.texture, sf::Vector2f(xPos, yPos), layer.hardness);
+            Tile newTile(layer.texture, sf::Vector2f(xPos, yPos), layer.hardness);
             newTile.sprite.setScale(sf::Vector2f(tileSize / layer.texture.getSize().x, tileSize / layer.texture.getSize().y));
 
-			m_tiles.emplace_back(std::move(newTile));
+            m_tiles.emplace_back(std::move(newTile));
+
+            // Ensure ladder vector is in sync
+            m_ladders.push_back(false);
         }
     }
 
-	m_rowsGenerated += rows;
+    m_rowsGenerated += rows;
 
     //gen fossils
 
@@ -121,23 +124,23 @@ int Map::determineLayerAtDepth(int row, int totalRows)
 {
     if (row == 0)
     {
-		return 0; // Topsoil    
+        return 0; // Topsoil    
     }
 
-	// calc depth as a ratio
+    // calc depth as a ratio
 
     float depthRatio = static_cast<float>(row) / static_cast<float>(totalRows);
 
-	// generate random value for blending
+    // generate random value for blending
 
-	float randVal = static_cast<float>(std::rand()) / RAND_MAX;
+    float randVal = static_cast<float>(std::rand()) / RAND_MAX;
 
     if (depthRatio < 0.20f)
     {
         // Near surface: mostly topsoil (0) transitioning to sediment (1)
         if (randVal < 0.7f)
         {
-			return 1; // Sediment
+            return 1; // Sediment
         }
         else
         {
@@ -150,7 +153,7 @@ int Map::determineLayerAtDepth(int row, int totalRows)
         // Upper layers: mostly sediment
         if (randVal < 0.85f)
         {
-             return 1; // Sediment
+            return 1; // Sediment
         }
         else
         {
@@ -210,18 +213,18 @@ int Map::determineLayerAtDepth(int row, int totalRows)
 void Map::setupBackground()
 {
 
-    if(!m_backgroundTexture.loadFromFile("ASSETS/IMAGES/TERRAIN/Background.png"))
+    if (!m_backgroundTexture.loadFromFile("ASSETS/IMAGES/TERRAIN/Background.png"))
     {
         std::cout << "failed to load background texture" << std::endl;
     }
 
     m_backgroundSprite.setTexture(m_backgroundTexture);
-    
+
 
     m_backgroundSprite.setTextureRect(sf::IntRect({ 0, 0 }, { WINDOW_X, BACKGROUND_LENGTH }));
 
     // Position background at (0,0)
-	m_backgroundSprite.setPosition(sf::Vector2f(0.f, 0.f));
+    m_backgroundSprite.setPosition(sf::Vector2f(0.f, 0.f));
 }
 
 void Map::removeTile(int row, int col)
@@ -236,6 +239,9 @@ void Map::removeTile(int row, int col)
     if (index >= 0 && index < static_cast<int>(m_tiles.size()))
     {
         m_tiles[index].sprite.setColor(sf::Color::Transparent);
+
+        // Mark this tile as mined so subsequent hardness checks return 0
+        m_tiles[index].layerHardness = 0;
 
         // Check for fossil discovery
         FossilPiece* fossil = m_fossilManager.getFossilAtTile(row, col);
@@ -271,13 +277,62 @@ void Map::drawMap(sf::RenderWindow& window)
 
     m_fossilManager.drawFossils(window);
 
-    for (auto& tile : m_tiles)
+    for (int i = 0; i < static_cast<int>(m_tiles.size()); ++i)
     {
+        const Tile& tile = m_tiles[i];
         window.draw(tile.sprite);
+
+        // Draw ladder support if present
+        if (i >= 0 && i < static_cast<int>(m_ladders.size()) && m_ladders[i])
+        {
+            // Draw small white square centered on tile
+            sf::RectangleShape ladderShape;
+            ladderShape.setSize(sf::Vector2f(m_tileSize * 0.3f, m_tileSize * 0.3f));
+            ladderShape.setFillColor(sf::Color::White);
+            ladderShape.setPosition(sf::Vector2f(tile.sprite.getPosition().x + (m_tileSize - ladderShape.getSize().x) / 2.0f, tile.sprite.getPosition().y + (m_tileSize - ladderShape.getSize().y) / 2.0f));
+            window.draw(ladderShape);
+        }
     }
 
     m_museum.drawMuseum(window);
     m_trader.drawTrader(window);
+}
+
+void Map::addLadder(int row, int col)
+{
+    if (row < 0 || col < 0 || row >= m_rows || col >= m_cols)
+        return;
+
+    int index = row * m_cols + col;
+    if (index >= 0 && index < static_cast<int>(m_ladders.size()))
+    {
+        m_ladders[index] = true;
+    }
+}
+
+void Map::removeLadder(int row, int col)
+{
+    if (row < 0 || col < 0 || row >= m_rows || col >= m_cols)
+        return;
+
+    int index = row * m_cols + col;
+    if (index >= 0 && index < static_cast<int>(m_ladders.size()))
+    {
+        m_ladders[index] = false;
+    }
+}
+
+bool Map::hasLadder(int row, int col) const
+{
+    if (row < 0 || col < 0 || row >= m_rows || col >= m_cols)
+        return false;
+
+    int index = row * m_cols + col;
+    if (index >= 0 && index < static_cast<int>(m_ladders.size()))
+    {
+        return m_ladders[index];
+    }
+    return false;
 }
 
 void Map::toggleDebugMode()
@@ -360,7 +415,7 @@ void Map::updateHover(const sf::RenderWindow& window, float tileSize, int cols)
 {
     if (!m_debugMode) return; // (only if debug is active)
 
-  
+
 
     sf::Vector2i mousePixel = sf::Mouse::getPosition(window);
     sf::Vector2f mouseWorld = window.mapPixelToCoords(mousePixel);
@@ -372,7 +427,7 @@ void Map::updateHover(const sf::RenderWindow& window, float tileSize, int cols)
     float offsetY = WINDOW_Y / 2.0f;
     float offsetX = (WINDOW_X - totalGridWidth) / 2.0f;
 
-    
+
     float localX = mouseWorld.x - offsetX;
     float localY = mouseWorld.y - offsetY;
 
