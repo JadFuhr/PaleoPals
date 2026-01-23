@@ -69,6 +69,11 @@ bool Map::loadMapFromConfig(const std::string& filepath)
     return true;
 }
 
+bool Map::isPointOnTrader(const sf::Vector2f& worldPos) const
+{
+    return m_trader.containsPoint(worldPos);
+}
+
 void Map::generateGrid(int rows, int cols, float tileSize, float windowWidth, float windowHeight)
 {
 
@@ -277,9 +282,23 @@ void Map::drawMap(sf::RenderWindow& window)
 
     m_fossilManager.drawFossils(window);
 
+    // Get view bounds for frustum culling
+    sf::View currentView = window.getView();
+    sf::Vector2f viewCenter = currentView.getCenter();
+    sf::Vector2f viewSize = currentView.getSize();
+    sf::FloatRect viewBounds(sf::Vector2f(viewCenter.x - viewSize.x / 2.f, viewCenter.y - viewSize.y / 2.f), viewSize);
+
+    // Only draw tiles that intersect with the view
     for (int i = 0; i < static_cast<int>(m_tiles.size()); ++i)
     {
         const Tile& tile = m_tiles[i];
+        
+        // Frustum culling: skip tiles outside the view
+        if (!viewBounds.findIntersection(tile.sprite.getGlobalBounds()))
+        {
+            continue;
+        }
+
         window.draw(tile.sprite);
 
         // Draw ladder support if present
@@ -294,8 +313,17 @@ void Map::drawMap(sf::RenderWindow& window)
         }
     }
 
-    m_museum.drawMuseum(window);
-    m_trader.drawTrader(window);
+    // Only draw museum if it's in view
+    if (viewBounds.findIntersection(m_museum.getSprite().getGlobalBounds()))
+    {
+        m_museum.drawMuseum(window);
+    }
+
+    // Only draw trader if it's in view
+    if (viewBounds.findIntersection(m_trader.getSprite().getGlobalBounds()))
+    {
+        m_trader.drawTrader(window);
+    }
 }
 
 void Map::addLadder(int row, int col)

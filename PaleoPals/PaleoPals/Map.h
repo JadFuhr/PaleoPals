@@ -62,6 +62,9 @@ public:
     void updateMuseum(sf::RenderWindow& window);
     void updateTrader(sf::RenderWindow& window);
 
+    // return true if the given world coordinate lies on the trader
+    bool isPointOnTrader(const sf::Vector2f& worldPos) const;
+
     int getRowCount() const { return m_rows; }
     int getColumnCount() const { return m_cols; }
     float getTileSize() const { return m_tileSize; }

@@ -14,6 +14,12 @@ public:
 	void updateTraderHover(const sf::RenderWindow& window);
 	void drawTrader(sf::RenderWindow& window);
 
+	// test whether a world-coordinate point hits the trader sprite
+	bool containsPoint(const sf::Vector2f& point) const;
+
+	// Get the sprite for frustum culling
+	const sf::Sprite& getSprite() const { return m_sprite; }
+
 private:
 
 	sf::Texture m_texture;
@@ -23,4 +29,4 @@ private:
 	int m_frameHeight = 0;
 };
 
-#endif 
+#endif

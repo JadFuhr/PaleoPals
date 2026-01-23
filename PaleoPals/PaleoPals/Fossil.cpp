@@ -203,17 +203,29 @@ void FossilManager::generateFossils(int totalRows, int totalCols, float tileSize
 
 //------------------------------------------------------------
 // drawFossils
-// Purpose: Renders all fossils to the screen
+// Purpose: Renders all fossils to the screen (with frustum culling)
 //------------------------------------------------------------
 void FossilManager::drawFossils(sf::RenderWindow& window)
 {
+    // Get the current camera view bounds for culling
+    sf::View currentView = window.getView();
+    sf::Vector2f viewCenter = currentView.getCenter();
+    sf::Vector2f viewSize = currentView.getSize();
+    sf::FloatRect viewBounds(sf::Vector2f(viewCenter.x - viewSize.x / 2.f, viewCenter.y - viewSize.y / 2.f), viewSize);
+
     // Loop through every fossil piece
     for (auto& fossil : m_fossilPieces)
     {
+        // Frustum culling: skip fossils outside the view 
+        if (!viewBounds.findIntersection(fossil.sprite.getGlobalBounds()))
+        {
+            continue;
+        }
+
         // Check discovery status
         if (!fossil.isDiscovered)
         {
-            // UNDISCOVERED FOSSILS: Make them semi-transparent (alpha = 100)
+            // UNDISCOVERED FOSSILS: semi-transparent (alpha = 100)
             // This is for TESTING 
             fossil.sprite.setColor(sf::Color(255, 255, 255, 100));
         }

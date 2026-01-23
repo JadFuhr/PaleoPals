@@ -50,3 +50,8 @@ void Trader::drawTrader(sf::RenderWindow& window)
     window.draw(m_sprite);
     //std::cout << "trader drawn" << std::endl;
 }
+
+bool Trader::containsPoint(const sf::Vector2f& point) const
+{
+    return m_sprite.getGlobalBounds().contains(point);
+}

@@ -80,15 +80,34 @@ void Game::processEvents()
             }
             else if (m_currentState == GameState::Gameplay)
             {
-                // Spawn a new paleontologist at mouse position when clicking in gameplay
+                // Get mouse world position
                 sf::Vector2i mousePixel = sf::Mouse::getPosition(m_window);
                 sf::Vector2f worldPos = m_window.mapPixelToCoords(mousePixel);
 
-                // Create and add a new paleontologist instance at the clicked world position
-                auto newPaleo = std::make_unique<Paleontologist>();
-                newPaleo->setPosition(worldPos);
-                newPaleo->setSpeed(60.0f);
-                m_paleontologists.push_back(std::move(newPaleo));
+                // If trader menu is open, let it handle the click first
+                if (m_traderMenu.isOpen())
+                {
+                    bool hireClicked = m_traderMenu.handleClick(worldPos);
+                    if (hireClicked)
+                    {
+                        // spawn a new paleontologist at a position near the click
+                        auto newPaleo = std::make_unique<Paleontologist>();
+                        newPaleo->setPosition(worldPos + sf::Vector2f(16.f, 0.f));
+                        newPaleo->setSpeed(60.0f);
+                        m_paleontologists.push_back(std::move(newPaleo));
+                      
+                    }
+                    // menu consumed the click (either hired or closed) 
+                    continue;
+                }
+
+                // check whether click was on the trader and open the menu
+                if (m_map.isPointOnTrader(worldPos))
+                {
+                    m_traderMenu.openAt(worldPos);
+                    continue;
+                }
+
             }
         }
 
@@ -171,6 +190,7 @@ void Game::update(sf::Time t_deltaTime)
         m_map.handleMouseHold(m_window, 24, 75);
         m_map.updateHover(m_window, 24.0f, 75);
         m_map.updateMuseum(m_window);
+        // Update trader hover (if you want hover animation)
         m_map.updateTrader(m_window);
 
         try
@@ -222,11 +242,25 @@ void Game::render()
 
         m_map.drawMap(m_window);
 
-        // Draw paleontologists
-        for (auto& p : m_paleontologists)
+        // local scope block to limit scope of viewCenter, viewSize and viewBounds
         {
-            if (p) p->draw(m_window);
+            sf::Vector2f viewCenter = m_cameraView.getCenter();
+            sf::Vector2f viewSize = m_cameraView.getSize();
+            sf::FloatRect viewBounds(sf::Vector2f(viewCenter.x - viewSize.x / 2.f, viewCenter.y - viewSize.y / 2.f), viewSize);
+
+            // draw paleontologists only if in view
+            for (auto& p : m_paleontologists)
+            {
+                // Frustum culling: skip paleontologists outside the view
+                if (viewBounds.findIntersection(p->getSprite().getGlobalBounds()))
+                {
+                    p->draw(m_window);
+                }
+            }
         }
+
+        // draw trader menu over everything if open
+        m_traderMenu.draw(m_window);
 
         m_map.drawDebug(m_window);
         break;
@@ -263,7 +297,8 @@ void Game::setupMap()
     }
 
     int cols = 75;
-    int totalRows = 30;
+    int totalRows = 200;
+
     float tileSize = 24.0f; // 24x24 pixels per tile
 
     m_map.setupBackground();

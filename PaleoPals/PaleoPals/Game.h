@@ -17,6 +17,8 @@
 #include <vector>
 #include <memory>
 
+#include "TraderMenu.h"
+
 
 class Game
 {
@@ -38,6 +40,8 @@ private:
     void setupMap(); // loads and generates the map grid
     void moveCamera(sf::Time t_deltaTime);
 
+
+
     Map m_map;
     Menu m_menu;
     PauseMenu m_pause;
@@ -52,6 +56,16 @@ private:
     GameState m_currentState{ GameState::MainMenu };
 
     bool m_DELETEexitGame; // control exiting game
+
+    TraderMenu m_traderMenu;
+
+    // Get the camera view bounds for frustum culling
+    sf::FloatRect getCameraViewBounds() const
+    {
+        sf::Vector2f center = m_cameraView.getCenter();
+        sf::Vector2f size = m_cameraView.getSize();
+        return sf::FloatRect(sf::Vector2f(center.x - size.x / 2.f, center.y - size.y / 2.f), size);
+    }
 };
 
 #pragma warning(pop)

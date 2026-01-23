@@ -71,7 +71,7 @@ void IdleBehavior::enter(Paleontologist* agent)
 {
     m_idleTimer = 0.0f;
     m_idleDuration = 1.0f + static_cast<float>(rand() % 200) / 100.0f; // 1-3 seconds
-    std::cout << "AI: Entering Idle state (on surface)\n";
+   // std::cout << "AI: Entering Idle state (on surface)\n";
 }
 
 BehaviorState IdleBehavior::update(Paleontologist* agent, sf::Time deltaTime, Map& map)
@@ -82,7 +82,7 @@ BehaviorState IdleBehavior::update(Paleontologist* agent, sf::Time deltaTime, Ma
     {
         // After idling, start walking horizontally or search for fossil
         int choice = rand() % 10;
-        if (choice < 3) // 30% chance to dig for fossil
+        if (choice < 5) // 30% chance to dig for fossil
         {
             return BehaviorState::SearchingForFossil;
         }
@@ -187,7 +187,7 @@ void WanderingBehavior::pickRandomWalkableTarget(Paleontologist* agent, Map& map
 
     m_targetPosition.x = std::max(minX, std::min(m_targetPosition.x, maxX));
 
-    std::cout << "AI: Picked wander target at X=" << m_targetPosition.x << "\n";
+    //std::cout << "AI: Picked wander target at X=" << m_targetPosition.x << "\n";
 }
 
 //------------------------------------------------------------
@@ -207,7 +207,7 @@ void SearchingBehavior::enter(Paleontologist* agent)
         m_surfacePosition = agent->getPosition(); // Store current surface position
     }
 
-    std::cout << "AI: Entering Searching state (looking for fossil to dig)\n";
+    //std::cout << "AI: Entering Searching state (looking for fossil to dig)\n";
 }
 
 BehaviorState SearchingBehavior::update(Paleontologist* agent, sf::Time deltaTime, Map& map)
@@ -625,7 +625,7 @@ BehaviorState MiningBehavior::update(Paleontologist* agent, sf::Time deltaTime, 
             << ") with hardness " << tileHardness << "\n";
 
         // After mining, start smooth return to surface
-        std::cout << "AI: Finished mining, returning to surface\n";
+        //std::cout << "AI: Finished mining, returning to surface\n";
 
         m_miningProgress = 0.0f;
         m_returningToSurface = true;

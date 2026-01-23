@@ -13,6 +13,9 @@ public:
 	void updateMuseumHover(const sf::RenderWindow& window);
 	void drawMuseum(sf::RenderWindow& window);
 
+	// Get the sprite for frustum culling
+	const sf::Sprite& getSprite() const { return m_sprite; }
+
 private:
 
 	sf::Texture m_texture;

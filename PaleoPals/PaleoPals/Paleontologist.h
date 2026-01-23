@@ -38,6 +38,8 @@ public:
     void setMiningProgress(float progress) { m_miningProgress = progress; }
     float getMiningProgress() const { return m_miningProgress; }
 
+    const sf::Sprite& getSprite() const { return m_sprite; }
+
     BehaviorState getCurrentState() const;
 
 private:

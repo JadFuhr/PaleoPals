@@ -30,6 +30,7 @@
     <ClCompile Include="Paused.cpp" />
     <ClCompile Include="Researcher.cpp" />
     <ClCompile Include="Trader.cpp" />
+    <ClCompile Include="TraderMenu.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Behaviours.h" />
@@ -42,7 +43,7 @@
     <ClInclude Include="Paleontologist.h" />
     <ClInclude Include="Paused.h" />
     <ClInclude Include="Researcher.h" />
-    <ClInclude Include="Trader.h" />
+    <ClInclude Include="TraderMenu.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="ASSETS\IMAGES\SFML-LOGO.png">
