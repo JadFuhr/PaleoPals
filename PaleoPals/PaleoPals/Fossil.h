@@ -5,30 +5,7 @@
 #include <SFML/Graphics.hpp>
 #include <string>
 #include <vector>
-
-// Represents a single fossil piece in the world
-class FossilPiece
-{
-public:
-    sf::Sprite sprite;
-    std::string fossilId;        
-    std::string dinosaurName;    
-    std::string category;        
-    bool isDiscovered = false;
-    int gridRow;                 // Which tile row it's behind
-    int gridCol;                 // Which tile col it's behind
-
-    FossilPiece(const sf::Texture& texture, const sf::Vector2f& pos,
-        const std::string& id, const std::string& dinoName,
-        const std::string& cat, int row, int col)
-        : sprite(texture), fossilId(id), dinosaurName(dinoName),
-        category(cat), gridRow(row), gridCol(col)
-    {
-        sprite.setPosition(pos);
-    }
-
-    FossilPiece() = delete;
-};
+#include <map>
 
 // Holds data for a dinosaur species from JSON
 struct DinosaurData
@@ -46,7 +23,37 @@ struct DinosaurData
     std::vector<Piece> pieces;
 };
 
-// Manages all fossils in the game
+// Represents a single collectible in the world
+class Collectible
+{
+public:
+    sf::Sprite sprite;
+    int collectibleIndex;           // 0-11: which collectible type
+    int gridRow;                    // Which tile row it's behind
+    int gridCol;                    // Which tile col it's behind
+    bool isDiscovered = false;
+
+    // Fossil-specific data (only used if collectibleIndex is 0-6)
+    std::string assignedDinosaurName;
+    std::string assignedPieceId;
+    std::string assignedCategory;
+
+    // Monetary value (for amber and trash types)
+    int monetaryValue = 0;
+
+    Collectible(const sf::Texture& texture, const sf::Vector2f& pos, int index, int row, int col)
+        : sprite(texture), collectibleIndex(index), gridRow(row), gridCol(col)
+    {
+        sprite.setPosition(pos);
+    }
+
+    Collectible() = delete;
+};
+
+// Legacy type alias for compatibility
+using FossilPiece = Collectible;
+
+// Manages all collectibles in the game
 class FossilManager
 {
 public:
@@ -55,25 +62,50 @@ public:
     bool loadFossilsFromConfig(const std::string& filepath);
 
     void generateFossils(int totalRows, int totalCols, float tileSize,
-        float windowWidth, float windowHeight);
+        float windowWidth, float windowHeight, int collectiblesPerTile = 1);
 
     void drawFossils(sf::RenderWindow& window);
 
-    // Check if a fossil exists at this tile position
-    FossilPiece* getFossilAtTile(int row, int col);
+    // Check if a collectible exists at this tile position
+    Collectible* getCollectibleAtTile(int row, int col);
+    
+    // Legacy method name for compatibility
+    FossilPiece* getFossilAtTile(int row, int col) { return getCollectibleAtTile(row, col); }
 
-    // Get all discovered fossils for a specific dinosaur
-    std::vector<FossilPiece*> getDiscoveredPiecesForDinosaur(const std::string& dinoName);
+    // Get all discovered fossil pieces for a specific dinosaur
+    std::vector<Collectible*> getDiscoveredPiecesForDinosaur(const std::string& dinoName);
 
-    int getTotalFossilCount() const { return m_fossilPieces.size(); }
+    // Check if all pieces of a dinosaur have been collected
+    bool hasDinosaurSkeleton(const std::string& dinoName) const;
+
+    // Get all dinosaurs and which ones are complete
+    const std::map<std::string, int>& getCollectedPiecesPerDino() const { return m_collectedPiecesPerDino; }
+
+    int getTotalCollectibleCount() const { return m_collectibles.size(); }
     int getDiscoveredCount() const;
+
+    // Get dinosaur data for museum display
+    const std::vector<DinosaurData>& getDinosaurData() const { return m_dinosaurData; }
 
 private:
     std::vector<DinosaurData> m_dinosaurData;
-    std::vector<sf::Texture> m_fossilTextures;
-    std::vector<FossilPiece> m_fossilPieces;
+    std::vector<sf::Texture> m_collectibleTextures;
+    std::vector<Collectible> m_collectibles;
+    
+    // Track discovered pieces per dinosaur (for quick completion check)
+    std::map<std::string, int> m_collectedPiecesPerDino;
 
     bool isPositionOccupied(int row, int col) const;
+
+    // Helper to pick a random dinosaur and piece for fossil collectibles
+    void assignRandomFossilToPiece(Collectible& collectible);
+
+    // Separate generation functions for different collectible types
+    void generateFossilCollectibles(int totalRows, int totalCols, float tileSize, 
+        float windowWidth, float windowHeight, int fossilCount);
+    
+    void generateAmberAndTrashCollectibles(int totalRows, int totalCols, float tileSize, 
+        float windowWidth, float windowHeight, int amberTrashCount);
 };
 
 #endif // FOSSIL_H

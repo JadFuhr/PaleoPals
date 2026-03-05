@@ -123,6 +123,7 @@ void Paleontologist::setFrame(int frame)
     }
 
     // Update texture rect to show the correct frame
+    // Frames are laid out horizontally: [0][1][2][3]
     int xOffset = frame * m_frameWidth;
     m_sprite.setTextureRect(sf::IntRect({ xOffset, 0 }, { m_frameWidth, m_frameHeight }));
 }

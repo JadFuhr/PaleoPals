@@ -22,6 +22,129 @@
     "position": {"x": 25, "y": 361}
   },
   
+  "collectibles": [
+    {
+      "index": 0,
+      "name": "Fossil_Fragment",
+      "type": "fossil",
+      "texture": "ASSETS/IMAGES/Fossils/1. Pickups/Collectibles_Sheet.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frameIndex": 0,
+      "monetaryValue": 0
+    },
+    {
+      "index": 1,
+      "name": "Fossil_Fragment",
+      "type": "fossil",
+      "texture": "ASSETS/IMAGES/Fossils/1. Pickups/Collectibles_Sheet.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frameIndex": 1,
+      "monetaryValue": 0
+    },
+    {
+      "index": 2,
+      "name": "Fossil_Fragment",
+      "type": "fossil",
+      "texture": "ASSETS/IMAGES/Fossils/1. Pickups/Collectibles_Sheet.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frameIndex": 2,
+      "monetaryValue": 0
+    },
+    {
+      "index": 3,
+      "name": "Fossil_Fragment",
+      "type": "fossil",
+      "texture": "ASSETS/IMAGES/Fossils/1. Pickups/Collectibles_Sheet.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frameIndex": 3,
+      "monetaryValue": 0
+    },
+    {
+      "index": 4,
+      "name": "Fossil_Fragment",
+      "type": "fossil",
+      "texture": "ASSETS/IMAGES/Fossils/1. Pickups/Collectibles_Sheet.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frameIndex": 4,
+      "monetaryValue": 0
+    },
+    {
+      "index": 5,
+      "name": "Fossil_Fragment",
+      "type": "fossil",
+      "texture": "ASSETS/IMAGES/Fossils/1. Pickups/Collectibles_Sheet.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frameIndex": 5,
+      "monetaryValue": 0
+    },
+    {
+      "index": 6,
+      "name": "Fossil_Fragment",
+      "type": "fossil",
+      "texture": "ASSETS/IMAGES/Fossils/1. Pickups/Collectibles_Sheet.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frameIndex": 6,
+      "monetaryValue": 0
+    },
+    {
+      "index": 7,
+      "name": "Small_Amber",
+      "type": "amber",
+      "texture": "ASSETS/IMAGES/Fossils/1. Pickups/Collectibles_Sheet.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frameIndex": 7,
+      "monetaryValue": 50
+    },
+    {
+      "index": 8,
+      "name": "Large_Amber",
+      "type": "amber",
+      "texture": "ASSETS/IMAGES/Fossils/1. Pickups/Collectibles_Sheet.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frameIndex": 8,
+      "monetaryValue": 100
+    },
+    {
+      "index": 9,
+      "name": "Trash",
+      "type": "trash",
+      "texture": "ASSETS/IMAGES/Fossils/1. Pickups/Collectibles_Sheet.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frameIndex": 9,
+      "monetaryValue": 0
+    },
+    {
+      "index": 10,
+      "name": "Trash",
+      "type": "trash",
+      "texture": "ASSETS/IMAGES/Fossils/1. Pickups/Collectibles_Sheet.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frameIndex": 10,
+      "monetaryValue": 0
+    },
+    {
+      "index": 11,
+      "name": "Trash",
+      "type": "trash",
+      "texture": "ASSETS/IMAGES/Fossils/1. Pickups/Collectibles_Sheet.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frameIndex": 11,
+      "monetaryValue": 0
+    }
+  ],
+
   "dinosaurs": [
     {
       "name": "Tyrannosaurus rex",

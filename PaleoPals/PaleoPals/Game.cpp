@@ -80,23 +80,33 @@ void Game::processEvents()
             }
             else if (m_currentState == GameState::Gameplay)
             {
-                // Get mouse world position
+                // Get mouse screen position (for UI menus)
                 sf::Vector2i mousePixel = sf::Mouse::getPosition(m_window);
+                sf::Vector2f screenPos(static_cast<float>(mousePixel.x), static_cast<float>(mousePixel.y));
+
+                // Also get world position for world-space clicks
                 sf::Vector2f worldPos = m_window.mapPixelToCoords(mousePixel);
 
                 // If trader menu is open, let it handle the click first
                 if (m_traderMenu.isOpen())
                 {
-                    bool hireClicked = m_traderMenu.handleClick(worldPos);
-                    if (hireClicked)
+                    HireAction action = m_traderMenu.handleClick(screenPos, m_window);
+                    
+                    if (action == HireAction::HirePaleontologist)
                     {
-                        // spawn a new paleontologist at a position near the click
+                        // Spawn a new paleontologist at the trader location
                         auto newPaleo = std::make_unique<Paleontologist>();
                         newPaleo->setPosition(worldPos + sf::Vector2f(16.f, 0.f));
                         newPaleo->setSpeed(60.0f);
                         m_paleontologists.push_back(std::move(newPaleo));
-                      
+                        std::cout << "Hired Paleontologist! Total: " << m_paleontologists.size() << "\n";
                     }
+                    else if (action == HireAction::HireResearcher)
+                    {
+                        // TODO: Implement researcher hiring when researcher class is ready
+                        std::cout << "Researcher hiring not yet implemented\n";
+                    }
+                    
                     // menu consumed the click (either hired or closed) 
                     continue;
                 }
@@ -297,7 +307,7 @@ void Game::setupMap()
     }
 
     int cols = 75;
-    int totalRows = 200;
+    int totalRows = 100;
 
     float tileSize = 24.0f; // 24x24 pixels per tile
 

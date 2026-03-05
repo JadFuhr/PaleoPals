@@ -13,11 +13,10 @@
 #include <json.hpp>
 #include <fstream>
 #include "constants.h"
+#include "TraderMenu.h"
 
 #include <vector>
 #include <memory>
-
-#include "TraderMenu.h"
 
 
 class Game

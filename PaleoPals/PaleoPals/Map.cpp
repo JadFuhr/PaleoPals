@@ -119,9 +119,10 @@ void Map::generateGrid(int rows, int cols, float tileSize, float windowWidth, fl
 
     if (m_rowsGenerated >= m_rows)
     {
-        m_fossilManager.generateFossils(m_rows, m_cols, m_tileSize, windowWidth, windowHeight);
+        // Spawn collectibles: 5 = 5% of tiles will have collectibles (adjustable)
+        m_fossilManager.generateFossils(m_rows, m_cols, m_tileSize, windowWidth, windowHeight, 25);
 
-        std::cout << "fossils generated" << std::endl;
+        std::cout << "collectibles generated" << std::endl;
     }
 }
 
@@ -248,13 +249,41 @@ void Map::removeTile(int row, int col)
         // Mark this tile as mined so subsequent hardness checks return 0
         m_tiles[index].layerHardness = 0;
 
-        // Check for fossil discovery
-        FossilPiece* fossil = m_fossilManager.getFossilAtTile(row, col);
-        if (fossil != nullptr && !fossil->isDiscovered)
+        // Check for collectible discovery
+        FossilPiece* collectible = m_fossilManager.getFossilAtTile(row, col);
+        if (collectible != nullptr && !collectible->isDiscovered)
         {
-            fossil->isDiscovered = true;
-            std::cout << "FOSSIL DISCOVERED! " << fossil->fossilId
-                << " from " << fossil->dinosaurName << "\n";
+            collectible->isDiscovered = true;
+            
+            // Different discovery messages based on collectible type
+            if (collectible->collectibleIndex < 7)
+            {
+                // Fossil type (0-6)
+                std::cout << "FOSSIL PIECE DISCOVERED! " << collectible->assignedPieceId
+                    << " from " << collectible->assignedDinosaurName << "\n";
+                
+                // Check if this completes a skeleton
+                if (m_fossilManager.hasDinosaurSkeleton(collectible->assignedDinosaurName))
+                {
+                    std::cout << "*** COMPLETE SKELETON FOUND! ***\n";
+                    std::cout << "*** " << collectible->assignedDinosaurName << " IS COMPLETE! ***\n";
+                }
+            }
+            else if (collectible->collectibleIndex == 7)
+            {
+                // Small Amber
+                std::cout << "SMALL AMBER DISCOVERED! Value: " << collectible->monetaryValue << "\n";
+            }
+            else if (collectible->collectibleIndex == 8)
+            {
+                // Large Amber
+                std::cout << "LARGE AMBER DISCOVERED! Value: " << collectible->monetaryValue << "\n";
+            }
+            else
+            {
+                // Trash (9-11)
+                std::cout << "TRASH DISCOVERED! (Worthless)\n";
+            }
         }
     }
 }
@@ -418,12 +447,41 @@ void Map::handleMouseHold(const sf::RenderWindow& window, float tileSize, int co
         {
             m_tiles[index].sprite.setColor(sf::Color::Transparent);
 
-            FossilPiece* fossil = m_fossilManager.getFossilAtTile(tileY, tileX);
+            FossilPiece* collectible = m_fossilManager.getFossilAtTile(tileY, tileX);
 
-            if (fossil != nullptr)
+            if (collectible != nullptr)
             {
-                fossil->isDiscovered = true;
-                std::cout << "FOSSIL DISCOVERED! " << fossil->fossilId << " from " << fossil->dinosaurName << "\n";
+                collectible->isDiscovered = true;
+                
+                // Different discovery messages based on collectible type
+                if (collectible->collectibleIndex < 7)
+                {
+                    // Fossil type (0-6)
+                    std::cout << "FOSSIL PIECE DISCOVERED! " << collectible->assignedPieceId
+                        << " from " << collectible->assignedDinosaurName << "\n";
+                    
+                    // Check if this completes a skeleton
+                    if (m_fossilManager.hasDinosaurSkeleton(collectible->assignedDinosaurName))
+                    {
+                        std::cout << "*** COMPLETE SKELETON FOUND! ***\n";
+                        std::cout << "*** " << collectible->assignedDinosaurName << " IS COMPLETE! ***\n";
+                    }
+                }
+                else if (collectible->collectibleIndex == 7)
+                {
+                    // Small Amber
+                    std::cout << "SMALL AMBER DISCOVERED! Value: " << collectible->monetaryValue << "\n";
+                }
+                else if (collectible->collectibleIndex == 8)
+                {
+                    // Large Amber
+                    std::cout << "LARGE AMBER DISCOVERED! Value: " << collectible->monetaryValue << "\n";
+                }
+                else
+                {
+                    // Trash (9-11)
+                    std::cout << "TRASH DISCOVERED! (Worthless)\n";
+                }
             }
         }
     }
