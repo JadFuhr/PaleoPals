@@ -107,7 +107,7 @@ void WanderingBehavior::enter(Paleontologist* agent)
     m_wanderTimer = 0.0f;
     m_wanderDuration = 3.0f + static_cast<float>(rand() % 400) / 100.0f; // 3-7 seconds
     m_hasTarget = false;
-    std::cout << "AI: Entering Wandering state (walking horizontally)\n";
+    //std::cout << "AI: Entering Wandering state (walking horizontally)\n";
 }
 
 BehaviorState WanderingBehavior::update(Paleontologist* agent, sf::Time deltaTime, Map& map)
@@ -223,7 +223,7 @@ BehaviorState SearchingBehavior::update(Paleontologist* agent, sf::Time deltaTim
         if (!findNearestFossil(agent, map))
         {
             // No fossils found, return to idle
-            std::cout << "AI: No fossils found, going back to wandering\n";
+            //std::cout << "AI: No fossils found, going back to wandering\n";
             return BehaviorState::Idle;
         }
 
@@ -241,7 +241,7 @@ BehaviorState SearchingBehavior::update(Paleontologist* agent, sf::Time deltaTim
         if (agentRow < 0) agentRow = 0;
         if (agentCol < 0 || agentCol >= map.getColumnCount())
         {
-            std::cout << "AI: Agent outside grid bounds, going idle\n";
+            //std::cout << "AI: Agent outside grid bounds, going idle\n";
             return BehaviorState::Idle;
         }
 
@@ -259,14 +259,14 @@ BehaviorState SearchingBehavior::update(Paleontologist* agent, sf::Time deltaTim
 
         if (m_path.empty())
         {
-            std::cout << "AI: Fossil at surface level or path invalid, going idle\n";
+            //std::cout << "AI: Fossil at surface level or path invalid, going idle\n";
             return BehaviorState::Idle;
         }
 
         m_hasPath = true;
         m_currentPathIndex = 0;
 
-        std::cout << "AI: Digging down to fossil at depth " << m_targetTile.y << " (path length: " << m_path.size() << ")\n";
+        //std::cout << "AI: Digging down to fossil at depth " << m_targetTile.y << " (path length: " << m_path.size() << ")\n";
     }
 
     // If returning to surface
@@ -292,7 +292,7 @@ BehaviorState SearchingBehavior::update(Paleontologist* agent, sf::Time deltaTim
                 if (agentPos.y < ladderTileWorldY - (tileSize * 0.2f))
                 {
                     map.removeLadder(last.y, last.x);
-                    std::cout << "AI: Removed ladder at (" << last.x << ", " << last.y << ") as agent climbed past it\n";
+                    //std::cout << "AI: Removed ladder at (" << last.x << ", " << last.y << ") as agent climbed past it\n";
                     m_minedTiles.pop_back();
                 }
                 else
@@ -313,10 +313,10 @@ BehaviorState SearchingBehavior::update(Paleontologist* agent, sf::Time deltaTim
                     map.removeLadder(t.y, t.x);
                 }
                 m_minedTiles.clear();
-                std::cout << "AI: Cleared remaining ladders on final surfacing\n";
+                //std::cout << "AI: Cleared remaining ladders on final surfacing\n";
             }
 
-            std::cout << "AI: Returned to surface\n";
+            //std::cout << "AI: Returned to surface\n";
             return BehaviorState::Idle;
         }
 
@@ -374,7 +374,7 @@ BehaviorState SearchingBehavior::update(Paleontologist* agent, sf::Time deltaTim
                     // Match mining duration formula used in MiningBehavior
                     m_currentTileDuration = 0.8f + (tileHardness * 0.4f);
 
-                    std::cout << "AI: Starting to mine tile (" << targetTile.x << ", " << targetTile.y << ") duration=" << m_currentTileDuration << " hardness=" << tileHardness << "\n";
+                    //std::cout << "AI: Starting to mine tile (" << targetTile.x << ", " << targetTile.y << ") duration=" << m_currentTileDuration << " hardness=" << tileHardness << "\n";
                 }
             }
             else
@@ -386,7 +386,7 @@ BehaviorState SearchingBehavior::update(Paleontologist* agent, sf::Time deltaTim
                 if (m_miningProgress >= m_currentTileDuration)
                 {
                     map.removeTile(targetTile.y, targetTile.x);
-                    std::cout << "AI: Mined tile (" << targetTile.x << ", " << targetTile.y << ")\n";
+                    //std::cout << "AI: Mined tile (" << targetTile.x << ", " << targetTile.y << ")\n";
 
                     // Place ladder support on the tile we just mined (only for underground tiles)
                     if (targetTile.y > 0)
@@ -416,7 +416,7 @@ BehaviorState SearchingBehavior::update(Paleontologist* agent, sf::Time deltaTim
     else
     {
         // Reached the fossil depth (all tiles above have been mined). Return to surface.
-        std::cout << "AI: Reached target depth, returning to surface\n";
+        //std::cout << "AI: Reached target depth, returning to surface\n";
         m_returningToSurface = true;
         agent->setMiningProgress(0.0f);
         return BehaviorState::SearchingForFossil;
@@ -494,11 +494,11 @@ bool SearchingBehavior::findNearestFossil(Paleontologist* agent, Map& map)
 
     if (foundFossil)
     {
-        std::cout << "AI: Found fossil at grid position (" << m_targetTile.x << ", " << m_targetTile.y << ")\n";
+        //std::cout << "AI: Found fossil at grid position (" << m_targetTile.x << ", " << m_targetTile.y << ")\n";
     }
     else
     {
-        std::cout << "AI: No fossils found in search area\n";
+        //std::cout << "AI: No fossils found in search area\n";
     }
 
     return foundFossil;
@@ -558,7 +558,7 @@ void MiningBehavior::enter(Paleontologist* agent)
         return;
     }
 
-    std::cout << "AI: Entering Mining state at tile (" << m_targetTile.x << ", " << m_targetTile.y << ")\n";
+    //std::cout << "AI: Entering Mining state at tile (" << m_targetTile.x << ", " << m_targetTile.y << ")\n";
 }
 
 BehaviorState MiningBehavior::update(Paleontologist* agent, sf::Time deltaTime, Map& map)
@@ -596,7 +596,7 @@ BehaviorState MiningBehavior::update(Paleontologist* agent, sf::Time deltaTime, 
     // Safety check for valid tile
     if (m_targetTile.x < 0 || m_targetTile.y < 0)
     {
-        std::cerr << "ERROR: Mining invalid tile, returning to idle\n";
+        //std::cerr << "ERROR: Mining invalid tile, returning to idle\n";
         return BehaviorState::Idle;
     }
 
@@ -605,7 +605,7 @@ BehaviorState MiningBehavior::update(Paleontologist* agent, sf::Time deltaTime, 
 
     if (tileHardness == 0)
     {
-        std::cout << "AI: Tile already mined or invalid, returning to surface\n";
+        //std::cout << "AI: Tile already mined or invalid, returning to surface\n";
 
         // Start smooth return to surface instead of teleporting
         m_returningToSurface = true;
@@ -621,8 +621,7 @@ BehaviorState MiningBehavior::update(Paleontologist* agent, sf::Time deltaTime, 
     {
         // Mining complete - remove the tile
         map.removeTile(m_targetTile.y, m_targetTile.x);
-        std::cout << "AI: Mined tile (" << m_targetTile.x << ", " << m_targetTile.y
-            << ") with hardness " << tileHardness << "\n";
+        std::cout << "AI: Mined tile (" << m_targetTile.x << ", " << m_targetTile.y<< ") with hardness " << tileHardness << "\n";
 
         // After mining, start smooth return to surface
         //std::cout << "AI: Finished mining, returning to surface\n";

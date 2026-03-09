@@ -71,7 +71,7 @@ bool FossilManager::loadFossilsFromConfig(const std::string& filepath)
         }
 
         // Success message showing how many species we loaded
-        std::cout << "Loaded " << m_dinosaurData.size() << " dinosaur species\n";
+        //std::cout << "Loaded " << m_dinosaurData.size() << " dinosaur species\n";
     }
     catch (const std::exception& e)
     {
@@ -171,7 +171,7 @@ void FossilManager::generateFossils(int totalRows, int totalCols, float tileSize
         else trashCount++;
     }
 
-    std::cout << "=== FINAL COLLECTIBLE COUNT ===\n";
+    std::cout << "FINAL COLLECTIBLE COUNT \n";
     std::cout << "Total: " << m_collectibles.size() << " | Fossils: " << fossilCountFinal << " | Amber: " << amberCount << " | Trash: " << trashCount << "\n";
 }
 
@@ -201,7 +201,7 @@ void FossilManager::generateFossilCollectibles(int totalRows, int totalCols, flo
 
     std::cout << "Generating " << fossilCount << " fossil collectibles...\n";
 
-    // === SPAWN FOSSILS ===
+    //  SPAWN FOSSILS 
     for (int i = 0; i < fossilCount; ++i)
     {
         // Find unique position
@@ -226,14 +226,14 @@ void FossilManager::generateFossilCollectibles(int totalRows, int totalCols, flo
         // Random fossil type (0-6)
         int collectibleIndex = fossilTypeDist(gen);
 
-        // === CREATE THE COLLECTIBLE ===
+        // CREATE THE COLLECTIBLE 
         Collectible collectible(texRef, sf::Vector2f(xPos, yPos), collectibleIndex, row, col);
 
         // SCALE & POSITION
         collectible.sprite.setScale(sf::Vector2f(0.5f, 0.5f));
         collectible.sprite.setOrigin(sf::Vector2f(texRef.getSize().x / 2.0f, texRef.getSize().y / 2.0f));
 
-        // === SET TEXTURE RECT FOR FRAME ===
+        //  SET TEXTURE RECT FOR FRAME 
         int frameX = (collectibleIndex % 4) * 64;
         int frameY = (collectibleIndex / 4) * 64;
         collectible.sprite.setTextureRect(sf::IntRect({ frameX, frameY }, { 64, 64 }));
@@ -258,7 +258,7 @@ void FossilManager::generateAmberAndTrashCollectibles(int totalRows, int totalCo
     float offsetY = windowHeight / 2.0f;
     float offsetX = (windowWidth - (totalCols * tileSize)) / 2.0f;
 
-    // === RANDOM NUMBER GENERATION ===
+    //  RANDOM NUMBER GENERATION 
     std::random_device rd;
     std::mt19937 gen(rd());
 
@@ -273,7 +273,7 @@ void FossilManager::generateAmberAndTrashCollectibles(int totalRows, int totalCo
 
     std::cout << "Generating " << amberTrashCount << " amber/trash collectibles...\n";
 
-    // === SPAWN AMBER AND TRASH ===
+    //  SPAWN AMBER AND TRASH 
     for (int i = 0; i < amberTrashCount; ++i)
     {
         // Find unique position
@@ -286,7 +286,8 @@ void FossilManager::generateAmberAndTrashCollectibles(int totalRows, int totalCo
             row = rowDist(gen);
             col = colDist(gen);
             attempts++;
-        } while (isPositionOccupied(row, col) && attempts < maxAttempts);
+        } 
+        while (isPositionOccupied(row, col) && attempts < maxAttempts);
 
         if (attempts >= maxAttempts)
             continue;
@@ -295,7 +296,7 @@ void FossilManager::generateAmberAndTrashCollectibles(int totalRows, int totalCo
         float xPos = col * tileSize + offsetX + (tileSize / 2.0f);
         float yPos = row * tileSize + offsetY + (tileSize / 2.0f);
 
-        // === DETERMINE TYPE: Amber or Trash ===
+        //  DETERMINE TYPE: Amber or Trash 
         int collectibleIndex;
         int roll = amberVsTrashDist(gen);
         
@@ -314,19 +315,19 @@ void FossilManager::generateAmberAndTrashCollectibles(int totalRows, int totalCo
             collectibleIndex = trashDist(gen);
         }
 
-        // === CREATE THE COLLECTIBLE ===
+        // CREATE THE COLLECTIBLE 
         Collectible collectible(texRef, sf::Vector2f(xPos, yPos), collectibleIndex, row, col);
 
         // SCALE & POSITION
         collectible.sprite.setScale(sf::Vector2f(0.5f, 0.5f));
         collectible.sprite.setOrigin(sf::Vector2f(texRef.getSize().x / 2.0f, texRef.getSize().y / 2.0f));
 
-        // === SET TEXTURE RECT FOR FRAME ===
+        //  SET TEXTURE RECT FOR FRAME 
         int frameX = (collectibleIndex % 4) * 64;
         int frameY = (collectibleIndex / 4) * 64;
         collectible.sprite.setTextureRect(sf::IntRect({ frameX, frameY }, { 64, 64 }));
 
-        // === ASSIGN MONETARY VALUE ===
+        //  ASSIGN MONETARY VALUE 
         if (collectibleIndex == 7)
         {
             collectible.monetaryValue = 50;

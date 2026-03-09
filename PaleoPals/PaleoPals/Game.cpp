@@ -99,7 +99,7 @@ void Game::processEvents()
                         newPaleo->setPosition(worldPos + sf::Vector2f(16.f, 0.f));
                         newPaleo->setSpeed(60.0f);
                         m_paleontologists.push_back(std::move(newPaleo));
-                        std::cout << "Hired Paleontologist! Total: " << m_paleontologists.size() << "\n";
+                        //std::cout << "Hired Paleontologist! Total: " << m_paleontologists.size() << "\n";
                     }
                     else if (action == HireAction::HireResearcher)
                     {
@@ -323,7 +323,7 @@ void Game::setupMap()
     initialPaleo->setSpeed(60.0f);
     m_paleontologists.push_back(std::move(initialPaleo));
 
-    std::cout << "Initial paleontologist created. Total paleontologists: " << m_paleontologists.size() << "\n";
+   // std::cout << "Initial paleontologist created. Total paleontologists: " << m_paleontologists.size() << "\n";
 }
 
 void Game::moveCamera(sf::Time t_deltaTime)
