@@ -33,6 +33,27 @@ bool FossilManager::loadFossilsFromConfig(const std::string& filepath)
         json config;
         file >> config;
 
+        // Load collectible types from config
+        if (config.contains("collectibles"))
+        {
+            auto collectibles = config["collectibles"];
+            for (auto& collectNode : collectibles)
+            {
+                CollectibleType collectType;
+                collectType.index = collectNode["index"].get<int>();
+                collectType.name = collectNode["name"].get<std::string>();
+                collectType.type = collectNode["type"].get<std::string>();
+                collectType.texture = collectNode["texture"].get<std::string>();
+                collectType.frameWidth = collectNode["frameWidth"].get<int>();
+                collectType.frameHeight = collectNode["frameHeight"].get<int>();
+                collectType.frameIndex = collectNode["frameIndex"].get<int>();
+                collectType.monetaryValue = collectNode["monetaryValue"].get<int>();
+                
+                m_collectibleTypes.push_back(collectType);
+            }
+            std::cout << "Loaded " << m_collectibleTypes.size() << " collectible types from config\n";
+        }
+
         // Check if the "dinosaurs" section exists in the JSON
         if (!config.contains("dinosaurs"))
         {
@@ -233,10 +254,22 @@ void FossilManager::generateFossilCollectibles(int totalRows, int totalCols, flo
         collectible.sprite.setScale(sf::Vector2f(0.5f, 0.5f));
         collectible.sprite.setOrigin(sf::Vector2f(texRef.getSize().x / 2.0f, texRef.getSize().y / 2.0f));
 
-        //  SET TEXTURE RECT FOR FRAME 
-        int frameX = (collectibleIndex % 4) * 64;
-        int frameY = (collectibleIndex / 4) * 64;
-        collectible.sprite.setTextureRect(sf::IntRect({ frameX, frameY }, { 64, 64 }));
+        //  SET TEXTURE RECT FOR FRAME -
+        if (collectibleIndex < m_collectibleTypes.size())
+        {
+            const CollectibleType& config = m_collectibleTypes[collectibleIndex];
+            int frameIndex = config.frameIndex;
+            int frameX = frameIndex * config.frameWidth;
+            int frameY = 0;
+            collectible.sprite.setTextureRect(sf::IntRect({ frameX, frameY }, { config.frameWidth, config.frameHeight }));
+        }
+        else
+        {
+            // Fallback if config not loaded
+            int frameX = collectibleIndex * 64;
+            int frameY = 0;
+            collectible.sprite.setTextureRect(sf::IntRect({ frameX, frameY }, { 64, 64 }));
+        }
 
         // Assign random dinosaur piece
         assignRandomFossilToPiece(collectible);
@@ -322,10 +355,22 @@ void FossilManager::generateAmberAndTrashCollectibles(int totalRows, int totalCo
         collectible.sprite.setScale(sf::Vector2f(0.5f, 0.5f));
         collectible.sprite.setOrigin(sf::Vector2f(texRef.getSize().x / 2.0f, texRef.getSize().y / 2.0f));
 
-        //  SET TEXTURE RECT FOR FRAME 
-        int frameX = (collectibleIndex % 4) * 64;
-        int frameY = (collectibleIndex / 4) * 64;
-        collectible.sprite.setTextureRect(sf::IntRect({ frameX, frameY }, { 64, 64 }));
+        //  SET TEXTURE RECT FOR FRAME - Use config frame index
+        if (collectibleIndex < m_collectibleTypes.size())
+        {
+            const CollectibleType& config = m_collectibleTypes[collectibleIndex];
+            int frameIndex = config.frameIndex;
+            int frameX = frameIndex * config.frameWidth;
+            int frameY = 0;
+            collectible.sprite.setTextureRect(sf::IntRect({ frameX, frameY }, { config.frameWidth, config.frameHeight }));
+        }
+        else
+        {
+            // Fallback if config not loaded
+            int frameX = collectibleIndex * 64;
+            int frameY = 0;
+            collectible.sprite.setTextureRect(sf::IntRect(sf::Vector2i(frameX, frameY), sf::Vector2i(64, 64)));
+        }
 
         //  ASSIGN MONETARY VALUE 
         if (collectibleIndex == 7)

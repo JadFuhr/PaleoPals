@@ -7,6 +7,19 @@
 #include <vector>
 #include <map>
 
+// Represents a single collectible type configuration
+struct CollectibleType
+{
+    int index;
+    std::string name;
+    std::string type; // "fossil", "amber", "trash"
+    std::string texture;
+    int frameWidth;
+    int frameHeight;
+    int frameIndex;
+    int monetaryValue;
+};
+
 // Holds data for a dinosaur species from JSON
 struct DinosaurData
 {
@@ -91,6 +104,7 @@ private:
     std::vector<DinosaurData> m_dinosaurData;
     std::vector<sf::Texture> m_collectibleTextures;
     std::vector<Collectible> m_collectibles;
+    std::vector<CollectibleType> m_collectibleTypes;  // Store config data for each collectible type
     
     // Track discovered pieces per dinosaur (for quick completion check)
     std::map<std::string, int> m_collectedPiecesPerDino;
