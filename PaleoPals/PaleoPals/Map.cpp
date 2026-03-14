@@ -328,7 +328,7 @@ void Map::drawMap(sf::RenderWindow& window)
             continue;
         }
 
-        window.draw(tile.sprite);
+        //window.draw(tile.sprite);
 
         // Draw ladder support if present
         if (i >= 0 && i < static_cast<int>(m_ladders.size()) && m_ladders[i])

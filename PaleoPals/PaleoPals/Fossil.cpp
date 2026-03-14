@@ -296,11 +296,11 @@ void FossilManager::generateAmberAndTrashCollectibles(int totalRows, int totalCo
     std::mt19937 gen(rd());
 
     // Skip the first 6 rows (topsoil/near-surface area)
-    int minRow = 6;
+    int minRow = 3;
 
     std::uniform_int_distribution<> rowDist(minRow, totalRows - 1);
     std::uniform_int_distribution<> colDist(0, totalCols - 1);
-    std::uniform_int_distribution<> amberVsTrashDist(7, 11); // 60% amber, 40% trash
+    std::uniform_int_distribution<> amberVsTrashDist(0, 9); // 60% amber, 40% trash
 
     const sf::Texture& texRef = m_collectibleTextures[0];
 
