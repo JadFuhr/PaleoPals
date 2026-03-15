@@ -14,7 +14,7 @@
 #include <fstream>
 #include "constants.h"
 #include "TraderMenu.h"
-
+#include "Player.h"
 #include <vector>
 #include <memory>
 
@@ -46,6 +46,7 @@ private:
     PauseMenu m_pause;
     Museum m_museum;
     std::vector<std::unique_ptr<Paleontologist>> m_paleontologists; // multiple paleontologist instances
+    Player m_player;
 
     sf::RenderWindow m_window; // main SFML window
     sf::View m_cameraView;

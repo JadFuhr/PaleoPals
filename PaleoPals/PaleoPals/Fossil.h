@@ -81,9 +81,12 @@ public:
 
     // Check if a collectible exists at this tile position
     Collectible* getCollectibleAtTile(int row, int col);
-    
+
     // Legacy method name for compatibility
     FossilPiece* getFossilAtTile(int row, int col) { return getCollectibleAtTile(row, col); }
+
+    // Get all collectibles (including discovered ones) for pickup scanning
+    std::vector<Collectible>& getAllCollectibles() { return m_collectibles; }
 
     // Get all discovered fossil pieces for a specific dinosaur
     std::vector<Collectible*> getDiscoveredPiecesForDinosaur(const std::string& dinoName);
@@ -105,7 +108,7 @@ private:
     std::vector<sf::Texture> m_collectibleTextures;
     std::vector<Collectible> m_collectibles;
     std::vector<CollectibleType> m_collectibleTypes;  // Store config data for each collectible type
-    
+
     // Track discovered pieces per dinosaur (for quick completion check)
     std::map<std::string, int> m_collectedPiecesPerDino;
 
@@ -115,10 +118,10 @@ private:
     void assignRandomFossilToPiece(Collectible& collectible);
 
     // Separate generation functions for different collectible types
-    void generateFossilCollectibles(int totalRows, int totalCols, float tileSize, 
+    void generateFossilCollectibles(int totalRows, int totalCols, float tileSize,
         float windowWidth, float windowHeight, int fossilCount);
-    
-    void generateAmberAndTrashCollectibles(int totalRows, int totalCols, float tileSize, 
+
+    void generateAmberAndTrashCollectibles(int totalRows, int totalCols, float tileSize,
         float windowWidth, float windowHeight, int amberTrashCount);
 };
 

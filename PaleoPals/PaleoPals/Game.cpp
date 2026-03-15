@@ -87,6 +87,13 @@ void Game::processEvents()
                 // Also get world position for world-space clicks
                 sf::Vector2f worldPos = m_window.mapPixelToCoords(mousePixel);
 
+                auto mouseButton = newEvent->getIf<sf::Event::MouseButtonPressed>();
+
+                if (mouseButton && mouseButton->button == sf::Mouse::Button::Left)
+                {
+                    m_player.tryMineAtMouse(m_window, m_map);
+                }
+
                 // If trader menu is open, let it handle the click first
                 if (m_traderMenu.isOpen())
                 {
@@ -196,12 +203,11 @@ void Game::update(sf::Time t_deltaTime)
     case GameState::Gameplay:
         moveCamera(t_deltaTime);
 
-        //m_map.updateIfNeeded(m_cameraView.getCenter().y, 50);
         m_map.handleMouseHold(m_window, 24, 75);
         m_map.updateHover(m_window, 24.0f, 75);
         m_map.updateMuseum(m_window);
-        // Update trader hover (if you want hover animation)
         m_map.updateTrader(m_window);
+        m_player.update(t_deltaTime, m_map);
 
         try
         {
@@ -216,6 +222,8 @@ void Game::update(sf::Time t_deltaTime)
             std::cerr << "Exception updating paleontologist: " << e.what() << "\n";
         }
         break;
+
+
 
     case GameState::Paused:
         m_pause.updatePauseMenu(m_window);
@@ -267,6 +275,8 @@ void Game::render()
                     p->draw(m_window);
                 }
             }
+
+            m_player.draw(m_window);
         }
 
         // draw trader menu over everything if open
@@ -323,6 +333,9 @@ void Game::setupMap()
     initialPaleo->setSpeed(60.0f);
     m_paleontologists.push_back(std::move(initialPaleo));
 
+   
+    m_player.setPosition(sf::Vector2f(WINDOW_X / 2.0f + 100.0f, WINDOW_Y / 2.0f));
+
    // std::cout << "Initial paleontologist created. Total paleontologists: " << m_paleontologists.size() << "\n";
 }
 
@@ -332,11 +345,11 @@ void Game::moveCamera(sf::Time t_deltaTime)
     float moveAmount = cameraSpeed * t_deltaTime.asSeconds();
 
 
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W))
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up))
     {
         m_cameraView.move(sf::Vector2f(0, -moveAmount));
     }
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S))
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down))
     {
         m_cameraView.move(sf::Vector2f(0, moveAmount));
     }

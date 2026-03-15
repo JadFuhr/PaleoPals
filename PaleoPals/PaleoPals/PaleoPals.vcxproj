@@ -28,6 +28,7 @@
     <ClCompile Include="Museum.cpp" />
     <ClCompile Include="Paleontologist.cpp" />
     <ClCompile Include="Paused.cpp" />
+    <ClCompile Include="Player.cpp" />
     <ClCompile Include="Researcher.cpp" />
     <ClCompile Include="Trader.cpp" />
     <ClCompile Include="TraderMenu.cpp" />
@@ -42,6 +43,7 @@
     <ClInclude Include="Museum.h" />
     <ClInclude Include="Paleontologist.h" />
     <ClInclude Include="Paused.h" />
+    <ClInclude Include="Player.h" />
     <ClInclude Include="Researcher.h" />
     <ClInclude Include="TraderMenu.h" />
   </ItemGroup>
