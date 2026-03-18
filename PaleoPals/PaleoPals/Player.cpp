@@ -115,7 +115,8 @@ void Player::handleInput(sf::Time deltaTime, Map& map)
 
     static bool eWasPressed = false;
     bool eIsPressed = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::E);
-
+        
+  
     if (eIsPressed && !eWasPressed)
     {
         tryPickupCollectible(map);
@@ -168,7 +169,7 @@ void Player::applyPhysics(sf::Time deltaTime, Map& map)
 //
 // The player sprite origin is at (frameWidth/2, frameHeight) i.e. bottom-centre.
 // At scale 0.2 the visible half-width is roughly (192*0.2)/2 = 19.2 px and the
-// visible height is 192*0.2 = 38.4 px, but we use a tighter hitbox so the
+// height is 192*0.2 = 38.4 px, but we use a tighter hitbox so the
 // player fits inside a single-tile tunnel.
 //
 // playerPos.y  == bottom of the player (feet)
@@ -179,21 +180,18 @@ void Player::checkCollisions(Map& map)
 {
     float tileSize = map.getTileSize();
 
-    // Hitbox dimensions – keep narrower than a tile so the player fits in dug tunnels
-    const float halfW = tileSize * 0.35f;   // ~8.4 px  (side clearance from centre)
-    const float playerHeight = tileSize * 1.6f; // ~38 px  (two tiles tall)
+    // Hitbox dimensions - keep narrower than a tile so the player fits in dug tunnels
+    const float halfW = tileSize * 0.35f;   // 8.4 px  (side clearance from centre)
+    const float playerHeight = tileSize * 1.6f; // 38 px  (two tiles tall)
 
     m_isGrounded = false;
 
-    // -------------------------------------------------------
+
     // Helper lambdas: tile position helpers
-    // tileLeft/tileTop use the raw sprite position stored by generateGrid
-    // (top-left corner of the tile).
-    // -------------------------------------------------------
     float tileOffsetX = (WINDOW_X - map.getColumnCount() * tileSize) / 2.0f;
     float tileOffsetY = WINDOW_Y / 2.0f;
 
-    // Convert world pos to tile col/row (no truncation issue — floor properly)
+    // Convert world pos to tile col/row 
     auto toTileCol = [&](float worldX) -> int {
         return static_cast<int>(std::floor((worldX - tileOffsetX) / tileSize));
         };
@@ -219,12 +217,11 @@ void Player::checkCollisions(Map& map)
 
     sf::Vector2f pos = m_sprite.getPosition(); // feet centre
 
-    // -------------------------------------------------------
+ 
     // VERTICAL COLLISION
-    // -------------------------------------------------------
     if (m_velocity.y >= 0)
     {
-        // === GROUND: check tile(s) directly under both bottom corners ===
+        // GROUND: check tile(s) directly under both bottom corners
         float feetY = pos.y;                    // feet are at pos.y
         int   footRow = toTileRow(feetY);        // row the feet are sitting on top of
 
@@ -236,6 +233,7 @@ void Player::checkCollisions(Map& map)
         if (solid(footRow, colL) || solid(footRow, colR))
         {
             float surfaceY = tileTop(footRow); // top edge of that tile
+
             if (feetY >= surfaceY - 2.0f)
             {
                 m_sprite.setPosition(sf::Vector2f(pos.x, surfaceY));
@@ -247,7 +245,7 @@ void Player::checkCollisions(Map& map)
     }
     else
     {
-        // === CEILING: check tile(s) above head ===
+        // CEILING: check tile(s) above head 
         float headY = pos.y - playerHeight;
         int   headRow = toTileRow(headY);
 
@@ -264,10 +262,9 @@ void Player::checkCollisions(Map& map)
         }
     }
 
-    // -------------------------------------------------------
+
     // HORIZONTAL COLLISION
-    // Check at three vertical sample points: head, mid, feet
-    // -------------------------------------------------------
+    // Checks three vertical points: head, mid, feet
     if (m_velocity.x != 0)
     {
         // Sample rows: just below head, mid-body, just above feet
@@ -337,12 +334,12 @@ void Player::tryPickupCollectible(Map& map)
     int playerCol = static_cast<int>(std::floor((playerPos.x - tileOffsetX) / tileSize));
     int playerRow = static_cast<int>(std::floor((playerPos.y - tileOffsetY) / tileSize));
 
-    std::cout << "=== PICKUP ATTEMPT ===\n";
+    std::cout << " PICKUP ATTEMPT \n";
     std::cout << "Player at tile (" << playerCol << ", " << playerRow << ")\n";
 
     int collectiblesFound = 0;
 
-    // Search all collectibles – we need to find ones that are discovered (isDiscovered==true)
+    // Search all collectibles – find discovered (isDiscovered==true)
     // because getCollectibleAtTile() only returns undiscovered ones.
     auto& allCollectibles = fossilManager.getAllCollectibles();
 
@@ -385,7 +382,7 @@ void Player::tryPickupCollectible(Map& map)
 
             m_inventory.push_back(item);
 
-            std::cout << "✓✓✓ PICKED UP: " << item.name << " (Type: " << item.type << ") ✓✓✓\n";
+            std::cout << " PICKED UP: " << item.name << " (Type: " << item.type << ") \n";
             std::cout << "    Inventory size: " << m_inventory.size() << "\n";
 
             // Remove from world by moving far off-screen and marking collected
@@ -399,10 +396,14 @@ void Player::tryPickupCollectible(Map& map)
     }
 
     if (collectiblesFound == 0)
+    {
         std::cout << "  No collectibles found in 1-tile radius\n";
+    }
     else
+    {
         std::cout << "  Found " << collectiblesFound << " collectible(s) but tile(s) not yet mined\n";
-    std::cout << "===================\n";
+        std::cout << "===================\n";
+    }
 }
 
 //------------------------------------------------------------
