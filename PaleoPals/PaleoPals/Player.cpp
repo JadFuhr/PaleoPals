@@ -115,8 +115,8 @@ void Player::handleInput(sf::Time deltaTime, Map& map)
 
     static bool eWasPressed = false;
     bool eIsPressed = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::E);
-        
-  
+
+
     if (eIsPressed && !eWasPressed)
     {
         tryPickupCollectible(map);
@@ -217,7 +217,7 @@ void Player::checkCollisions(Map& map)
 
     sf::Vector2f pos = m_sprite.getPosition(); // feet centre
 
- 
+
     // VERTICAL COLLISION
     if (m_velocity.y >= 0)
     {
@@ -424,14 +424,21 @@ void Player::tryMineAtMouse(const sf::RenderWindow& window, Map& map)
     sf::Vector2f playerPos = m_sprite.getPosition();
     sf::Vector2i playerTile = worldToTile(playerPos, map);
 
-    // Check if mouse tile is within 1 tile radius
-    int dx = std::abs(mouseTile.x - playerTile.x);
-    int dy = std::abs(mouseTile.y - playerTile.y);
+    // Check if mouse tile is within mining range (2 tiles in any direction)
+    float dx = static_cast<float>(mouseTile.x - playerTile.x);
+    float dy = static_cast<float>(mouseTile.y - playerTile.y);
+    float distance = std::sqrt(dx * dx + dy * dy);
 
-    if (dx <= 1 && dy <= 1)
+    std::cout << "Mining attempt: Player tile (" << playerTile.x << ", " << playerTile.y 
+        << "), Mouse tile (" << mouseTile.x << ", " << mouseTile.y 
+        << "), Distance: " << distance << "\n";
+
+    if (distance <= 2.5f)
     {
         // Check if tile exists and has hardness
         int hardness = map.getTileHardness(mouseTile.y, mouseTile.x);
+
+        std::cout << "  Within range! Hardness: " << hardness << "\n";
 
         if (hardness > 0)
         {
@@ -445,6 +452,10 @@ void Player::tryMineAtMouse(const sf::RenderWindow& window, Map& map)
             std::cout << "Started mining tile (" << mouseTile.x << ", " << mouseTile.y
                 << ") with hardness " << hardness << "\n";
         }
+    }
+    else
+    {
+        std::cout << "  OUT OF RANGE (distance " << distance << " > 2.0)\n";
     }
 }
 
