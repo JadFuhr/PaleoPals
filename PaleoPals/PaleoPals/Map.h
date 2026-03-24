@@ -72,6 +72,10 @@ public:
     //fossil system
     FossilManager& getFossilManager() { return m_fossilManager; }
 
+    // Direct access to buildings (for click detection in Game)
+    Museum& getMuseum() { return m_museum; }
+    Trader& getTrader() { return m_trader; }
+
 private:
 
     sf::Texture m_backgroundTexture;

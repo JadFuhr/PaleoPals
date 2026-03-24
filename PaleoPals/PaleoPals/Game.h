@@ -14,6 +14,7 @@
 #include <fstream>
 #include "constants.h"
 #include "TraderMenu.h"
+#include "MuseumInterior.h"
 #include "Player.h"
 #include <vector>
 #include <memory>
@@ -45,6 +46,7 @@ private:
     Menu m_menu;
     PauseMenu m_pause;
     Museum m_museum;
+	MuseumInterior m_museumInterior;
     std::vector<std::unique_ptr<Paleontologist>> m_paleontologists; // multiple paleontologist instances
     Player m_player;
 

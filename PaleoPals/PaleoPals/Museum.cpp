@@ -44,9 +44,13 @@ void Museum::updateMuseumHover (const sf::RenderWindow& window)
  
 }
 
-
+bool Museum::containsPoint(const sf::Vector2f& worldPos) const
+{
+    return m_sprite.getGlobalBounds().contains(worldPos);
+}
 
 void Museum::drawMuseum(sf::RenderWindow& window)
 {
 	window.draw(m_sprite);
 }
+

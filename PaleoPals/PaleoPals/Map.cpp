@@ -104,6 +104,7 @@ void Map::generateGrid(int rows, int cols, float tileSize, float windowWidth, fl
             float xPos = col * tileSize + offsetX;
 
             Tile newTile(layer.texture, sf::Vector2f(xPos, yPos), layer.hardness);
+
             newTile.sprite.setScale(sf::Vector2f(tileSize / layer.texture.getSize().x, tileSize / layer.texture.getSize().y));
 
             m_tiles.emplace_back(std::move(newTile));

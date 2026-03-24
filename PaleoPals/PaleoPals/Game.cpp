@@ -67,7 +67,7 @@ void Game::processEvents()
         {
             processKeys(newEvent);
         }
-        else if (newEvent->is<sf::Event::MouseButtonPressed>() )
+        else if (newEvent->is<sf::Event::MouseButtonPressed>())
         {
             // Handle mouse clicks for menu
             if (m_currentState == GameState::MainMenu)
@@ -91,38 +91,49 @@ void Game::processEvents()
 
                 if (mouseButton && mouseButton->button == sf::Mouse::Button::Left)
                 {
+                    // Museum interior open - it consumes all clicks
+                    if (m_museumInterior.isOpen())
+                    {
+                        m_museumInterior.handleClick(screenPos);
+                        continue;
+                    }
+
+                    // Trader menu open - it consumes all clicks
+                    if (m_traderMenu.isOpen())
+                    {
+                        HireAction action = m_traderMenu.handleClick(screenPos, m_window);
+
+                        if (action == HireAction::HirePaleontologist)
+                        {
+                            auto newPaleo = std::make_unique<Paleontologist>();
+                            newPaleo->setPosition(worldPos + sf::Vector2f(16.f, 0.f));
+                            newPaleo->setSpeed(60.0f);
+                            m_paleontologists.push_back(std::move(newPaleo));
+                        }
+                        else if (action == HireAction::HireResearcher)
+                        {
+                            std::cout << "Researcher hiring not yet implemented\n";
+                        }
+                        continue;
+                    }
+
+                    // Click on museum building - open interior
+                    if (m_map.getMuseum().containsPoint(worldPos))
+                    {
+                        m_museumInterior.loadAssets(m_map.getFossilManager().getDinosaurData());
+                        m_museumInterior.open();
+                        continue;
+                    }
+
+                    // Click on trader building - open trader menu
+                    if (m_map.getTrader().containsPoint(worldPos))
+                    {
+                        m_traderMenu.openAt(worldPos);
+                        continue;
+                    }
+
+                    // Nothing special hit - try to mine
                     m_player.tryMineAtMouse(m_window, m_map);
-                }
-
-                // If trader menu is open, let it handle the click first
-                if (m_traderMenu.isOpen())
-                {
-                    HireAction action = m_traderMenu.handleClick(screenPos, m_window);
-                    
-                    if (action == HireAction::HirePaleontologist)
-                    {
-                        // Spawn a new paleontologist at the trader location
-                        auto newPaleo = std::make_unique<Paleontologist>();
-                        newPaleo->setPosition(worldPos + sf::Vector2f(16.f, 0.f));
-                        newPaleo->setSpeed(60.0f);
-                        m_paleontologists.push_back(std::move(newPaleo));
-                        //std::cout << "Hired Paleontologist! Total: " << m_paleontologists.size() << "\n";
-                    }
-                    else if (action == HireAction::HireResearcher)
-                    {
-                        // TODO: Implement researcher hiring when researcher class is ready
-                        std::cout << "Researcher hiring not yet implemented\n";
-                    }
-                    
-                    // menu consumed the click (either hired or closed) 
-                    continue;
-                }
-
-                // check whether click was on the trader and open the menu
-                if (m_map.isPointOnTrader(worldPos))
-                {
-                    m_traderMenu.openAt(worldPos);
-                    continue;
                 }
 
             }
@@ -207,7 +218,26 @@ void Game::update(sf::Time t_deltaTime)
         m_map.updateHover(m_window, 24.0f, 75);
         m_map.updateMuseum(m_window);
         m_map.updateTrader(m_window);
-        m_player.update(t_deltaTime, m_map);
+
+        if (m_museumInterior.isOpen())
+        {
+            m_museumInterior.update(m_window);
+        }
+        else
+        {
+
+            m_player.update(t_deltaTime, m_map);
+
+            for (const auto& item : m_player.getNewPickups())
+            {
+                if (item.type == "fossil")
+                {
+                    m_museumInterior.onFossilCollected(item.dinosaurName, item.pieceId);
+                }
+            }
+            m_player.clearNewPickups();
+
+        }
 
         try
         {
@@ -281,8 +311,10 @@ void Game::render()
 
         // draw trader menu over everything if open
         m_traderMenu.draw(m_window);
+        m_museumInterior.draw(m_window);
 
         m_map.drawDebug(m_window);
+
         break;
     case GameState::Paused:
         m_window.setView(m_cameraView);
@@ -333,10 +365,10 @@ void Game::setupMap()
     initialPaleo->setSpeed(60.0f);
     m_paleontologists.push_back(std::move(initialPaleo));
 
-   
+
     m_player.setPosition(sf::Vector2f(WINDOW_X / 2.0f + 100.0f, WINDOW_Y / 2.0f));
 
-   // std::cout << "Initial paleontologist created. Total paleontologists: " << m_paleontologists.size() << "\n";
+    // std::cout << "Initial paleontologist created. Total paleontologists: " << m_paleontologists.size() << "\n";
 }
 
 void Game::moveCamera(sf::Time t_deltaTime)

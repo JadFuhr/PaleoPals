@@ -1,0 +1,373 @@
+#include "MuseumInterior.h"
+#include "constants.h"
+#include <iostream>
+#include <algorithm>
+
+//------------------------------------------------------------
+// Constructor
+//------------------------------------------------------------
+MuseumInterior::MuseumInterior()
+    : m_leftArrow(m_arrowsTex),
+      m_rightArrow(m_arrowsTex),
+      m_backSprite(m_backTex),
+	  m_interiorSprite(m_interiorTex)
+{
+
+    if (!m_interiorTex.loadFromFile("ASSETS/IMAGES/Screens/Museum_Interior.png"))
+    {
+		std::cout << "MuseumInterior: failed to load interior background texture\n";
+    }
+	m_interiorSprite.setTexture(m_interiorTex);
+	m_interiorSprite.setTextureRect(sf::IntRect({ 0, 0 }, { 2000, 1000 }));
+    m_interiorSprite.setOrigin(sf::Vector2f(1000.0f, 500.0f));
+	m_interiorSprite.setPosition(sf::Vector2f(WINDOW_X / 2.0f, WINDOW_Y / 2.0f));
+	m_interiorSprite.setScale(sf::Vector2f(0.6f, 0.6f));
+
+    // ---- Arrow buttons ----
+    // The sheet has 4 equal-width frames side by side:
+    //   col 0 = black  left  (normal)
+    //   col 1 = white  left  (hover)
+    //   col 2 = black  right (normal)
+    //   col 3 = white  right (hover)
+    if (!m_arrowsTex.loadFromFile("ASSETS/IMAGES/Screens/DirectionArrows.png"))
+    {
+		std::cout << "MuseumInterior: failed to load arrows texture\n";
+    }
+
+    {
+        sf::Vector2u sz = m_arrowsTex.getSize();
+        m_arrowFrameW = static_cast<int>(sz.x) / 4;  // 4 frames wide
+        m_arrowFrameH = static_cast<int>(sz.y);
+    }
+
+    m_leftArrow.setTexture(m_arrowsTex);
+    m_rightArrow.setTexture(m_arrowsTex);
+
+    // Scale arrows up a bit so they're easy to click
+    float arrowScale = 0.5f;
+    m_leftArrow.setScale(sf::Vector2f(arrowScale, arrowScale));
+    m_rightArrow.setScale(sf::Vector2f(arrowScale, arrowScale));
+
+    // ---- Back button ----
+    // Sheet has 2 frames: col 0 = normal, col 1 = hover
+    if (!m_backTex.loadFromFile("ASSETS/IMAGES/Screens/BackButton.png"))
+    {
+		std::cout << "MuseumInterior: failed to load back button texture\n";
+    }
+
+    {
+        sf::Vector2u size = m_backTex.getSize();
+        m_backFrameW = static_cast<int>(size.x) / 2;
+        m_backFrameH = static_cast<int>(size.y);
+    }
+
+    m_backSprite.setTexture(m_backTex);
+    m_backSprite.setScale(sf::Vector2f(0.7f, 0.7f));
+}
+
+//------------------------------------------------------------
+// loadAssets
+// Loads per-dino textures from the paths in DinosaurData.
+// Called after FossilManager has finished loading the JSON.
+//------------------------------------------------------------
+// loadAssets
+// Loads per-dino textures from the paths in DinosaurData.
+// Called after FossilManager has finished loading the JSON.
+//------------------------------------------------------------
+bool MuseumInterior::loadAssets(const std::vector<DinosaurData>& dinoData)
+{
+    m_dinos.clear();
+    m_dinos.reserve(dinoData.size());
+
+    for (const auto& data : dinoData)
+    {
+        auto display = std::make_unique<DinoDisplay>();
+        display->name = data.name;
+
+        // Load background texture and create sprite with it
+        if (!display->backgroundTex.loadFromFile(data.backgroundTexture))
+        {
+            std::cerr << "MuseumInterior: failed to load background for " << data.name << "\n";
+        }
+        else
+        {
+            // Recreate the sprite with the loaded texture
+            display->backgroundSprite = sf::Sprite(display->backgroundTex);
+        }
+
+        // Load piece textures and create sprites
+        for (const auto& piece : data.pieces)
+        {
+            int idx = pieceIdToIndex(piece.id);
+            if (idx < 0 || idx > 3) continue;
+
+            if (!display->pieceTex[idx].loadFromFile(piece.texturePath))
+            {
+                std::cerr << "MuseumInterior: failed to load piece " << piece.id
+                    << " for " << data.name << "\n";
+            }
+            else
+            {
+                // Recreate the sprite with the loaded texture
+                display->pieceSprite[idx] = sf::Sprite(display->pieceTex[idx]);
+            }
+        }
+
+        m_dinos.push_back(std::move(display));
+    }
+
+    std::cout << "MuseumInterior: loaded " << m_dinos.size() << " dinosaur displays\n";
+    return !m_dinos.empty();
+}
+
+//------------------------------------------------------------
+// onFossilCollected
+// Called by Game (or Player) whenever a fossil piece is picked up
+//------------------------------------------------------------
+void MuseumInterior::onFossilCollected(const std::string& dinoName, const std::string& pieceId)
+{
+    int idx = pieceIdToIndex(pieceId);
+    if (idx < 0 || idx > 3) return;
+
+    for (auto& dino : m_dinos)
+    {
+        if (dino && dino->name == dinoName)
+        {
+            dino->collected[idx] = true;
+            std::cout << "MuseumInterior: marked " << pieceId << " of " << dinoName << " as collected\n";
+            return;
+        }
+    }
+}
+
+//------------------------------------------------------------
+// open / close
+//------------------------------------------------------------
+void MuseumInterior::open()
+{
+    m_open = true;
+    if (m_currentDinoIndex >= static_cast<int>(m_dinos.size()))
+        m_currentDinoIndex = 0;
+}
+
+void MuseumInterior::close()
+{
+    m_open = false;
+}
+
+//------------------------------------------------------------
+// handleClick  (screen coordinates)
+// Returns true when the Back button was pressed (Game should close museum)
+//------------------------------------------------------------
+bool MuseumInterior::handleClick(const sf::Vector2f& screenPos)
+{
+    if (!m_open) return false;
+
+    if (containsPoint(m_backSprite, screenPos))
+    {
+        close();
+        return true;
+    }
+
+    if (!m_dinos.empty())
+    {
+        if (containsPoint(m_leftArrow, screenPos))
+        {
+            m_currentDinoIndex = (m_currentDinoIndex - 1 + static_cast<int>(m_dinos.size()))
+                % static_cast<int>(m_dinos.size());
+        }
+        else if (containsPoint(m_rightArrow, screenPos))
+        {
+            m_currentDinoIndex = (m_currentDinoIndex + 1)
+                % static_cast<int>(m_dinos.size());
+        }
+    }
+
+    return false; // museum still open
+}
+
+//------------------------------------------------------------
+// update  – hover detection in screen coords
+//------------------------------------------------------------
+void MuseumInterior::update(const sf::RenderWindow& window)
+{
+    if (!m_open) return;
+
+    updateButtonPositions(window);
+
+    sf::Vector2i mousePixel = sf::Mouse::getPosition(window);
+    sf::Vector2f screenPos(static_cast<float>(mousePixel.x), static_cast<float>(mousePixel.y));
+
+    m_hoverLeft = containsPoint(m_leftArrow, screenPos);
+    m_hoverRight = containsPoint(m_rightArrow, screenPos);
+    m_hoverBack = containsPoint(m_backSprite, screenPos);
+
+    // Set arrow frames based on hover
+    // Left arrow: col 0 = normal black, col 1 = hover white
+    m_leftArrow.setTextureRect(sf::IntRect(
+        { m_hoverLeft ? m_arrowFrameW : 0, 0 },
+        { m_arrowFrameW, m_arrowFrameH }));
+
+    // Right arrow: col 2 = normal black, col 3 = hover white
+    m_rightArrow.setTextureRect(sf::IntRect(
+        { m_hoverRight ? m_arrowFrameW * 3 : m_arrowFrameW * 2, 0 },
+        { m_arrowFrameW, m_arrowFrameH }));
+
+    // Back button: col 0 = normal, col 1 = hover
+    m_backSprite.setTextureRect(sf::IntRect(
+        { m_hoverBack ? m_backFrameW : 0, 0 },
+        { m_backFrameW, m_backFrameH }));
+}
+
+//------------------------------------------------------------
+// draw  – everything is in screen space (use default view)
+//------------------------------------------------------------
+void MuseumInterior::draw(sf::RenderWindow& window)
+{
+    if (!m_open) return;
+
+    // Switch to default (screen) view so UI is fixed on screen
+    sf::View prev = window.getView();
+    window.setView(window.getDefaultView());
+
+	window.draw(m_interiorSprite);
+
+    // ---- Current dinosaur display ----
+    if (!m_dinos.empty() && m_dinos[m_currentDinoIndex])
+    {
+        DinoDisplay& dino = *m_dinos[m_currentDinoIndex];
+
+        // Draw the dino background silhouette centred on screen
+        sf::Vector2u bgSize = dino.backgroundTex.getSize();
+        if (bgSize.x > 0 && bgSize.y > 0)
+        {
+            // Scale it to occupy roughly the centre 60% of the window height
+            float targetH = WINDOW_Y * 0.60f;
+            float scale = targetH / static_cast<float>(bgSize.y);
+
+            dino.backgroundSprite.setScale(sf::Vector2f(scale, scale));
+            dino.backgroundSprite.setOrigin(sf::Vector2f(
+                static_cast<float>(bgSize.x) / 2.f,
+                static_cast<float>(bgSize.y) / 2.f));
+            dino.backgroundSprite.setPosition(sf::Vector2f(WINDOW_X / 2.f, WINDOW_Y * 0.42f));
+
+            // Draw as a dim silhouette (greyed out)
+            dino.backgroundSprite.setColor(sf::Color(180, 180, 180, 180));
+            window.draw(dino.backgroundSprite);
+            dino.backgroundSprite.setColor(sf::Color::White); // reset
+        }
+
+        // Draw each collected piece on top at the same position/scale
+        for (int i = 0; i < 4; ++i)
+        {
+            if (!dino.collected[i]) continue;
+
+            sf::Vector2u pieceSize = dino.pieceTex[i].getSize();
+            if (pieceSize.x == 0 || pieceSize.y == 0) continue;
+
+            float targetH = WINDOW_Y * 0.60f;
+            float scale = targetH / static_cast<float>(pieceSize.y);
+
+            dino.pieceSprite[i].setScale(sf::Vector2f(scale, scale));
+            dino.pieceSprite[i].setOrigin(sf::Vector2f(
+                static_cast<float>(pieceSize.x) / 2.f,
+                static_cast<float>(pieceSize.y) / 2.f));
+            dino.pieceSprite[i].setPosition(sf::Vector2f(WINDOW_X / 2.f, WINDOW_Y * 0.42f));
+
+            window.draw(dino.pieceSprite[i]);
+        }
+
+        // ---- Dino name label (placeholder rectangle until you add a font) ----
+        // If you have sf::Font set up you can replace this with sf::Text
+        // For now draw a small dark bar at the top so you know which dino is shown
+        sf::RectangleShape nameBar(sf::Vector2f(400.f, 30.f));
+        nameBar.setFillColor(sf::Color(30, 30, 30, 200));
+        nameBar.setPosition(sf::Vector2f(WINDOW_X / 2.f - 200.f, 20.f));
+        window.draw(nameBar);
+
+        // ---- Piece collection indicators (4 small squares near the bottom) ----
+        // Filled = collected, outline only = missing
+        std::string pieceNames[4] = { "Skull", "Torso", "Pelvis", "Tail" };
+        float indicatorSize = 24.f;
+        float spacing = 40.f;
+        float startX = WINDOW_X / 2.f - (spacing * 1.5f);
+        float indicatorY = WINDOW_Y * 0.82f;
+
+        for (int i = 0; i < 4; ++i)
+        {
+            sf::RectangleShape indicator(sf::Vector2f(indicatorSize, indicatorSize));
+            indicator.setPosition(sf::Vector2f(startX + i * spacing, indicatorY));
+            indicator.setOutlineThickness(2.f);
+
+            if (dino.collected[i])
+            {
+                indicator.setFillColor(sf::Color(100, 220, 100));    // green = have it
+                indicator.setOutlineColor(sf::Color(50, 180, 50));
+            }
+            else
+            {
+                indicator.setFillColor(sf::Color(50, 50, 50, 150));  // dark = missing
+                indicator.setOutlineColor(sf::Color(150, 150, 150));
+            }
+
+            window.draw(indicator);
+        }
+    }
+
+    // ---- Navigation arrows ----
+    window.draw(m_leftArrow);
+    window.draw(m_rightArrow);
+
+    // ---- Back button ----
+    window.draw(m_backSprite);
+
+    // Restore previous (world) view
+    window.setView(prev);
+}
+
+//------------------------------------------------------------
+// updateButtonPositions  (screen coords)
+//------------------------------------------------------------
+void MuseumInterior::updateButtonPositions(const sf::RenderWindow& window)
+{
+    sf::Vector2u winSize = window.getSize();
+
+    // Left arrow – vertically centred, close to left edge
+    m_leftArrow.setPosition(sf::Vector2f(310.f, winSize.y / 2.f - m_arrowFrameH * m_leftArrow.getScale().y / 2.f));
+
+    // Right arrow – mirrored on the right edge
+    m_rightArrow.setPosition(sf::Vector2f(winSize.x - 310.f - m_arrowFrameW * m_rightArrow.getScale().x, winSize.y / 2.f - m_arrowFrameH * m_rightArrow.getScale().y / 2.f));
+
+    // Back button – bottom-left corner
+    m_backSprite.setPosition(sf::Vector2f(310.f, winSize.y - m_backFrameH * m_backSprite.getScale().y - 160.f));
+}
+
+//------------------------------------------------------------
+// pieceIdToIndex
+// Maps a piece id string to [0]=skull [1]=torso [2]=pelvis [3]=tail
+// Works by looking for keywords anywhere in the id (case insensitive)
+//------------------------------------------------------------
+int MuseumInterior::pieceIdToIndex(const std::string& pieceId) const
+{
+    // Lowercase copy for matching
+    std::string lower = pieceId;
+    std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
+
+    if (lower.find("skull") != std::string::npos) return 0;
+    if (lower.find("torso") != std::string::npos) return 1;
+    if (lower.find("pelvis") != std::string::npos) return 2;
+    if (lower.find("tail") != std::string::npos) return 3;
+
+    std::cerr << "MuseumInterior: unknown piece id '" << pieceId << "'\n";
+    return -1;
+}
+
+//------------------------------------------------------------
+// containsPoint helpers
+//------------------------------------------------------------
+bool MuseumInterior::containsPoint(const sf::Sprite& sprite, const sf::Vector2f& pt) const
+{
+    return sprite.getGlobalBounds().contains(pt);
+}
+
+

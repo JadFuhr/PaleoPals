@@ -52,9 +52,13 @@ public:
     sf::Vector2f getPosition() const { return m_sprite.getPosition(); }
     const sf::Sprite& getSprite() const { return m_sprite; }
     const std::vector<CollectedItem>& getInventory() const { return m_inventory; }
+    const std::vector<CollectedItem>& getNewPickups() const { return m_newPickups; }
+    void clearNewPickups() { m_newPickups.clear(); }
 
     // Setters
     void setPosition(sf::Vector2f pos);
+
+
 
 private:
     // Rendering
@@ -92,6 +96,7 @@ private:
 
     // Inventory
     std::vector<CollectedItem> m_inventory;
+	std::vector<CollectedItem> m_newPickups; // Items picked up current frame
     float m_interactionRadius = 24.0f; // 1 tile radius
 
     // Helper functions

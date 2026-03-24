@@ -16,6 +16,9 @@ public:
 	// Get the sprite for frustum culling
 	const sf::Sprite& getSprite() const { return m_sprite; }
 
+	// return true if world coordinate point is inside the museum sprite (for click detection)
+	bool containsPoint(const sf::Vector2f& worldPos) const;
+
 private:
 
 	sf::Texture m_texture;

@@ -381,6 +381,7 @@ void Player::tryPickupCollectible(Map& map)
             }
 
             m_inventory.push_back(item);
+			m_newPickups.push_back(item);
 
             std::cout << " PICKED UP: " << item.name << " (Type: " << item.type << ") \n";
             std::cout << "    Inventory size: " << m_inventory.size() << "\n";
