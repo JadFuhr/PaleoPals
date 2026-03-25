@@ -469,16 +469,20 @@ MuseumInterior::DisplaySettings MuseumInterior::getDisplaySettings(const std::st
     else if (dinoName.find("Pteranodon longiceps") != std::string::npos)
     {
         scale *= 0.6f;
-        posY = WINDOW_Y * 0.40f;
-        humanScale = 0.8f;
-        humanPosX = WINDOW_X * 0.20f;
+        posX += 20.f;
+        posY += 75.f;
+        humanScale = 0.75f;
+        humanPosX = posX - 300;
+        humanPosY += 40;
     }
     else if (dinoName.find("Quetzalcoatlus northropi") != std::string::npos)
     {
         scale *= 0.6f;
-        posY = WINDOW_Y * 0.40f;
+        posX += 20.f;
+        posY += 75.f;
         humanScale = 0.5f;
-        humanPosX = WINDOW_X * 0.15f;
+        humanPosX = posX - 200;
+        humanPosY += 60;
     }
 
     return { scale, sf::Vector2f(posX, posY), humanScale, sf::Vector2f(humanPosX, humanPosY) };
