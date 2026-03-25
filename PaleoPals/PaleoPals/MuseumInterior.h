@@ -32,6 +32,17 @@ public:
     void draw(sf::RenderWindow& window);
 
 private:
+
+    struct DisplaySettings {
+        float scale;
+        sf::Vector2f position;
+        float humanScale = 1.0f;
+        sf::Vector2f humanPosition = sf::Vector2f(0.f, 0.f);
+    };
+
+    DisplaySettings getDisplaySettings(const std::string& dinoName,
+        const sf::Vector2u& bgSize) const;
+
     void updateButtonPositions(const sf::RenderWindow& window);
     bool containsPoint(const sf::Sprite& sprite, const sf::Vector2f& pt) const;
     int  pieceIdToIndex(const std::string& pieceId) const;
@@ -84,6 +95,9 @@ private:
     int         m_backFrameW = 0;
     int         m_backFrameH = 0;
     bool        m_hoverBack = false;
+
+    sf::Texture m_humanTex;
+    sf::Sprite  m_humanSprite{ m_humanTex };
 };
 
 #endif // MUSEUM_INTERIOR_H

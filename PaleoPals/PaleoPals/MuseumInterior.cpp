@@ -63,6 +63,15 @@ MuseumInterior::MuseumInterior()
 
     m_backSprite.setTexture(m_backTex);
     m_backSprite.setScale(sf::Vector2f(0.7f, 0.7f));
+
+    // ---- Human sprite for size comparison ----
+    if (!m_humanTex.loadFromFile("ASSETS/IMAGES/Screens/Human1.png"))
+    {
+        std::cout << "MuseumInterior: failed to load human sprite texture\n";
+    }
+    m_humanSprite.setTexture(m_humanTex);
+    m_humanSprite.setTextureRect(sf::IntRect({ 0, 0 }, { 72, 214 }));
+    m_humanSprite.setOrigin(sf::Vector2f(36, 107));
 }
 
 //------------------------------------------------------------
@@ -241,20 +250,32 @@ void MuseumInterior::draw(sf::RenderWindow& window)
         sf::Vector2u bgSize = dino.backgroundTex.getSize();
         if (bgSize.x > 0 && bgSize.y > 0)
         {
-            // Scale it to occupy roughly the centre 60% of the window height
-            float targetH = WINDOW_Y * 0.60f;
-            float scale = targetH / static_cast<float>(bgSize.y);
+            // Get display settings for this dinosaur (includes custom scale/position)
+            auto settings = getDisplaySettings(dino.name, bgSize);
 
-            dino.backgroundSprite.setScale(sf::Vector2f(scale, scale));
+            dino.backgroundSprite.setScale(sf::Vector2f(settings.scale, settings.scale));
             dino.backgroundSprite.setOrigin(sf::Vector2f(
                 static_cast<float>(bgSize.x) / 2.f,
                 static_cast<float>(bgSize.y) / 2.f));
-            dino.backgroundSprite.setPosition(sf::Vector2f(WINDOW_X / 2.f, WINDOW_Y * 0.42f));
+            dino.backgroundSprite.setPosition(settings.position);
 
             // Draw as a dim silhouette (greyed out)
             dino.backgroundSprite.setColor(sf::Color(180, 180, 180, 180));
             window.draw(dino.backgroundSprite);
             dino.backgroundSprite.setColor(sf::Color::White); // reset
+
+            // Draw human sprite for size comparison
+            sf::Vector2u humanSize = m_humanTex.getSize();
+            if (humanSize.x > 0 && humanSize.y > 0)
+            {
+                m_humanSprite.setScale(sf::Vector2f(settings.humanScale, settings.humanScale));
+                m_humanSprite.setOrigin(sf::Vector2f(
+                    static_cast<float>(humanSize.x) / 2.f,
+                    static_cast<float>(humanSize.y) / 2.f));
+                m_humanSprite.setPosition(settings.humanPosition);
+                m_humanSprite.setColor(sf::Color::White);
+                window.draw(m_humanSprite);
+            }
         }
 
         // Draw each collected piece on top at the same position/scale
@@ -265,14 +286,11 @@ void MuseumInterior::draw(sf::RenderWindow& window)
             sf::Vector2u pieceSize = dino.pieceTex[i].getSize();
             if (pieceSize.x == 0 || pieceSize.y == 0) continue;
 
-            float targetH = WINDOW_Y * 0.60f;
-            float scale = targetH / static_cast<float>(pieceSize.y);
+            auto settings = getDisplaySettings(dino.name, bgSize);
 
-            dino.pieceSprite[i].setScale(sf::Vector2f(scale, scale));
-            dino.pieceSprite[i].setOrigin(sf::Vector2f(
-                static_cast<float>(pieceSize.x) / 2.f,
-                static_cast<float>(pieceSize.y) / 2.f));
-            dino.pieceSprite[i].setPosition(sf::Vector2f(WINDOW_X / 2.f, WINDOW_Y * 0.42f));
+            dino.pieceSprite[i].setScale(sf::Vector2f(settings.scale, settings.scale));
+            dino.pieceSprite[i].setOrigin(sf::Vector2f(static_cast<float>(pieceSize.x) / 2.f, static_cast<float>(pieceSize.y) / 2.f));
+            dino.pieceSprite[i].setPosition(settings.position);
 
             window.draw(dino.pieceSprite[i]);
         }
@@ -370,4 +388,98 @@ bool MuseumInterior::containsPoint(const sf::Sprite& sprite, const sf::Vector2f&
     return sprite.getGlobalBounds().contains(pt);
 }
 
+  
+MuseumInterior::DisplaySettings MuseumInterior::getDisplaySettings(const std::string& dinoName, const sf::Vector2u& bgSize) const
+{
+    float targetH = WINDOW_Y * 0.60f;
+    float scale = targetH / static_cast<float>(bgSize.y);
+    float posX = WINDOW_X / 2.f;
+    float posY = WINDOW_Y / 2.f;
+    float humanScale = 0.8f;  // default human scale
+    float humanPosX = WINDOW_X * 0.25f;  // default left side for comparison
+    float humanPosY = WINDOW_Y * 0.65f;  // default bottom alignment
 
+    if (dinoName.find("Tyrannosaurus rex") != std::string::npos)
+    {
+        scale *= 0.6f;
+        posY += 90.f;
+        humanScale = 0.6f;
+        humanPosX = posX - 200;
+        humanPosY += 60;
+    }
+    else if (dinoName.find("Allosaurus fragilis") != std::string::npos)
+    {
+        scale *= 0.5f;
+        posY += 125.f;
+        humanScale = 0.8f;
+        humanPosX = posX -300;
+        humanPosY += 40;
+    }
+    else if (dinoName.find("Spinosaurus aegyptiacus") != std::string::npos)
+    {
+        scale *= 0.7f;
+        posX += 20.f;
+        posY += 75.f;
+        humanScale = 0.6f;
+        humanPosX = posX - 300;
+        humanPosY += 60;
+    }
+    else if (dinoName.find("Maip macrothorax") != std::string::npos)
+    {
+        scale *= 0.56f;
+        posY += 115.f;
+        humanScale = 0.75f;
+        humanPosX = posX - 250;
+        humanPosY += 40;
+    }
+    else if (dinoName.find("Triceratops horridus") != std::string::npos)
+    {
+        scale *= 0.7f;
+        posX -= 50.f;
+        posY += 90.f;
+        humanScale = 0.7f;
+        humanPosX = posX - 200;
+        humanPosY += 40;
+    }
+    else if (dinoName.find("Dreadnoughtus schrani") != std::string::npos)
+    {
+        scale *= 0.9f;
+        posY += 15.f;
+        humanScale = 0.3f;
+        humanPosX = posX - 150;
+        humanPosY += 83;
+    }
+    else if (dinoName.find("Ankylosaurus magniventris") != std::string::npos)
+    {
+        scale *= 0.55f;
+        posX += 50.f;
+        posY += 120.f;
+        humanScale = 0.75f;
+        humanPosX = posX - 300;
+        humanPosY += 40;
+    }
+    else if (dinoName.find("Therizinosaurus cheloniformis") != std::string::npos)
+    {
+        scale *= 0.9f;
+        posY += 30.f;
+        humanScale = 0.55f;
+        humanPosX = posX - 200;
+        humanPosY += 60;
+    }
+    else if (dinoName.find("Pteranodon longiceps") != std::string::npos)
+    {
+        scale *= 0.6f;
+        posY = WINDOW_Y * 0.40f;
+        humanScale = 0.8f;
+        humanPosX = WINDOW_X * 0.20f;
+    }
+    else if (dinoName.find("Quetzalcoatlus northropi") != std::string::npos)
+    {
+        scale *= 0.6f;
+        posY = WINDOW_Y * 0.40f;
+        humanScale = 0.5f;
+        humanPosX = WINDOW_X * 0.15f;
+    }
+
+    return { scale, sf::Vector2f(posX, posY), humanScale, sf::Vector2f(humanPosX, humanPosY) };
+}
