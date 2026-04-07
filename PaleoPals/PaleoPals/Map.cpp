@@ -632,3 +632,14 @@ void Map::damageTile(int row, int col, int dmg)
         removeTile(row, col); 
     }
 }
+
+int Map::getTileCurrentHP(int row, int col) const
+{
+    if (row < 0 || col < 0 || row >= m_rows || col >= m_cols)
+        return 0;
+
+    int index = row * m_cols + col;
+
+
+    return m_tiles[index].currentHP;
+}

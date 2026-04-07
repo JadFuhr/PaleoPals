@@ -67,9 +67,13 @@ void Player::update(sf::Time deltaTime, Map& map, const sf::RenderWindow& window
 
     m_isSwinging = mouseHeld;
 
-    if (m_isSwinging)
+    m_pickaxeCooldown -= deltaTime.asSeconds();
+
+    if (m_isSwinging && m_pickaxeCooldown <= 0.0f)
     {
         updatePickaxe(window, map);
+		checkPickaxeHit(window, map);
+        m_pickaxeCooldown = m_pickaxeHitDelay;
     }
     
 
@@ -617,27 +621,49 @@ void Player::updatePickaxe(const sf::RenderWindow& window, Map& map)
 
 void Player::checkPickaxeHit(const sf::RenderWindow& window, Map& map)
 {
-    if (!m_isSwinging) return;
+    if (!m_isSwinging)
+        return;
 
+    // Get pickaxe bounds
     sf::FloatRect axeBounds = m_pickaxeSprite.getGlobalBounds();
 
-    float tileSize = map.getTileSize();
-    int rows = map.getRowCount();
-    int cols = map.getColumnCount();
+    // Shrink hitbox
+    sf::Vector2f pos = axeBounds.position;
+    sf::Vector2f size = axeBounds.size;
 
-    for (int r = 0; r < rows; r++)
+    pos.x += size.x * 0.3f;
+    pos.y += size.y * 0.3f;
+    size.x *= 0.4f;
+    size.y *= 0.4f;
+
+    axeBounds = sf::FloatRect(pos, size);
+
+    float tileSize = map.getTileSize();
+
+    // Player tile position
+    sf::Vector2f playerPos = m_sprite.getPosition();
+    sf::Vector2i playerTile = worldToTile(playerPos, map);
+
+    // Only check nearby tiles
+    for (int r = playerTile.y - 2; r <= playerTile.y + 2; r++)
     {
-        for (int c = 0; c < cols; c++)
+        for (int c = playerTile.x - 2; c <= playerTile.x + 2; c++)
         {
+            if (r < 0 || c < 0 || r >= map.getRowCount() || c >= map.getColumnCount())
+                continue;
+
             sf::Vector2f tilePos = map.tileToWorld({ c, r });
-            sf::FloatRect tileRect({ tilePos.x - tileSize / 2, tilePos.y - tileSize / 2 }, { tileSize, tileSize });
+
+            sf::FloatRect tileRect(
+                { tilePos.x - tileSize / 2, tilePos.y - tileSize / 2 },
+                { tileSize, tileSize }
+            );
 
             if (axeBounds.findIntersection(tileRect))
             {
-                int hardness = map.getTileHardness(r, c);
-                if (hardness > 0)
+                if (map.getTileCurrentHP(r, c) > 0)
                 {
-                    map.damageTile(r, c, 1); //damage system
+                    map.damageTile(r, c, 1);
                     return;
                 }
             }

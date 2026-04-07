@@ -109,6 +109,10 @@ private:
     float m_interactionRadius = 24.0f; // 1 tile radius
     int m_money = 0; // Money from selling amber/trash
 
+    //mining cooldown
+    float m_pickaxeCooldown = 0.0f;
+    float m_pickaxeHitDelay = 0.15f; // 150ms between hits
+
     // Helper functions
     void updateAnimation(sf::Time deltaTime);
     void setFrame(int frame);

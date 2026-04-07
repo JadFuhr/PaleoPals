@@ -31,10 +31,11 @@ public:
     // Constructor 
 
     Tile(const sf::Texture& texture, const sf::Vector2f& pos, int hardnessValue)
-        : sprite(texture), layerHardness(hardnessValue)
+        : sprite(texture), layerHardness(hardnessValue), currentHP(hardnessValue)
     {
         sprite.setPosition(pos);
     }
+
 
     // Delete default constructor 
     Tile() = delete;
@@ -63,6 +64,7 @@ public:
 
     void handleMouseHold(const sf::RenderWindow& window, float tileSize, int cols);
     sf::Vector2f tileToWorld(sf::Vector2i tilePos) const;
+    int getTileCurrentHP(int row, int col) const;
 
     // update museum sprite
 
@@ -82,6 +84,8 @@ public:
     // Direct access to buildings (for click detection in Game)
     Museum& getMuseum() { return m_museum; }
     Trader& getTrader() { return m_trader; }
+
+
 
 private:
 
