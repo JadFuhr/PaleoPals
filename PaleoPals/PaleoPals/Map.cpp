@@ -1,4 +1,5 @@
 #include "Map.h"
+#include "Player.h"
 #include <iostream>
 #include <fstream>
 #include <algorithm>
@@ -246,12 +247,11 @@ void Map::removeTile(int row, int col)
     if (index >= 0 && index < static_cast<int>(m_tiles.size()))
     {
         m_tiles[index].sprite.setColor(sf::Color::Transparent);
-
-        // Mark this tile as mined so subsequent hardness checks return 0
         m_tiles[index].layerHardness = 0;
 
         // Check for collectible discovery
         FossilPiece* collectible = m_fossilManager.getFossilAtTile(row, col);
+        
         if (collectible != nullptr && !collectible->isDiscovered)
         {
             collectible->isDiscovered = true;
@@ -266,27 +266,99 @@ void Map::removeTile(int row, int col)
                 // Check if this completes a skeleton
                 if (m_fossilManager.hasDinosaurSkeleton(collectible->assignedDinosaurName))
                 {
-
                     std::cout << collectible->assignedDinosaurName << " IS COMPLETE! \n";
                 }
             }
             else if (collectible->collectibleIndex == 7)
             {
-                // Small Amber
                 std::cout << "SMALL AMBER DISCOVERED! Value: " << collectible->monetaryValue << "\n";
             }
             else if (collectible->collectibleIndex == 8)
             {
-                // Large Amber
                 std::cout << "LARGE AMBER DISCOVERED! Value: " << collectible->monetaryValue << "\n";
             }
             else
             {
-                // Trash (9-11)
                 std::cout << "TRASH DISCOVERED! (Worthless)\n";
             }
         }
     }
+}
+
+//------------------------------------------------------------
+// removeTile (with auto-pickup)
+// Purpose: Remove tile AND auto-collect if fossil/item within 2-tile range
+// Items discovered but OUT OF RANGE won't be collected yet
+//------------------------------------------------------------
+void Map::removeTile(int row, int col, Player& player)
+{
+    // First, get collectible reference BEFORE discovering it
+    FossilPiece* collectible = m_fossilManager.getFossilAtTile(row, col);
+    
+    std::cout << "removeTile WITH PLAYER called for (" << col << ", " << row << ")\n";
+    
+    if (collectible != nullptr)
+    {
+        std::cout << "  Collectible found at this position (Type: " << collectible->collectibleIndex << ")\n";
+    }
+    
+    // Now do standard tile removal (this will discover the collectible)
+    removeTile(row, col);
+    
+    if (collectible == nullptr)
+    {
+        std::cout << "  No collectible to pickup\n";
+        return;
+    }
+    
+    // Check if player is within 2-tile range
+    sf::Vector2f playerPos = player.getPosition();
+    float tileSize = getTileSize();
+    float offsetX = (WINDOW_X - (m_cols * tileSize)) / 2.0f;
+    float offsetY = WINDOW_Y / 2.0f;
+    
+    int playerCol = static_cast<int>((playerPos.x - offsetX) / tileSize);
+    int playerRow = static_cast<int>((playerPos.y - offsetY) / tileSize);
+    
+    int dx = col - playerCol;
+    int dy = row - playerRow;
+    float distance = std::sqrt(dx * dx + dy * dy);
+    
+    std::cout << "  Distance to player: " << distance << " (range limit: 2.5)\n";
+    
+    // ONLY auto-pickup if within 2.5 tile range
+    if (distance > 2.5f)
+    {
+        std::cout << "  OUT OF RANGE - will not auto-pickup\n";
+        return;
+    }
+    
+    // AUTO-PICKUP!
+    std::cout << "  WITHIN RANGE - AUTO-PICKING UP\n";
+    
+    if (collectible->collectibleIndex <= 6)
+    {
+        // FOSSIL
+        player.collectFossil(collectible->assignedDinosaurName, 
+                           collectible->assignedPieceId, 
+                           collectible->assignedCategory);
+    }
+    else if (collectible->collectibleIndex <= 8)
+    {
+        // AMBER
+        player.collectAmber(collectible->monetaryValue);
+    }
+    else
+    {
+        // TRASH
+        player.collectTrash();
+    }
+    
+    // Mark as picked up
+    collectible->sprite.setPosition(sf::Vector2f(-10000.f, -10000.f));
+    collectible->gridRow = -1;
+    collectible->gridCol = -1;
+    std::cout << "  Sprite hidden and marked for removal\n";
 }
 
 int Map::getTileHardness(int row, int col) const
@@ -443,50 +515,22 @@ void Map::handleMouseHold(const sf::RenderWindow& window, float tileSize, int co
 
     if (index >= 0 && index < static_cast<int>(m_tiles.size()))
     {
-        // Only remove if not already transparent (avoid spam console messages)
+        // Only remove if not already transparent 
         if (m_tiles[index].sprite.getColor() != sf::Color::Transparent)
         {
-            m_tiles[index].sprite.setColor(sf::Color::Transparent);
-
-            FossilPiece* collectible = m_fossilManager.getFossilAtTile(tileY, tileX);
-
-            //if (collectible != nullptr)
-            //{
-            //    collectible->isDiscovered = true;
-            //    
-            //    // Different discovery messages based on collectible type
-            //    if (collectible->collectibleIndex < 7)
-            //    {
-            //        // Fossil type (0-6)
-            //        std::cout << "FOSSIL PIECE DISCOVERED! " << collectible->assignedPieceId
-            //            << " from " << collectible->assignedDinosaurName << "\n";
-            //        
-            //        // Check if this completes a skeleton
-            //        if (m_fossilManager.hasDinosaurSkeleton(collectible->assignedDinosaurName))
-            //        {
-            //            std::cout << " COMPLETE SKELETON FOUND! \n";
-            //            std::cout << collectible->assignedDinosaurName << " IS COMPLETE!\n";
-            //        }
-            //    }
-            //    else if (collectible->collectibleIndex == 7)
-            //    {
-            //        // Small Amber
-            //        std::cout << "SMALL AMBER DISCOVERED! Value: " << collectible->monetaryValue << "\n";
-            //    }
-            //    else if (collectible->collectibleIndex == 8)
-            //    {
-            //        // Large Amber
-            //        std::cout << "LARGE AMBER DISCOVERED! Value: " << collectible->monetaryValue << "\n";
-            //    }
-            //    else
-            //    {
-            //        // Trash (9-11)
-            //        std::cout << "TRASH DISCOVERED! (Worthless)\n";
-            //    }
-            //}
+            // Call removeTile instead of just setting color transparent
+            removeTile(tileY, tileX);
         }
     }
 }
+
+sf::Vector2f Map::tileToWorld(sf::Vector2i tilePos) const
+{
+    float x = tilePos.x * m_tileSize + (m_windowWidth - m_cols * m_tileSize) / 2.0f + m_tileSize / 2.0f;
+    float y = tilePos.y * m_tileSize + m_windowHeight / 2.0f + m_tileSize / 2.0f;
+    return sf::Vector2f(x, y);
+}
+
 
 void Map::updateMuseum(sf::RenderWindow& window)
 {
@@ -571,5 +615,20 @@ void Map::drawDebug(sf::RenderWindow& window)
     if (m_debugMode && m_hoveredIndex != -1)
     {
         window.draw(m_hoverOutline);
+    }
+}
+
+
+
+void Map::damageTile(int row, int col, int dmg)
+{
+    int index = row * m_cols + col;
+    Tile& t = m_tiles[index];
+
+    t.currentHP -= dmg;
+
+    if (t.currentHP <= 0)
+    {
+        removeTile(row, col); 
     }
 }

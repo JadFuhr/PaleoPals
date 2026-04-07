@@ -40,13 +40,12 @@ public:
     ~Player();
 
     // Core functions
-    void update(sf::Time deltaTime, Map& map);
+    void update(sf::Time deltaTime, Map& map, const sf::RenderWindow& window);
     void draw(sf::RenderWindow& window);
     void handleInput(sf::Time deltaTime, Map& map);
 
     // Interaction
     void tryPickupCollectible(Map& map);
-    void tryMineAtMouse(const sf::RenderWindow& window, Map& map);
 
     // Getters
     sf::Vector2f getPosition() const { return m_sprite.getPosition(); }
@@ -54,10 +53,25 @@ public:
     const std::vector<CollectedItem>& getInventory() const { return m_inventory; }
     const std::vector<CollectedItem>& getNewPickups() const { return m_newPickups; }
     void clearNewPickups() { m_newPickups.clear(); }
+    int getMoney() const { return m_money; }
+
+    // Collection methods
+    void collectFossil(const std::string& dinosaurName, const std::string& pieceId, const std::string& category);
+    void collectAmber(int monetaryValue);
+    void collectTrash();
+        
+    void updatePickaxe(const sf::RenderWindow& window, Map& map);
+
+    void checkPickaxeHit(const sf::RenderWindow& window, Map& map);
 
     // Setters
     void setPosition(sf::Vector2f pos);
 
+    //Mining (New)
+
+    bool m_isSwinging = false;
+    float m_pickaxeAngle = 0.f;
+    float m_pickaxeRadius = 24.f; // 1 tile radius
 
 
 private:
@@ -65,8 +79,9 @@ private:
     sf::Texture m_texture;
     sf::Sprite m_sprite{m_texture};
     sf::RectangleShape m_interactionRadiusVisual; // Visual debug circle
-    sf::RectangleShape m_miningProgressBar;
-    sf::RectangleShape m_miningProgressBarBg;
+
+    sf::Texture m_pickaxeTexture;
+    sf::Sprite m_pickaxeSprite{ m_pickaxeTexture };
 
     // Animation
     int m_currentFrame = 0;
@@ -88,16 +103,11 @@ private:
     // Player state
     PlayerState m_state = PlayerState::Idle;
 
-    // Mining
-    bool m_isMining = false;
-    float m_miningProgress = 0.0f;
-    float m_miningDuration = 1.0f;
-    sf::Vector2i m_miningTarget{ -1, -1 };
-
     // Inventory
     std::vector<CollectedItem> m_inventory;
 	std::vector<CollectedItem> m_newPickups; // Items picked up current frame
     float m_interactionRadius = 24.0f; // 1 tile radius
+    int m_money = 0; // Money from selling amber/trash
 
     // Helper functions
     void updateAnimation(sf::Time deltaTime);
@@ -107,8 +117,7 @@ private:
     bool isOnGround(Map& map);
     sf::Vector2i worldToTile(sf::Vector2f worldPos, Map& map);
     sf::Vector2f tileToWorld(sf::Vector2i tilePos, Map& map);
-    void updateMining(sf::Time deltaTime, Map& map);
-    void updateMiningProgressBar();
+
 };
 
 #endif // !PLAYER_H

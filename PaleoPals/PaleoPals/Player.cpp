@@ -31,14 +31,15 @@ Player::Player()
     m_interactionRadiusVisual.setOutlineColor(sf::Color(0, 255, 0, 100));
     m_interactionRadiusVisual.setOutlineThickness(1.0f);
 
-    // Setup mining progress bar
-    m_miningProgressBarBg.setSize(sf::Vector2f(40.0f, 6.0f));
-    m_miningProgressBarBg.setFillColor(sf::Color(50, 50, 50));
-    m_miningProgressBarBg.setOutlineColor(sf::Color::White);
-    m_miningProgressBarBg.setOutlineThickness(1.0f);
+    if (!m_pickaxeTexture.loadFromFile("ASSETS/IMAGES/Items/pickaxe.png"))
+    {
+        std::cerr << "Failed to load pickaxe texture!\n";
+    }
+    m_pickaxeSprite.setTexture(m_pickaxeTexture);
+    m_pickaxeSprite.setOrigin(sf::Vector2f(m_pickaxeTexture.getSize().x * 0.1f, m_pickaxeTexture.getSize().y * 0.5f));
+    m_pickaxeSprite.setTextureRect(sf::IntRect({ 0,0 }, { 64,64 }));
+    m_pickaxeSprite.setScale(sf::Vector2f(0.4f, 0.4f));
 
-    m_miningProgressBar.setSize(sf::Vector2f(40.0f, 6.0f));
-    m_miningProgressBar.setFillColor(sf::Color::Yellow);
 
     std::cout << "Player constructor END\n";
 }
@@ -53,16 +54,25 @@ Player::~Player()
 //------------------------------------------------------------
 // Update
 //------------------------------------------------------------
-void Player::update(sf::Time deltaTime, Map& map)
+void Player::update(sf::Time deltaTime, Map& map, const sf::RenderWindow& window)
 {
     handleInput(deltaTime, map);
     applyPhysics(deltaTime, map);
     updateAnimation(deltaTime);
-    updateMining(deltaTime, map);
-    updateMiningProgressBar();
 
     // Update interaction radius position
     m_interactionRadiusVisual.setPosition(sf::Vector2f(m_sprite.getPosition() + sf::Vector2f(0, -16.0f)));
+
+    bool mouseHeld = sf::Mouse::isButtonPressed(sf::Mouse::Button::Left);
+
+    m_isSwinging = mouseHeld;
+
+    if (m_isSwinging)
+    {
+        updatePickaxe(window, map);
+    }
+    
+
 }
 
 //------------------------------------------------------------
@@ -70,11 +80,6 @@ void Player::update(sf::Time deltaTime, Map& map)
 //------------------------------------------------------------
 void Player::handleInput(sf::Time deltaTime, Map& map)
 {
-    // Don't allow movement while mining
-    if (m_isMining)
-    {
-        return;
-    }
 
     // Horizontal movement
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A))
@@ -129,11 +134,6 @@ void Player::handleInput(sf::Time deltaTime, Map& map)
 //------------------------------------------------------------
 void Player::applyPhysics(sf::Time deltaTime, Map& map)
 {
-    if (m_isMining)
-    {
-        // No physics while mining
-        return;
-    }
 
     // Apply gravity
     m_velocity.y += m_gravity * deltaTime.asSeconds();
@@ -335,18 +335,32 @@ void Player::tryPickupCollectible(Map& map)
     int playerRow = static_cast<int>(std::floor((playerPos.y - tileOffsetY) / tileSize));
 
     std::cout << " PICKUP ATTEMPT \n";
+    std::cout << "Player at world pos (" << playerPos.x << ", " << playerPos.y << ")\n";
     std::cout << "Player at tile (" << playerCol << ", " << playerRow << ")\n";
+    std::cout << "Tile offset: (" << tileOffsetX << ", " << tileOffsetY << "), Tile size: " << tileSize << "\n";
 
     int collectiblesFound = 0;
 
     // Search all collectibles – find discovered (isDiscovered==true)
     // because getCollectibleAtTile() only returns undiscovered ones.
     auto& allCollectibles = fossilManager.getAllCollectibles();
+    
+    std::cout << "Total collectibles in world: " << allCollectibles.size() << "\n";
 
     for (auto& collectible : allCollectibles)
     {
         int dy = collectible.gridRow - playerRow;
         int dx = collectible.gridCol - playerCol;
+
+        // Debug: Print first few collectibles to see their positions
+        static int debugCount = 0;
+        if (debugCount < 10)
+        {
+            std::cout << "  Collectible #" << debugCount << " at grid (" << collectible.gridCol << ", " 
+                << collectible.gridRow << ") world (" << collectible.sprite.getPosition().x << ", " 
+                << collectible.sprite.getPosition().y << ") - dy=" << dy << " dx=" << dx << "\n";
+            debugCount++;
+        }
 
         // Only check within a 1-tile radius
         if (std::abs(dy) > 1 || std::abs(dx) > 1)
@@ -359,8 +373,10 @@ void Player::tryPickupCollectible(Map& map)
             << ") - Discovered: " << (collectible.isDiscovered ? "YES" : "NO")
             << " - Hardness: " << hardness << "\n";
 
-        // A collectible is pickupable when the tile covering it has been mined (hardness == 0)
-        if (hardness == 0)
+        // A collectible is pickupable when:
+        // 1. It has been discovered (tile was mined, revealing the fossil)
+        // 2. The tile covering it has been completely mined (hardness == 0)
+        if (collectible.isDiscovered && hardness == 0)
         {
             CollectedItem item;
             item.collectibleIndex = collectible.collectibleIndex;
@@ -388,9 +404,9 @@ void Player::tryPickupCollectible(Map& map)
 
             // Remove from world by moving far off-screen and marking collected
             collectible.sprite.setPosition(sf::Vector2f(-10000.f, -10000.f));
-            collectible.isDiscovered = false;
             collectible.gridRow = -1;
             collectible.gridCol = -1;
+            // NOTE: don't revert isDiscovered - keep it true to indicate it was found
 
             return; // Only pick up one item per press
         }
@@ -408,91 +424,12 @@ void Player::tryPickupCollectible(Map& map)
 }
 
 //------------------------------------------------------------
-// Try Mine At Mouse
-//------------------------------------------------------------
-void Player::tryMineAtMouse(const sf::RenderWindow& window, Map& map)
-{
-    if (m_isMining)
-    {
-        return; // Already mining
-    }
-
-    sf::Vector2i mousePixel = sf::Mouse::getPosition(window);
-    sf::Vector2f mouseWorld = window.mapPixelToCoords(mousePixel);
-
-    // Get tile at mouse position
-    sf::Vector2i mouseTile = worldToTile(mouseWorld, map);
-    sf::Vector2f playerPos = m_sprite.getPosition();
-    sf::Vector2i playerTile = worldToTile(playerPos, map);
-
-    // Check if mouse tile is within mining range (2 tiles in any direction)
-    float dx = static_cast<float>(mouseTile.x - playerTile.x);
-    float dy = static_cast<float>(mouseTile.y - playerTile.y);
-    float distance = std::sqrt(dx * dx + dy * dy);
-
-    std::cout << "Mining attempt: Player tile (" << playerTile.x << ", " << playerTile.y 
-        << "), Mouse tile (" << mouseTile.x << ", " << mouseTile.y 
-        << "), Distance: " << distance << "\n";
-
-    if (distance <= 2.5f)
-    {
-        // Check if tile exists and has hardness
-        int hardness = map.getTileHardness(mouseTile.y, mouseTile.x);
-
-        std::cout << "  Within range! Hardness: " << hardness << "\n";
-
-        if (hardness > 0)
-        {
-            // Start mining
-            m_isMining = true;
-            m_miningProgress = 0.0f;
-            m_miningTarget = mouseTile;
-            m_miningDuration = 0.8f + (hardness * 0.4f);
-            m_state = PlayerState::Mining;
-
-            std::cout << "Started mining tile (" << mouseTile.x << ", " << mouseTile.y
-                << ") with hardness " << hardness << "\n";
-        }
-    }
-    else
-    {
-        std::cout << "  OUT OF RANGE (distance " << distance << " > 2.0)\n";
-    }
-}
-
-//------------------------------------------------------------
-// Update Mining
-//------------------------------------------------------------
-void Player::updateMining(sf::Time deltaTime, Map& map)
-{
-    if (!m_isMining)
-    {
-        return;
-    }
-
-    m_miningProgress += deltaTime.asSeconds();
-
-    if (m_miningProgress >= m_miningDuration)
-    {
-        // Mining complete
-        map.removeTile(m_miningTarget.y, m_miningTarget.x);
-        std::cout << "Mined tile (" << m_miningTarget.x << ", " << m_miningTarget.y << ")\n";
-
-        // Reset mining state
-        m_isMining = false;
-        m_miningProgress = 0.0f;
-        m_miningTarget = sf::Vector2i(-1, -1);
-        m_state = PlayerState::Idle;
-    }
-}
-
-//------------------------------------------------------------
 // Update Animation
 //------------------------------------------------------------
 void Player::updateAnimation(sf::Time deltaTime)
 {
     // Idle and Mining: use frame 0
-    if (m_state == PlayerState::Idle || m_state == PlayerState::Mining)
+    if (m_state == PlayerState::Idle)
     {
         setFrame(0);
         m_animationTimer = 0.0f;
@@ -552,31 +489,18 @@ void Player::draw(sf::RenderWindow& window)
     // Draw interaction radius (debug)
     window.draw(m_interactionRadiusVisual);
 
+    if (m_isSwinging)
+    {
+		window.draw(m_pickaxeSprite);
+    }
+
     window.draw(m_sprite);
+
 
     m_sprite.setColor(sf::Color::Red);
 
-    // Draw mining progress bar
-    if (m_isMining && m_miningProgress > 0.0f)
-    {
-        window.draw(m_miningProgressBarBg);
-        window.draw(m_miningProgressBar);
-    }
 }
 
-//------------------------------------------------------------
-// Update Mining Progress Bar
-//------------------------------------------------------------
-void Player::updateMiningProgressBar()
-{
-    sf::Vector2f spritePos = m_sprite.getPosition();
-
-    m_miningProgressBarBg.setPosition(sf::Vector2f(spritePos.x - 20.0f, spritePos.y - 50.0f));
-    m_miningProgressBar.setPosition(m_miningProgressBarBg.getPosition());
-
-    float progress = m_miningProgress / m_miningDuration;
-    m_miningProgressBar.setSize(sf::Vector2f(40.0f * progress, 6.0f));
-}
 
 //------------------------------------------------------------
 // World to Tile Conversion
@@ -614,4 +538,109 @@ sf::Vector2f Player::tileToWorld(sf::Vector2i tilePos, Map& map)
 void Player::setPosition(sf::Vector2f pos)
 {
     m_sprite.setPosition(pos);
+}
+
+//------------------------------------------------------------
+// Collect Fossil
+//------------------------------------------------------------
+void Player::collectFossil(const std::string& dinosaurName, const std::string& pieceId, const std::string& category)
+{
+    CollectedItem item;
+    item.collectibleIndex = 0; // Fossil type
+    item.type = "fossil";
+    item.monetaryValue = 0;
+    item.dinosaurName = dinosaurName;
+    item.pieceId = pieceId;
+    item.category = category;
+    item.name = pieceId + " of " + dinosaurName;
+
+    m_inventory.push_back(item);
+    m_newPickups.push_back(item);
+
+    std::cout << "✓ Collected: " << item.name << "\n";
+}
+
+//------------------------------------------------------------
+// Collect Amber (and add to money)
+//------------------------------------------------------------
+void Player::collectAmber(int monetaryValue)
+{
+    CollectedItem item;
+    item.collectibleIndex = 7; // Amber type
+    item.type = "amber";
+    item.monetaryValue = monetaryValue;
+    item.name = (monetaryValue == 50) ? "Small Amber" : "Large Amber";
+
+    m_inventory.push_back(item);
+    m_money += monetaryValue;
+
+    std::cout << "✓ " << item.name << " (+$" << monetaryValue << " | Total: $" << m_money << ")\n";
+}
+
+//------------------------------------------------------------
+// Collect Trash (worthless)
+//------------------------------------------------------------
+void Player::collectTrash()
+{
+    CollectedItem item;
+    item.collectibleIndex = 9; // Trash type
+    item.type = "trash";
+    item.monetaryValue = 0;
+    item.name = "Trash";
+
+    m_inventory.push_back(item);
+
+    std::cout << "✓ Collected: Trash (worthless)\n";
+}
+
+void Player::updatePickaxe(const sf::RenderWindow& window, Map& map)
+{
+    sf::Vector2f playerPos = m_sprite.getPosition();
+
+    // Mouse world position
+    sf::Vector2i mousePixel = sf::Mouse::getPosition(window);
+    sf::Vector2f mouseWorld = window.mapPixelToCoords(mousePixel);
+
+    // Direction from player → mouse
+    sf::Vector2f dir = mouseWorld - playerPos;
+    float angle = std::atan2(dir.y, dir.x) * 180.f / 3.14159f;
+
+    m_pickaxeAngle = angle;
+
+    // Position pickaxe at radius around player
+    sf::Vector2f offset = sf::Vector2f(std::cos(angle * 0.01745f), std::sin(angle * 0.01745f)) * m_pickaxeRadius;
+
+    m_pickaxeSprite.setPosition(playerPos + offset);
+    m_pickaxeSprite.setRotation(sf::degrees(angle + 90.f)); // adjust depending on sprite
+}
+
+
+void Player::checkPickaxeHit(const sf::RenderWindow& window, Map& map)
+{
+    if (!m_isSwinging) return;
+
+    sf::FloatRect axeBounds = m_pickaxeSprite.getGlobalBounds();
+
+    float tileSize = map.getTileSize();
+    int rows = map.getRowCount();
+    int cols = map.getColumnCount();
+
+    for (int r = 0; r < rows; r++)
+    {
+        for (int c = 0; c < cols; c++)
+        {
+            sf::Vector2f tilePos = map.tileToWorld({ c, r });
+            sf::FloatRect tileRect({ tilePos.x - tileSize / 2, tilePos.y - tileSize / 2 }, { tileSize, tileSize });
+
+            if (axeBounds.findIntersection(tileRect))
+            {
+                int hardness = map.getTileHardness(r, c);
+                if (hardness > 0)
+                {
+                    map.damageTile(r, c, 1); //damage system
+                    return;
+                }
+            }
+        }
+    }
 }

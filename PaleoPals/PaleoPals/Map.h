@@ -11,6 +11,9 @@
 #include "Trader.h"
 #include "Fossil.h"
 
+// Forward declaration
+class Player;
+
 struct LayerType
 {
     std::string name;
@@ -22,6 +25,7 @@ class Tile
 {
 public:
     sf::Sprite sprite;
+    int currentHP = 0;
     int layerHardness = 0;
 
     // Constructor 
@@ -47,15 +51,18 @@ public:
     void setupBackground();
 
     void removeTile(int row, int col);
+    void removeTile(int row, int col, Player& player); // Auto-pickup version
     int getTileHardness(int row, int col) const;
 
     void drawMap(sf::RenderWindow& window);
 
     void updateHover(const sf::RenderWindow& window, float tileSize, int cols);
     void drawDebug(sf::RenderWindow& window);
+    void damageTile(int row, int col, int dmg);
     void toggleDebugMode();
 
     void handleMouseHold(const sf::RenderWindow& window, float tileSize, int cols);
+    sf::Vector2f tileToWorld(sf::Vector2i tilePos) const;
 
     // update museum sprite
 

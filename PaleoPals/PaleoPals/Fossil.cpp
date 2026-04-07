@@ -212,9 +212,11 @@ void FossilManager::generateFossilCollectibles(int totalRows, int totalCols, flo
     std::mt19937 gen(rd());
 
     // Skip the first 6 rows (topsoil/near-surface area)
+    // But cap at row 35 so fossils aren't spawned too deep
     int minRow = 6;
+    int maxRow = std::min(35, totalRows - 1);
 
-    std::uniform_int_distribution<> rowDist(minRow, totalRows - 1);
+    std::uniform_int_distribution<> rowDist(minRow, maxRow);
     std::uniform_int_distribution<> colDist(0, totalCols - 1);
     std::uniform_int_distribution<> fossilTypeDist(0, 6); // 7 fossil types
 
@@ -296,9 +298,11 @@ void FossilManager::generateAmberAndTrashCollectibles(int totalRows, int totalCo
     std::mt19937 gen(rd());
 
     // Skip the first 1 rows (topsoil/near-surface area)
+    // But cap at row 40 so amber/trash aren't spawned too deep
     int minRow = 1;
+    int maxRow = std::min(40, totalRows - 1);
 
-    std::uniform_int_distribution<> rowDist(minRow, totalRows - 1);
+    std::uniform_int_distribution<> rowDist(minRow, maxRow);
     std::uniform_int_distribution<> colDist(0, totalCols - 1);
     std::uniform_int_distribution<> amberVsTrashDist(0, 9); // 60% amber, 40% trash
 
@@ -414,11 +418,18 @@ void FossilManager::drawFossils(sf::RenderWindow& window)
     
     sf::FloatRect viewBounds(sf::Vector2f(viewLeft, viewTop), sf::Vector2f(viewWidth, viewHeight));
 
-    int drawnCount = 0, culledCount = 0;
+    int drawnCount = 0, culledCount = 0, skippedPickedUp = 0;
 
     // Loop through every collectible
     for (auto& collectible : m_collectibles)
     {
+        // Skip collectibles that have been picked up
+        if (collectible.gridRow == -1 || collectible.gridCol == -1)
+        {
+            skippedPickedUp++;
+            continue;
+        }
+
         // Frustum culling: skip collectibles outside the view bounds
         if (!viewBounds.findIntersection(collectible.sprite.getGlobalBounds()))
         {
@@ -444,8 +455,13 @@ void FossilManager::drawFossils(sf::RenderWindow& window)
         window.draw(collectible.sprite);
     }
 
-    // Optional: Uncomment for culling stats
-    // std::cout << "Collectibles - Drawn: " << drawnCount << " | Culled: " << culledCount << "\n";
+    static int frameCount = 0;
+    frameCount++;
+    if (frameCount % 60 == 0)  // Print every 60 frames (once per second at 60fps)
+    {
+        std::cout << "Collectibles - Drawn: " << drawnCount << " | Culled: " << culledCount 
+            << " | Picked up (skipped): " << skippedPickedUp << "\n";
+    }
 }
 
 //------------------------------------------------------------

@@ -131,9 +131,6 @@ void Game::processEvents()
                         m_traderMenu.openAt(worldPos);
                         continue;
                     }
-
-                    // Nothing special hit - try to mine
-                    m_player.tryMineAtMouse(m_window, m_map);
                 }
 
             }
@@ -226,7 +223,7 @@ void Game::update(sf::Time t_deltaTime)
         else
         {
 
-            m_player.update(t_deltaTime, m_map);
+            m_player.update(t_deltaTime, m_map, m_window);
 
             for (const auto& item : m_player.getNewPickups())
             {
@@ -239,19 +236,19 @@ void Game::update(sf::Time t_deltaTime)
 
         }
 
-        try
-        {
-            // Update all paleontologists
-            for (auto& p : m_paleontologists)
-            {
-                if (p) p->update(t_deltaTime, m_map);
-            }
-        }
-        catch (const std::exception& e)
-        {
-            std::cerr << "Exception updating paleontologist: " << e.what() << "\n";
-        }
-        break;
+        //try
+        //{
+        //    // Update all paleontologists
+        //    for (auto& p : m_paleontologists) 
+        //    {
+        //        if (p) p->update(t_deltaTime, m_map);
+        //    }
+        //}
+        //catch (const std::exception& e)
+        //{
+        //    std::cerr << "Exception updating paleontologist: " << e.what() << "\n";
+        //}
+        //break;
 
 
 
