@@ -67,6 +67,12 @@ bool Map::loadMapFromConfig(const std::string& filepath)
         return false;
     }
 
+    if (!m_crackedOverlayTexture.loadFromFile("ASSETS/IMAGES/Terrain/Cracks.png"))
+    {
+        std::cerr << "Failed to load crack texture!\n";
+    }
+
+
     return true;
 }
 
@@ -104,7 +110,10 @@ void Map::generateGrid(int rows, int cols, float tileSize, float windowWidth, fl
             float yPos = row * tileSize + offsetY;
             float xPos = col * tileSize + offsetX;
 
-            Tile newTile(layer.texture, sf::Vector2f(xPos, yPos), layer.hardness);
+            Tile newTile(layer.texture,
+                sf::Vector2f(xPos, yPos),
+                layer.hardness,
+                m_crackedOverlayTexture);
 
             newTile.sprite.setScale(sf::Vector2f(tileSize / layer.texture.getSize().x, tileSize / layer.texture.getSize().y));
 
@@ -403,6 +412,11 @@ void Map::drawMap(sf::RenderWindow& window)
 
         window.draw(tile.sprite);
 
+        if (tile.currentHP > 0 && tile.crackedFrameIndex > 0)
+        {
+			window.draw(tile.crackedSprite);
+        }
+
         // Draw ladder support if present
         if (i >= 0 && i < static_cast<int>(m_ladders.size()) && m_ladders[i])
         {
@@ -625,13 +639,45 @@ void Map::damageTile(int row, int col, int dmg)
     int index = row * m_cols + col;
     Tile& t = m_tiles[index];
 
+    if (t.currentHP <= 0)
+        return;
+
     t.currentHP -= dmg;
+
+    float hpPercent = static_cast<float>(t.currentHP) / t.layerHardness;
+
+    if (hpPercent > 0.75f)
+    {
+        t.crackedFrameIndex = 0;
+    }
+    else if (hpPercent > 0.50f)
+    {
+        t.crackedFrameIndex = 1;
+    }
+    else if (hpPercent > 0.25f)
+    {
+        t.crackedFrameIndex = 2;
+    }
+    else if (hpPercent > 0.10f)
+    {
+        t.crackedFrameIndex = 3;
+    }
+    else
+    {
+        t.crackedFrameIndex = 4;
+    }
+
+    int frameWidth = 24; // crack sprite frame width 
+
+    t.crackedSprite.setTextureRect(sf::IntRect({ t.crackedFrameIndex * frameWidth, 0 }, { frameWidth, frameWidth }));
+
 
     if (t.currentHP <= 0)
     {
         removeTile(row, col); 
     }
 }
+
 
 int Map::getTileCurrentHP(int row, int col) const
 {

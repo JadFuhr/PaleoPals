@@ -36,7 +36,7 @@ Player::Player()
         std::cerr << "Failed to load pickaxe texture!\n";
     }
     m_pickaxeSprite.setTexture(m_pickaxeTexture);
-    m_pickaxeSprite.setOrigin(sf::Vector2f(m_pickaxeTexture.getSize().x * 0.1f, m_pickaxeTexture.getSize().y * 0.5f));
+    m_pickaxeSprite.setOrigin(sf::Vector2f(0.f, m_pickaxeTexture.getSize().y));
     m_pickaxeSprite.setTextureRect(sf::IntRect({ 0,0 }, { 64,64 }));
     m_pickaxeSprite.setScale(sf::Vector2f(0.4f, 0.4f));
 
@@ -66,14 +66,21 @@ void Player::update(sf::Time deltaTime, Map& map, const sf::RenderWindow& window
     bool mouseHeld = sf::Mouse::isButtonPressed(sf::Mouse::Button::Left);
 
     m_isSwinging = mouseHeld;
-
     m_pickaxeCooldown -= deltaTime.asSeconds();
 
     if (m_isSwinging && m_pickaxeCooldown <= 0.0f)
     {
+		updatePickaxeAnimation(deltaTime);
         updatePickaxe(window, map);
 		checkPickaxeHit(window, map);
         m_pickaxeCooldown = m_pickaxeHitDelay;
+    }
+
+    if (!mouseHeld)
+    {
+		m_isSwinging = false;
+		m_pickaxeCurrentFrame = 0;
+		m_pickaxeFrameDirection = 1;
     }
     
 
@@ -600,6 +607,7 @@ void Player::collectTrash()
 void Player::updatePickaxe(const sf::RenderWindow& window, Map& map)
 {
     sf::Vector2f playerPos = m_sprite.getPosition();
+    playerPos.y -= 15.0f;
 
     // Mouse world position
     sf::Vector2i mousePixel = sf::Mouse::getPosition(window);
@@ -612,39 +620,51 @@ void Player::updatePickaxe(const sf::RenderWindow& window, Map& map)
     m_pickaxeAngle = angle;
 
     // Position pickaxe at radius around player
-    sf::Vector2f offset = sf::Vector2f(std::cos(angle * 0.01745f), std::sin(angle * 0.01745f)) * m_pickaxeRadius;
+    float rad = angle * 0.01745f;
+    sf::Vector2f offset(std::cos(rad), std::sin(rad));
+    offset *= m_pickaxeRadius;
 
+    // Set sprite position FIRST
     m_pickaxeSprite.setPosition(playerPos + offset);
-    m_pickaxeSprite.setRotation(sf::degrees(angle + 90.f)); // adjust depending on sprite
+    m_pickaxeSprite.setRotation(sf::degrees(angle + 45));
+
+    // Compute tip AFTER setting sprite position
+    sf::Vector2f tipOffset(
+        std::cos(rad) * m_pickaxeTipDistance,
+        std::sin(rad) * m_pickaxeTipDistance
+    );
+
+    m_pickaxeTip = m_pickaxeSprite.getPosition() + tipOffset;
 }
 
 
+
+
+    
 void Player::checkPickaxeHit(const sf::RenderWindow& window, Map& map)
 {
     if (!m_isSwinging)
         return;
 
-    // Get pickaxe bounds
-    sf::FloatRect axeBounds = m_pickaxeSprite.getGlobalBounds();
-
-    // Shrink hitbox
-    sf::Vector2f pos = axeBounds.position;
-    sf::Vector2f size = axeBounds.size;
-
-    pos.x += size.x * 0.3f;
-    pos.y += size.y * 0.3f;
-    size.x *= 0.4f;
-    size.y *= 0.4f;
-
-    axeBounds = sf::FloatRect(pos, size);
+    const float radius = m_pickaxeTipRadius;
+    const sf::Vector2f tip = m_pickaxeTip;
 
     float tileSize = map.getTileSize();
 
-    // Player tile position
     sf::Vector2f playerPos = m_sprite.getPosition();
     sf::Vector2i playerTile = worldToTile(playerPos, map);
 
-    // Only check nearby tiles
+    auto circleIntersectsRect = [](sf::Vector2f c, float r, const sf::FloatRect& rect)
+        {
+            float closestX = std::clamp(c.x, rect.position.x, rect.position.x + rect.size.x);
+            float closestY = std::clamp(c.y, rect.position.y, rect.position.y + rect.size.y);
+
+            float dx = c.x - closestX;
+            float dy = c.y - closestY;
+
+            return (dx * dx + dy * dy) <= (r * r);
+        };
+
     for (int r = playerTile.y - 2; r <= playerTile.y + 2; r++)
     {
         for (int c = playerTile.x - 2; c <= playerTile.x + 2; c++)
@@ -655,11 +675,11 @@ void Player::checkPickaxeHit(const sf::RenderWindow& window, Map& map)
             sf::Vector2f tilePos = map.tileToWorld({ c, r });
 
             sf::FloatRect tileRect(
-                { tilePos.x - tileSize / 2, tilePos.y - tileSize / 2 },
+                { tilePos.x - tileSize / 2.f, tilePos.y - tileSize / 2.f },
                 { tileSize, tileSize }
             );
 
-            if (axeBounds.findIntersection(tileRect))
+            if (circleIntersectsRect(tip, radius, tileRect))
             {
                 if (map.getTileCurrentHP(r, c) > 0)
                 {
@@ -669,4 +689,36 @@ void Player::checkPickaxeHit(const sf::RenderWindow& window, Map& map)
             }
         }
     }
+}
+
+
+
+void Player::updatePickaxeAnimation(sf::Time dt)
+{
+    m_pickaxeAnimationTimer += dt.asSeconds();
+
+    if (m_pickaxeAnimationTimer >= m_pickaxeFrameTime)
+    {
+        m_pickaxeAnimationTimer = 0.f;
+
+        // Advance forward only
+        m_pickaxeCurrentFrame++;
+
+        // Loop back to 0 when reaching the end
+        if (m_pickaxeCurrentFrame >= m_pickaxeTotalFrames)
+        {
+            m_pickaxeCurrentFrame = 0;
+        }
+    }
+
+    // --- This MUST be outside the if-block ---
+    int frameWidth = static_cast<int>(m_pickaxeTexture.getSize().x / m_pickaxeTotalFrames);
+    int frameHeight = static_cast<int>(m_pickaxeTexture.getSize().y);
+
+    int left = m_pickaxeCurrentFrame * frameWidth;
+    int top = 0;
+
+    m_pickaxeSprite.setTextureRect(
+        sf::IntRect({ left, top }, { frameWidth, frameHeight })
+    );
 }

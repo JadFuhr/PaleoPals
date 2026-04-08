@@ -6,6 +6,7 @@
 #include "constants.h"
 #include <vector>
 #include <string>
+#include <algorithm>
 
 // Forward declarations
 class Map;
@@ -60,18 +61,23 @@ public:
     void collectAmber(int monetaryValue);
     void collectTrash();
         
+	//pickaxe methods
     void updatePickaxe(const sf::RenderWindow& window, Map& map);
-
     void checkPickaxeHit(const sf::RenderWindow& window, Map& map);
+    void updatePickaxeAnimation(sf::Time dt);
 
     // Setters
     void setPosition(sf::Vector2f pos);
 
-    //Mining (New)
+    //Mining 
 
     bool m_isSwinging = false;
     float m_pickaxeAngle = 0.f;
-    float m_pickaxeRadius = 24.f; // 1 tile radius
+    float m_pickaxeRadius = 20.f; // 1 tile radius
+    sf::Vector2f m_pickaxeTip;
+    float m_pickaxeTipDistance = 32.f; 
+    float m_pickaxeTipRadius = 6.f;    // collision circle radius
+
 
 
 private:
@@ -91,6 +97,13 @@ private:
     const int m_frameHeight = 192;
     const int m_totalFrames = 4;
     bool m_facingRight = true;
+
+    // pickaxe animation
+	int m_pickaxeCurrentFrame = 0;
+	int m_pickaxeFrameDirection = 1;
+	float m_pickaxeAnimationTimer = 0.0f;
+	float m_pickaxeFrameTime = 0.01f; // 10ms per frame
+	int m_pickaxeTotalFrames = 4;
 
     // Physics
     sf::Vector2f m_velocity;

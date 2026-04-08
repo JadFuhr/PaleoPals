@@ -25,17 +25,26 @@ class Tile
 {
 public:
     sf::Sprite sprite;
+    sf::Sprite crackedSprite;
     int currentHP = 0;
     int layerHardness = 0;
+    int crackedFrameIndex = 0;
+
+
 
     // Constructor 
-
-    Tile(const sf::Texture& texture, const sf::Vector2f& pos, int hardnessValue)
-        : sprite(texture), layerHardness(hardnessValue), currentHP(hardnessValue)
+    Tile(const sf::Texture& texture,
+        const sf::Vector2f& pos,
+        int hardnessValue,
+        const sf::Texture& crackTexture)
+        : sprite(texture),
+        layerHardness(hardnessValue),
+        currentHP(hardnessValue),
+		crackedSprite(crackTexture)
     {
         sprite.setPosition(pos);
+		crackedSprite.setPosition(pos);
     }
-
 
     // Delete default constructor 
     Tile() = delete;
@@ -91,6 +100,7 @@ private:
 
     sf::Texture m_backgroundTexture;
     sf::Sprite m_backgroundSprite{ m_backgroundTexture };
+	sf::Texture m_crackedOverlayTexture; // texture for the cracks 
 
     int m_rowsGenerated = 0;      // How many rows are currently generated
     float m_tileSize = 0.f;
