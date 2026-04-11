@@ -120,7 +120,7 @@ void Game::processEvents()
                     // Click on museum building - open interior
                     if (m_map.getMuseum().containsPoint(worldPos))
                     {
-                        m_museumInterior.loadAssets(m_map.getFossilManager().getDinosaurData());
+                        
                         m_museumInterior.open();
                         continue;
                     }
@@ -352,6 +352,7 @@ void Game::setupMap()
 
     m_map.setupBackground();
     m_map.generateGrid(totalRows, cols, tileSize, WINDOW_X, WINDOW_Y);
+	m_museumInterior.loadAssets(m_map.getFossilManager().getDinosaurData());
 
     // Setup paleontologist at surface
     std::cout << "Setting up paleontologist...\n";

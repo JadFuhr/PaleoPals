@@ -120,7 +120,7 @@ void Map::generateGrid(int rows, int cols, float tileSize, float windowWidth, fl
     if (m_rowsGenerated >= m_rows)
     {
         m_fossilManager.cacheGridOffsets(offsetX, offsetY);
-        std::cout << "Grid complete – collectibles will drop on tile break\n";
+        std::cout << "Grid complete \n";
     }
 }
 

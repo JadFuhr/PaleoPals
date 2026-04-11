@@ -308,13 +308,13 @@ void MuseumInterior::draw(sf::RenderWindow& window)
         std::string pieceNames[4] = { "Skull", "Torso", "Pelvis", "Tail" };
         float indicatorSize = 24.f;
         float spacing = 40.f;
-        float startX = WINDOW_X / 2.f - (spacing * 1.5f);
-        float indicatorY = WINDOW_Y * 0.82f;
+        float startX = WINDOW_X - 540;
+        float startY = WINDOW_Y - 180;
 
         for (int i = 0; i < 4; ++i)
         {
             sf::RectangleShape indicator(sf::Vector2f(indicatorSize, indicatorSize));
-            indicator.setPosition(sf::Vector2f(startX + i * spacing, indicatorY));
+            indicator.setPosition(sf::Vector2f(startX + i * spacing, startY));
             indicator.setOutlineThickness(2.f);
 
             if (dino.collected[i])

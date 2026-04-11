@@ -81,13 +81,13 @@
     <ClCompile Include="Fossil.cpp">
       <Filter>Source Files\Gameplay</Filter>
     </ClCompile>
-    <ClCompile Include="TraderMenu.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Player.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="MuseumInterior.cpp">
+      <Filter>Source Files\Menus</Filter>
+    </ClCompile>
+    <ClCompile Include="TraderMenu.cpp">
       <Filter>Source Files\Menus</Filter>
     </ClCompile>
   </ItemGroup>

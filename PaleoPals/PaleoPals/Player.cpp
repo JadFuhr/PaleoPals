@@ -380,13 +380,13 @@ void Player::tryPickupCollectible(Map& map)
         }
         else
         {
-            item.type = "trash";
+            item.type   = "trash";
             item.name = "Trash";
         }
 
         m_inventory.push_back(item);
         m_newPickups.push_back(item);
-
+        
         // Mark as collected and move off-screen
         c.isPickedUp = true;
         c.sprite.setPosition(sf::Vector2f(-10000.f, -10000.f));
