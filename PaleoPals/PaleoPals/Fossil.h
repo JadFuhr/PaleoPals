@@ -123,7 +123,7 @@ private:
     float m_cachedOffsetX = 0.f;
     float m_cachedOffsetY = 0.f;
 
-    int m_spawnChancePercent = 40;
+    int m_spawnChancePercent = 70;
 
     // Helper to pick a random dinosaur and piece for fossil collectibles
     void assignRandomFossilToPiece(Collectible& collectible);

@@ -24,12 +24,11 @@ Player::Player()
     m_sprite.setScale(sf::Vector2f(0.2f, 0.2f));
     m_sprite.setPosition(sf::Vector2f(400.0f, 300.0f));
 
-    // Setup interaction radius visualization (for debug)
-    m_interactionRadiusVisual.setSize(sf::Vector2f(m_interactionRadius * 2.0f, m_interactionRadius * 2.0f));
-    m_interactionRadiusVisual.setOrigin(sf::Vector2f(m_interactionRadius, m_interactionRadius));
-    m_interactionRadiusVisual.setFillColor(sf::Color::Transparent);
-    m_interactionRadiusVisual.setOutlineColor(sf::Color(0, 255, 0, 100));
-    m_interactionRadiusVisual.setOutlineThickness(1.0f);
+    m_pickupRadiusVisual.setRadius(pickupRadius);
+    m_pickupRadiusVisual.setOrigin(sf::Vector2f(pickupRadius, pickupRadius));
+    m_pickupRadiusVisual.setFillColor(sf::Color::Transparent);
+    m_pickupRadiusVisual.setOutlineColor(sf::Color(255, 255, 0, 80));
+    m_pickupRadiusVisual.setOutlineThickness(1.0f);
 
     if (!m_pickaxeTexture.loadFromFile("ASSETS/IMAGES/Items/pickaxe.png"))
     {
@@ -61,7 +60,7 @@ void Player::update(sf::Time deltaTime, Map& map, const sf::RenderWindow& window
     updateAnimation(deltaTime);
 
     // Update interaction radius position
-    m_interactionRadiusVisual.setPosition(sf::Vector2f(m_sprite.getPosition() + sf::Vector2f(0, -16.0f)));
+    m_pickupRadiusVisual.setPosition(m_sprite.getPosition() + sf::Vector2f(0.f, -16.f));
 
     bool mouseHeld = sf::Mouse::isButtonPressed(sf::Mouse::Button::Left);
 
@@ -341,8 +340,9 @@ void Player::tryPickupCollectible(Map& map)
 
     
     // player tile pos (feet)
-    int playerCol = static_cast<int>(std::floor((playerPos.x - tileOffsetX) / tileSize));
-    int playerRow = static_cast<int>(std::floor((playerPos.y - tileOffsetY) / tileSize));
+    sf::Vector2f bodyCentre = playerPos - sf::Vector2f(0.f, tileSize * 0.8f);
+    int playerCol = static_cast<int>(std::floor((bodyCentre.x - tileOffsetX) / tileSize));
+    int playerRow = static_cast<int>(std::floor((bodyCentre.y - tileOffsetY) / tileSize));
 
 	auto& allCollectibles = fossilManager.getAllCollectibles();
     
@@ -351,8 +351,12 @@ void Player::tryPickupCollectible(Map& map)
 
         if (c.isPickedUp) continue;
 
-        // Must be within 2-tile radius
-        if (std::abs(c.gridRow - playerRow) > 2 || std::abs(c.gridCol - playerCol) > 2)
+        sf::Vector2f collectiblePos = c.sprite.getPosition();
+        sf::Vector2f diff = collectiblePos - bodyCentre;
+        float distSq = diff.x * diff.x + diff.y * diff.y;
+		float pickupRadius = tileSize * 1.0f; // adjustable pickup radius (1 tiles)
+
+        if (distSq > pickupRadius * pickupRadius)
             continue;
 
         // Build the inventory item
@@ -457,7 +461,7 @@ void Player::setFrame(int frame)
 void Player::draw(sf::RenderWindow& window)
 {
     // Draw interaction radius (debug)
-    window.draw(m_interactionRadiusVisual);
+    window.draw(m_pickupRadiusVisual);
 
     if (m_isSwinging)
     {
@@ -470,7 +474,6 @@ void Player::draw(sf::RenderWindow& window)
     m_sprite.setColor(sf::Color::Red);
 
 }
-
 
 //------------------------------------------------------------
 // World to Tile Conversion
@@ -603,7 +606,8 @@ void Player::checkPickaxeHit(const sf::RenderWindow& window, Map& map)
     const float radius = m_pickaxeTipRadius;
     const sf::Vector2f tip = m_pickaxeTip;
     float tileSize = map.getTileSize();
-    sf::Vector2i playerTile = worldToTile(m_sprite.getPosition(), map);
+    sf::Vector2f bodyCentre = m_sprite.getPosition() - sf::Vector2f(0.f, tileSize * 0.8f);
+    sf::Vector2i playerTile = worldToTile(bodyCentre, map);
 
     auto circleIntersectsRect = [](sf::Vector2f c, float r, const sf::FloatRect& rect)
         {

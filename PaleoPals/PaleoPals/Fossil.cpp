@@ -166,6 +166,7 @@ bool FossilManager::trySpawnCollectible(int row, int col, float tileSize, float 
     {
         const CollectibleType& cfg = m_collectibleTypes[collectibleIndex];
 
+		c.sprite.setOrigin(sf::Vector2f(cfg.frameWidth / 2.f, cfg.frameHeight / 2.f));
         c.sprite.setTextureRect(sf::IntRect({ cfg.frameIndex * cfg.frameWidth, 0 }, { cfg.frameWidth, cfg.frameHeight }));
 
         c.monetaryValue = cfg.monetaryValue;
@@ -174,6 +175,7 @@ bool FossilManager::trySpawnCollectible(int row, int col, float tileSize, float 
     {
         // Fallback if config table is incomplete
         c.sprite.setTextureRect(sf::IntRect({ collectibleIndex * 64, 0 }, { 64, 64 }));
+		c.sprite.setOrigin(sf::Vector2f(32.f, 32.f));
     }
 
     // Fossil: assign a random dinosaur piece

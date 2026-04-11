@@ -84,7 +84,8 @@ private:
     // Rendering
     sf::Texture m_texture;
     sf::Sprite m_sprite{m_texture};
-    sf::RectangleShape m_interactionRadiusVisual; // Visual debug circle
+    sf::CircleShape m_pickupRadiusVisual; // Visual debug circle
+	float pickupRadius = 24.0f; // 1 tile radius
 
     sf::Texture m_pickaxeTexture;
     sf::Sprite m_pickaxeSprite{ m_pickaxeTexture };
