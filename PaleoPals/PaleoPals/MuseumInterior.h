@@ -58,6 +58,7 @@ private:
         sf::Texture backgroundTex;
         sf::Sprite  backgroundSprite;
 
+
         // [0]=skull  [1]=torso  [2]=pelvis  [3]=tail
         std::array<sf::Texture, 4> pieceTex;
         std::array<sf::Sprite, 4> pieceSprite;
@@ -76,6 +77,9 @@ private:
         }
     };
 
+
+    sf::Font m_font;
+    sf::Text m_dinoNameText;
 
     std::vector<std::unique_ptr<DinoDisplay>> m_dinos;
    

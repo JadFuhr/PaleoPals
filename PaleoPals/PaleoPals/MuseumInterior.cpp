@@ -10,7 +10,8 @@ MuseumInterior::MuseumInterior()
     : m_leftArrow(m_arrowsTex),
       m_rightArrow(m_arrowsTex),
       m_backSprite(m_backTex),
-	  m_interiorSprite(m_interiorTex)
+	  m_interiorSprite(m_interiorTex),
+	  m_dinoNameText(m_font)
 {
 
     if (!m_interiorTex.loadFromFile("ASSETS/IMAGES/Screens/Museum_Interior.png"))
@@ -72,17 +73,22 @@ MuseumInterior::MuseumInterior()
     m_humanSprite.setTexture(m_humanTex);
     m_humanSprite.setTextureRect(sf::IntRect({ 0, 0 }, { 72, 214 }));
     m_humanSprite.setOrigin(sf::Vector2f(36, 107));
+
+    if (!m_font.openFromFile("ASSETS/FONTS/Jersey20-Regular.ttf"))
+    {
+		std::cout << "MuseumInterior: failed to load font\n";
+    }
+
+	m_dinoNameText.setFont(m_font);
+	m_dinoNameText.setCharacterSize(24);
+	m_dinoNameText.setFillColor(sf::Color::White);
+	m_dinoNameText.setStyle(sf::Text::Bold);
+
 }
 
-//------------------------------------------------------------
 // loadAssets
 // Loads per-dino textures from the paths in DinosaurData.
 // Called after FossilManager has finished loading the JSON.
-//------------------------------------------------------------
-// loadAssets
-// Loads per-dino textures from the paths in DinosaurData.
-// Called after FossilManager has finished loading the JSON.
-//------------------------------------------------------------
 bool MuseumInterior::loadAssets(const std::vector<DinosaurData>& dinoData)
 {
     m_dinos.clear();
@@ -131,7 +137,7 @@ bool MuseumInterior::loadAssets(const std::vector<DinosaurData>& dinoData)
 
 //------------------------------------------------------------
 // onFossilCollected
-// Called by Game (or Player) whenever a fossil piece is picked up
+// Called by Player whenever a fossil piece is picked up
 //------------------------------------------------------------
 void MuseumInterior::onFossilCollected(const std::string& dinoName, const std::string& pieceId)
 {
@@ -238,14 +244,15 @@ void MuseumInterior::draw(sf::RenderWindow& window)
     // Switch to default (screen) view so UI is fixed on screen
     sf::View prev = window.getView();
     window.setView(window.getDefaultView());
-
 	window.draw(m_interiorSprite);
 
-    // ---- Current dinosaur display ----
+    // Current dinosaur display
     if (!m_dinos.empty() && m_dinos[m_currentDinoIndex])
     {
         DinoDisplay& dino = *m_dinos[m_currentDinoIndex];
-
+		m_dinoNameText.setString(dino.name);
+        m_dinoNameText.setPosition(sf::Vector2f(WINDOW_X / 2.f - 180, 22.f));
+		
         // Draw the dino background silhouette centred on screen
         sf::Vector2u bgSize = dino.backgroundTex.getSize();
         if (bgSize.x > 0 && bgSize.y > 0)
@@ -254,9 +261,7 @@ void MuseumInterior::draw(sf::RenderWindow& window)
             auto settings = getDisplaySettings(dino.name, bgSize);
 
             dino.backgroundSprite.setScale(sf::Vector2f(settings.scale, settings.scale));
-            dino.backgroundSprite.setOrigin(sf::Vector2f(
-                static_cast<float>(bgSize.x) / 2.f,
-                static_cast<float>(bgSize.y) / 2.f));
+            dino.backgroundSprite.setOrigin(sf::Vector2f(static_cast<float>(bgSize.x) / 2.f, static_cast<float>(bgSize.y) / 2.f));
             dino.backgroundSprite.setPosition(settings.position);
 
             // Draw as a dim silhouette (greyed out)
@@ -269,9 +274,7 @@ void MuseumInterior::draw(sf::RenderWindow& window)
             if (humanSize.x > 0 && humanSize.y > 0)
             {
                 m_humanSprite.setScale(sf::Vector2f(settings.humanScale, settings.humanScale));
-                m_humanSprite.setOrigin(sf::Vector2f(
-                    static_cast<float>(humanSize.x) / 2.f,
-                    static_cast<float>(humanSize.y) / 2.f));
+                m_humanSprite.setOrigin(sf::Vector2f(static_cast<float>(humanSize.x) / 2.f, static_cast<float>(humanSize.y) / 2.f));
                 m_humanSprite.setPosition(settings.humanPosition);
                 m_humanSprite.setColor(sf::Color::White);
                 window.draw(m_humanSprite);
@@ -295,16 +298,13 @@ void MuseumInterior::draw(sf::RenderWindow& window)
             window.draw(dino.pieceSprite[i]);
         }
 
-        // ---- Dino name label (placeholder rectangle until you add a font) ----
-        // If you have sf::Font set up you can replace this with sf::Text
-        // For now draw a small dark bar at the top so you know which dino is shown
+        // For now draw a small dark bar at the top
         sf::RectangleShape nameBar(sf::Vector2f(400.f, 30.f));
         nameBar.setFillColor(sf::Color(30, 30, 30, 200));
         nameBar.setPosition(sf::Vector2f(WINDOW_X / 2.f - 200.f, 20.f));
         window.draw(nameBar);
 
-        // ---- Piece collection indicators (4 small squares near the bottom) ----
-        // Filled = collected, outline only = missing
+        // Piece collection indicators (4 small squares near the bottom)
         std::string pieceNames[4] = { "Skull", "Torso", "Pelvis", "Tail" };
         float indicatorSize = 24.f;
         float spacing = 40.f;
@@ -332,11 +332,9 @@ void MuseumInterior::draw(sf::RenderWindow& window)
         }
     }
 
-    // ---- Navigation arrows ----
+    window.draw(m_dinoNameText);
     window.draw(m_leftArrow);
     window.draw(m_rightArrow);
-
-    // ---- Back button ----
     window.draw(m_backSprite);
 
     // Restore previous (world) view
