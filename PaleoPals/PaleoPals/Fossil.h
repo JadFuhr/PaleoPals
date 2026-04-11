@@ -14,10 +14,10 @@ struct CollectibleType
     std::string name;
     std::string type; // "fossil", "amber", "trash"
     std::string texture;
-    int frameWidth;
-    int frameHeight;
-    int frameIndex;
-    int monetaryValue;
+    int frameWidth = 64;
+    int frameHeight = 64;
+    int frameIndex = 0;
+    int monetaryValue = 0;
 };
 
 // Holds data for a dinosaur species from JSON
@@ -41,10 +41,10 @@ class Collectible
 {
 public:
     sf::Sprite sprite;
-    int collectibleIndex;           // 0-11: which collectible type
-    int gridRow;                    // Which tile row it's behind
-    int gridCol;                    // Which tile col it's behind
-    bool isDiscovered = false;
+    int collectibleIndex = 0;           // 0-11
+    int gridRow = -1;
+    int gridCol = -1;
+    bool isPickedUp = false;
 
     // Fossil-specific data (only used if collectibleIndex is 0-6)
     std::string assignedDinosaurName;
@@ -54,7 +54,9 @@ public:
     // Monetary value (for amber and trash types)
     int monetaryValue = 0;
 
-    Collectible(const sf::Texture& texture, const sf::Vector2f& pos, int index, int row, int col)
+    Collectible(const sf::Texture& texture,
+        const sf::Vector2f& pos,
+        int index, int row, int col)
         : sprite(texture), collectibleIndex(index), gridRow(row), gridCol(col)
     {
         sprite.setPosition(pos);
@@ -71,58 +73,63 @@ class FossilManager
 {
 public:
     FossilManager();
-
+     
+    // Load collectible type config + dinosaur data from map.json.
+    // Also pre-loads the shared sprite-sheet texture.
     bool loadFossilsFromConfig(const std::string& filepath);
 
-    void generateFossils(int totalRows, int totalCols, float tileSize,
-        float windowWidth, float windowHeight, int collectiblesPerTile = 1);
+    // Must be called once after the map grid is built so spawned
+   // collectibles appear at the correct world positions.
+    void cacheGridOffsets(float offsetX, float offsetY);
 
-    void drawFossils(sf::RenderWindow& window);
 
-    // Check if a collectible exists at this tile position
-    Collectible* getCollectibleAtTile(int row, int col);
+    // Called by Map::removeTile when a tile is fully destroyed.
+    // Rolls the spawn chance; if it succeeds, creates a Collectible
+    // at the centre of the broken tile.  Returns true on spawn.
+    bool trySpawnCollectible(int row, int col, float tileSize, float windowWidth, float windowHeight);
 
-    // Legacy method name for compatibility
-    FossilPiece* getFossilAtTile(int row, int col) { return getCollectibleAtTile(row, col); }
+    // Draw all live (not yet picked up) collectibles.
+    void drawCollectibles(sf::RenderWindow& window);
 
-    // Get all collectibles (including discovered ones) for pickup scanning
+    // Return pointer to a live collectible within [range] tiles of
+    // (playerRow, playerCol), or nullptr if none found.
+    Collectible* getCollectibleNearTile(int playerRow, int playerCol, int range = 1);
+
+    // Direct access to every collectible (for Player::tryPickupCollectible)
     std::vector<Collectible>& getAllCollectibles() { return m_collectibles; }
 
-    // Get all discovered fossil pieces for a specific dinosaur
-    std::vector<Collectible*> getDiscoveredPiecesForDinosaur(const std::string& dinoName);
-
-    // Check if all pieces of a dinosaur have been collected
-    bool hasDinosaurSkeleton(const std::string& dinoName) const;
-
-    // Get all dinosaurs and which ones are complete
-    const std::map<std::string, int>& getCollectedPiecesPerDino() const { return m_collectedPiecesPerDino; }
-
-    int getTotalCollectibleCount() const { return m_collectibles.size(); }
-    int getDiscoveredCount() const;
-
-    // Get dinosaur data for museum display
+    // Dinosaur data for MuseumInterior
     const std::vector<DinosaurData>& getDinosaurData() const { return m_dinosaurData; }
+
+    // Legacy helper kept for compatibility
+    FossilPiece* getFossilAtTile(int row, int col) { return getCollectibleNearTile(row, col, 0); }
+
+    int getTotalCollectibleCount() const { return static_cast<int>(m_collectibles.size()); }
+
+    // Tune drop rate (0-100).  Default = 40 (40% chance per broken tile).
+    void setSpawnChance(int percent) { m_spawnChancePercent = percent; }
+
+
 
 private:
     std::vector<DinosaurData> m_dinosaurData;
-    std::vector<sf::Texture> m_collectibleTextures;
+    sf::Texture m_collectibleTexture;
     std::vector<Collectible> m_collectibles;
     std::vector<CollectibleType> m_collectibleTypes;  // Store config data for each collectible type
 
-    // Track discovered pieces per dinosaur (for quick completion check)
-    std::map<std::string, int> m_collectedPiecesPerDino;
+    bool m_textureLoaded = false;
 
-    bool isPositionOccupied(int row, int col) const;
+    // Cached from Map after the grid is generated
+    float m_cachedOffsetX = 0.f;
+    float m_cachedOffsetY = 0.f;
+
+    int m_spawnChancePercent = 40;
 
     // Helper to pick a random dinosaur and piece for fossil collectibles
     void assignRandomFossilToPiece(Collectible& collectible);
 
-    // Separate generation functions for different collectible types
-    void generateFossilCollectibles(int totalRows, int totalCols, float tileSize,
-        float windowWidth, float windowHeight, int fossilCount);
+    int  pickRandomCollectibleIndex();
 
-    void generateAmberAndTrashCollectibles(int totalRows, int totalCols, float tileSize,
-        float windowWidth, float windowHeight, int amberTrashCount);
 };
 
 #endif // FOSSIL_H

@@ -11,20 +11,19 @@ Map::Map() {}
 bool Map::loadMapFromConfig(const std::string& filepath)
 {
     std::ifstream file(filepath);
-
     if (!file.is_open())
     {
-        std::cerr << "Failed to open JSON config: " << filepath << std::endl;
+        std::cerr << "Failed to open JSON config: " << filepath << "\n";
         return false;
     }
+
     try
     {
         json config;
         file >> config;
 
-        auto layers = config["map"]["layers"];
-
-        for (auto& layerNode : layers)
+        // --- Terrain layers ---
+        for (auto& layerNode : config["map"]["layers"])
         {
             LayerType layer;
             layer.name = layerNode["name"].get<std::string>();
@@ -32,12 +31,13 @@ bool Map::loadMapFromConfig(const std::string& filepath)
 
             if (!layer.texture.loadFromFile(layerNode["texture"].get<std::string>()))
             {
-                std::cerr << "Failed to load texture for layer: " << layer.name << std::endl;
+                std::cerr << "Failed to load texture for layer: " << layer.name << "\n";
                 return false;
             }
-
             m_layerTypes.push_back(std::move(layer));
         }
+
+        // --- Buildings ---
         if (config.contains("museum"))
         {
             if (!m_museum.loadMuseumFromConfig(config["museum"]))
@@ -54,31 +54,25 @@ bool Map::loadMapFromConfig(const std::string& filepath)
                 return false;
             }
         }
+
+        // --- Collectible + dinosaur config ---
         if (!m_fossilManager.loadFossilsFromConfig(filepath))
         {
-            std::cerr << "Failed to load fossils\n";
+            std::cerr << "Failed to load fossil config\n";
             return false;
         }
-
     }
     catch (const std::exception& e)
     {
-        std::cerr << "Error loading JSON map config: " << e.what() << std::endl;
+        std::cerr << "Error loading JSON map config: " << e.what() << "\n";
         return false;
     }
 
+    // Crack overlay texture
     if (!m_crackedOverlayTexture.loadFromFile("ASSETS/IMAGES/Terrain/Cracks.png"))
-    {
         std::cerr << "Failed to load crack texture!\n";
-    }
-
 
     return true;
-}
-
-bool Map::isPointOnTrader(const sf::Vector2f& worldPos) const
-{
-    return m_trader.containsPoint(worldPos);
 }
 
 void Map::generateGrid(int rows, int cols, float tileSize, float windowWidth, float windowHeight)
@@ -110,10 +104,7 @@ void Map::generateGrid(int rows, int cols, float tileSize, float windowWidth, fl
             float yPos = row * tileSize + offsetY;
             float xPos = col * tileSize + offsetX;
 
-            Tile newTile(layer.texture,
-                sf::Vector2f(xPos, yPos),
-                layer.hardness,
-                m_crackedOverlayTexture);
+            Tile newTile(layer.texture, sf::Vector2f(xPos, yPos), layer.hardness, m_crackedOverlayTexture);
 
             newTile.sprite.setScale(sf::Vector2f(tileSize / layer.texture.getSize().x, tileSize / layer.texture.getSize().y));
 
@@ -126,14 +117,10 @@ void Map::generateGrid(int rows, int cols, float tileSize, float windowWidth, fl
 
     m_rowsGenerated += rows;
 
-    //gen fossils
-
     if (m_rowsGenerated >= m_rows)
     {
-        // Spawn collectibles: 5 = 5% of tiles will have collectibles (adjustable)
-        m_fossilManager.generateFossils(m_rows, m_cols, m_tileSize, windowWidth, windowHeight, 35);
-
-        std::cout << "collectibles generated" << std::endl;
+        m_fossilManager.cacheGridOffsets(offsetX, offsetY);
+        std::cout << "Grid complete – collectibles will drop on tile break\n";
     }
 }
 
@@ -248,126 +235,35 @@ void Map::removeTile(int row, int col)
 {
     if (row < 0 || col < 0 || row >= m_rows || col >= m_cols)
     {
+		return;
+    }
+
+	int index = row * m_cols + col;
+
+    if (index < 0 || index >= static_cast<int>(m_tiles.size()))
+    {
+		return;
+    }
+
+	Tile& tile = m_tiles[index];
+
+    // already removed tiles 
+    if (tile.sprite.getColor() == sf::Color::Transparent)
+    {
         return;
     }
 
-    int index = row * m_cols + col;
+	tile.sprite.setColor(sf::Color::Transparent);
+	tile.layerHardness = 0;
+	tile.currentHP = 0;
 
-    if (index >= 0 && index < static_cast<int>(m_tiles.size()))
-    {
-        m_tiles[index].sprite.setColor(sf::Color::Transparent);
-        m_tiles[index].layerHardness = 0;
+    m_fossilManager.trySpawnCollectible(row, col, m_tileSize, m_windowWidth, m_windowHeight);
 
-        // Check for collectible discovery
-        FossilPiece* collectible = m_fossilManager.getFossilAtTile(row, col);
-        
-        if (collectible != nullptr && !collectible->isDiscovered)
-        {
-            collectible->isDiscovered = true;
-            
-            // Different discovery messages based on collectible type
-            if (collectible->collectibleIndex < 7)
-            {
-                // Fossil type (0-6)
-                std::cout << "FOSSIL PIECE DISCOVERED! " << collectible->assignedPieceId
-                    << " from " << collectible->assignedDinosaurName << "\n";
-                
-                // Check if this completes a skeleton
-                if (m_fossilManager.hasDinosaurSkeleton(collectible->assignedDinosaurName))
-                {
-                    std::cout << collectible->assignedDinosaurName << " IS COMPLETE! \n";
-                }
-            }
-            else if (collectible->collectibleIndex == 7)
-            {
-                std::cout << "SMALL AMBER DISCOVERED! Value: " << collectible->monetaryValue << "\n";
-            }
-            else if (collectible->collectibleIndex == 8)
-            {
-                std::cout << "LARGE AMBER DISCOVERED! Value: " << collectible->monetaryValue << "\n";
-            }
-            else
-            {
-                std::cout << "TRASH DISCOVERED! (Worthless)\n";
-            }
-        }
-    }
 }
 
-//------------------------------------------------------------
-// removeTile (with auto-pickup)
-// Purpose: Remove tile AND auto-collect if fossil/item within 2-tile range
-// Items discovered but OUT OF RANGE won't be collected yet
-//------------------------------------------------------------
-void Map::removeTile(int row, int col, Player& player)
+void Map::removeTile(int row, int col, Player& player)  //calls the base removeTile; player pickup is handled by player::tryPickupCollectivle
 {
-    // First, get collectible reference BEFORE discovering it
-    FossilPiece* collectible = m_fossilManager.getFossilAtTile(row, col);
-    
-    std::cout << "removeTile WITH PLAYER called for (" << col << ", " << row << ")\n";
-    
-    if (collectible != nullptr)
-    {
-        std::cout << "  Collectible found at this position (Type: " << collectible->collectibleIndex << ")\n";
-    }
-    
-    // Now do standard tile removal (this will discover the collectible)
     removeTile(row, col);
-    
-    if (collectible == nullptr)
-    {
-        std::cout << "  No collectible to pickup\n";
-        return;
-    }
-    
-    // Check if player is within 2-tile range
-    sf::Vector2f playerPos = player.getPosition();
-    float tileSize = getTileSize();
-    float offsetX = (WINDOW_X - (m_cols * tileSize)) / 2.0f;
-    float offsetY = WINDOW_Y / 2.0f;
-    
-    int playerCol = static_cast<int>((playerPos.x - offsetX) / tileSize);
-    int playerRow = static_cast<int>((playerPos.y - offsetY) / tileSize);
-    
-    int dx = col - playerCol;
-    int dy = row - playerRow;
-    float distance = std::sqrt(dx * dx + dy * dy);
-    
-    std::cout << "  Distance to player: " << distance << " (range limit: 2.5)\n";
-    
-    // ONLY auto-pickup if within 2.5 tile range
-    if (distance > 2.5f)
-    {
-        std::cout << "  OUT OF RANGE - will not auto-pickup\n";
-        return;
-    }
-    
-    // AUTO-PICKUP!
-    std::cout << "  WITHIN RANGE - AUTO-PICKING UP\n";
-    
-    if (collectible->collectibleIndex <= 6)
-    {
-        // FOSSIL
-        player.collectFossil(collectible->assignedDinosaurName, 
-                           collectible->assignedPieceId, 
-                           collectible->assignedCategory);
-    }
-    else if (collectible->collectibleIndex <= 8)
-    {
-        // AMBER
-        player.collectAmber(collectible->monetaryValue);
-    }
-    else
-    {
-        // TRASH
-        player.collectTrash();
-    }
-    
-    // Mark as picked up
-    collectible->sprite.setPosition(sf::Vector2f(-10000.f, -10000.f));
-    collectible->gridRow = -1;
-    collectible->gridCol = -1;
-    std::cout << "  Sprite hidden and marked for removal\n";
 }
 
 int Map::getTileHardness(int row, int col) const
@@ -387,11 +283,64 @@ int Map::getTileHardness(int row, int col) const
     return 0;
 }
 
+int Map::getTileCurrentHP(int row, int col) const
+{
+    if (row < 0 || col < 0 || row >= m_rows || col >= m_cols)
+        return 0;
+
+    int index = row * m_cols + col;
+
+
+    return m_tiles[index].currentHP;
+}
+
+void Map::damageTile(int row, int col, int dmg)
+{
+    int index = row * m_cols + col;
+    Tile& t = m_tiles[index];
+
+    if (t.currentHP <= 0)
+        return;
+
+    t.currentHP -= dmg;
+
+    float hpPercent = static_cast<float>(t.currentHP) / t.layerHardness;
+
+    if (hpPercent > 0.75f)
+    {
+        t.crackedFrameIndex = 0;
+    }
+    else if (hpPercent > 0.50f)
+    {
+        t.crackedFrameIndex = 1;
+    }
+    else if (hpPercent > 0.25f)
+    {
+        t.crackedFrameIndex = 2;
+    }
+    else if (hpPercent > 0.10f)
+    {
+        t.crackedFrameIndex = 3;
+    }
+    else
+    {
+        t.crackedFrameIndex = 4;
+    }
+
+    int frameWidth = 24; // crack sprite frame width 
+
+    t.crackedSprite.setTextureRect(sf::IntRect({ t.crackedFrameIndex * frameWidth, 0 }, { frameWidth, frameWidth }));
+
+
+    if (t.currentHP <= 0)
+    {
+		removeTile(row, col);       // tile destroyed now triggers collectible spawn 
+    }
+}
+
 void Map::drawMap(sf::RenderWindow& window)
 {
     window.draw(m_backgroundSprite);
-
-    m_fossilManager.drawFossils(window);
 
     // Get view bounds for frustum culling
     sf::View currentView = window.getView();
@@ -429,6 +378,8 @@ void Map::drawMap(sf::RenderWindow& window)
         }
     }
 
+    m_fossilManager.drawCollectibles(window);
+
     // Only draw museum if it's in view
     if (viewBounds.findIntersection(m_museum.getSprite().getGlobalBounds()))
     {
@@ -440,43 +391,6 @@ void Map::drawMap(sf::RenderWindow& window)
     {
         m_trader.drawTrader(window);
     }
-}
-
-void Map::addLadder(int row, int col)
-{
-    if (row < 0 || col < 0 || row >= m_rows || col >= m_cols)
-        return;
-
-    int index = row * m_cols + col;
-    if (index >= 0 && index < static_cast<int>(m_ladders.size()))
-    {
-        m_ladders[index] = true;
-    }
-}
-
-void Map::removeLadder(int row, int col)
-{
-    if (row < 0 || col < 0 || row >= m_rows || col >= m_cols)
-        return;
-
-    int index = row * m_cols + col;
-    if (index >= 0 && index < static_cast<int>(m_ladders.size()))
-    {
-        m_ladders[index] = false;
-    }
-}
-
-bool Map::hasLadder(int row, int col) const
-{
-    if (row < 0 || col < 0 || row >= m_rows || col >= m_cols)
-        return false;
-
-    int index = row * m_cols + col;
-    if (index >= 0 && index < static_cast<int>(m_ladders.size()))
-    {
-        return m_ladders[index];
-    }
-    return false;
 }
 
 void Map::toggleDebugMode()
@@ -491,69 +405,6 @@ void Map::toggleDebugMode()
     {
         std::cout << "Debug mode OFF\n";
     }
-}
-
-void Map::handleMouseHold(const sf::RenderWindow& window, float tileSize, int cols)
-{
-
-    if (!m_debugMode) return; // Only work in debug mode
-
-    if (!sf::Mouse::isButtonPressed(sf::Mouse::Button::Left))
-    {
-        return;
-    }
-
-    sf::Vector2i mousePixel = sf::Mouse::getPosition(window);
-    sf::Vector2f mouseWorld = window.mapPixelToCoords(mousePixel);
-
-    // Compute grid starting offsets (same as updateHover)
-    int rows = static_cast<int>(m_tiles.size() / cols);
-    float totalGridHeight = rows * tileSize;
-    float totalGridWidth = cols * tileSize;
-    float offsetY = WINDOW_Y / 2.0f;
-    float offsetX = (WINDOW_X - totalGridWidth) / 2.0f;
-
-    float localX = mouseWorld.x - offsetX;
-    float localY = mouseWorld.y - offsetY;
-
-    // Skip if outside the grid bounds
-    if (localX < 0 || localY < 0 || localX >= totalGridWidth || localY >= totalGridHeight)
-    {
-        return;
-    }
-
-    // Calculate which tile was clicked
-    int tileX = static_cast<int>(localX / tileSize);
-    int tileY = static_cast<int>(localY / tileSize);
-    int index = tileY * cols + tileX;
-
-    if (index >= 0 && index < static_cast<int>(m_tiles.size()))
-    {
-        // Only remove if not already transparent 
-        if (m_tiles[index].sprite.getColor() != sf::Color::Transparent)
-        {
-            // Call removeTile instead of just setting color transparent
-            removeTile(tileY, tileX);
-        }
-    }
-}
-
-sf::Vector2f Map::tileToWorld(sf::Vector2i tilePos) const
-{
-    float x = tilePos.x * m_tileSize + (m_windowWidth - m_cols * m_tileSize) / 2.0f + m_tileSize / 2.0f;
-    float y = tilePos.y * m_tileSize + m_windowHeight / 2.0f + m_tileSize / 2.0f;
-    return sf::Vector2f(x, y);
-}
-
-
-void Map::updateMuseum(sf::RenderWindow& window)
-{
-    m_museum.updateMuseumHover(window);
-}
-
-void Map::updateTrader(sf::RenderWindow& window)
-{
-    m_trader.updateTraderHover(window);
 }
 
 void Map::updateHover(const sf::RenderWindow& window, float tileSize, int cols)
@@ -624,6 +475,51 @@ void Map::updateHover(const sf::RenderWindow& window, float tileSize, int cols)
     }
 }
 
+void Map::handleMouseHold(const sf::RenderWindow& window, float tileSize, int cols)
+{
+
+    if (!m_debugMode) return; // Only work in debug mode
+
+    if (!sf::Mouse::isButtonPressed(sf::Mouse::Button::Left))
+    {
+        return;
+    }
+
+    sf::Vector2i mousePixel = sf::Mouse::getPosition(window);
+    sf::Vector2f mouseWorld = window.mapPixelToCoords(mousePixel);
+
+    // Compute grid starting offsets (same as updateHover)
+    int rows = static_cast<int>(m_tiles.size() / cols);
+    float totalGridHeight = rows * tileSize;
+    float totalGridWidth = cols * tileSize;
+    float offsetY = WINDOW_Y / 2.0f;
+    float offsetX = (WINDOW_X - totalGridWidth) / 2.0f;
+
+    float localX = mouseWorld.x - offsetX;
+    float localY = mouseWorld.y - offsetY;
+
+    // Skip if outside the grid bounds
+    if (localX < 0 || localY < 0 || localX >= totalGridWidth || localY >= totalGridHeight)
+    {
+        return;
+    }
+
+    // Calculate which tile was clicked
+    int tileX = static_cast<int>(localX / tileSize);
+    int tileY = static_cast<int>(localY / tileSize);
+    int index = tileY * cols + tileX;
+
+    if (index >= 0 && index < static_cast<int>(m_tiles.size()))
+    {
+        // Only remove if not already transparent 
+        if (m_tiles[index].sprite.getColor() != sf::Color::Transparent)
+        {
+            // Call removeTile instead of just setting color transparent
+            removeTile(tileY, tileX);
+        }
+    }
+}
+
 void Map::drawDebug(sf::RenderWindow& window)
 {
     if (m_debugMode && m_hoveredIndex != -1)
@@ -632,60 +528,67 @@ void Map::drawDebug(sf::RenderWindow& window)
     }
 }
 
+// coordinate helpers
 
-
-void Map::damageTile(int row, int col, int dmg)
+sf::Vector2f Map::tileToWorld(sf::Vector2i tilePos) const
 {
-    int index = row * m_cols + col;
-    Tile& t = m_tiles[index];
-
-    if (t.currentHP <= 0)
-        return;
-
-    t.currentHP -= dmg;
-
-    float hpPercent = static_cast<float>(t.currentHP) / t.layerHardness;
-
-    if (hpPercent > 0.75f)
-    {
-        t.crackedFrameIndex = 0;
-    }
-    else if (hpPercent > 0.50f)
-    {
-        t.crackedFrameIndex = 1;
-    }
-    else if (hpPercent > 0.25f)
-    {
-        t.crackedFrameIndex = 2;
-    }
-    else if (hpPercent > 0.10f)
-    {
-        t.crackedFrameIndex = 3;
-    }
-    else
-    {
-        t.crackedFrameIndex = 4;
-    }
-
-    int frameWidth = 24; // crack sprite frame width 
-
-    t.crackedSprite.setTextureRect(sf::IntRect({ t.crackedFrameIndex * frameWidth, 0 }, { frameWidth, frameWidth }));
-
-
-    if (t.currentHP <= 0)
-    {
-        removeTile(row, col); 
-    }
+    float x = tilePos.x * m_tileSize + (m_windowWidth - m_cols * m_tileSize) / 2.0f + m_tileSize / 2.0f;
+    float y = tilePos.y * m_tileSize + m_windowHeight / 2.0f + m_tileSize / 2.0f;
+    return sf::Vector2f(x, y);
+}
+bool Map::isPointOnTrader(const sf::Vector2f& worldPos) const
+{
+    return m_trader.containsPoint(worldPos);
 }
 
 
-int Map::getTileCurrentHP(int row, int col) const
+// building updates 
+
+void Map::updateMuseum(sf::RenderWindow& window)
+{
+    m_museum.updateMuseumHover(window);
+}
+
+void Map::updateTrader(sf::RenderWindow& window)
+{
+    m_trader.updateTraderHover(window);
+}
+
+// ladder helpers 
+
+void Map::addLadder(int row, int col)
 {
     if (row < 0 || col < 0 || row >= m_rows || col >= m_cols)
-        return 0;
+        return;
 
     int index = row * m_cols + col;
+    if (index >= 0 && index < static_cast<int>(m_ladders.size()))
+    {
+        m_ladders[index] = true;
+    }
+}
 
+void Map::removeLadder(int row, int col)
+{
+    if (row < 0 || col < 0 || row >= m_rows || col >= m_cols)
+        return;
 
-    return m_tiles[index].currentHP;
+    int index = row * m_cols + col;
+    if (index >= 0 && index < static_cast<int>(m_ladders.size()))
+    {
+        m_ladders[index] = false;
+    }
+}
+
+bool Map::hasLadder(int row, int col) const
+{
+    if (row < 0 || col < 0 || row >= m_rows || col >= m_cols)
+        return false;
+
+    int index = row * m_cols + col;
+    if (index >= 0 && index < static_cast<int>(m_ladders.size()))
+    {
+        return m_ladders[index];
+    }
+    return false;
 }

@@ -466,7 +466,7 @@ bool SearchingBehavior::findNearestFossil(Paleontologist* agent, Map& map)
         {
             FossilPiece* fossil = fossilManager.getFossilAtTile(row, col);
 
-            if (fossil != nullptr && !fossil->isDiscovered)
+            if (fossil != nullptr && !fossil->isPickedUp)
             {
                 float offsetX = (WINDOW_X - (colsToCheck * tileSize)) / 2.0f;
                 float offsetY = WINDOW_Y / 2.0f;

@@ -1,4 +1,4 @@
-﻿#include "Player.h"
+﻿ #include "Player.h"
 #include "Map.h"
 #include "Fossil.h"
 #include <iostream>
@@ -120,7 +120,7 @@ void Player::handleInput(sf::Time deltaTime, Map& map)
         m_velocity.y = m_jumpForce;
         m_canJump = false;
         m_state = PlayerState::Jumping;
-        std::cout << "Player jumped!\n";
+        //std::cout << "Player jumped!\n";
     }
 
     // Release jump key to allow next jump
@@ -335,102 +335,61 @@ void Player::tryPickupCollectible(Map& map)
 {
     sf::Vector2f playerPos = m_sprite.getPosition();
     FossilManager& fossilManager = map.getFossilManager();
-
     float tileSize = map.getTileSize();
     float tileOffsetX = (WINDOW_X - map.getColumnCount() * tileSize) / 2.0f;
     float tileOffsetY = WINDOW_Y / 2.0f;
 
-    // Use floor-based conversion (same as checkCollisions) so the tile row/col
-    // correctly matches the rows stored in each Collectible's gridRow/gridCol.
+    
+    // player tile pos (feet)
     int playerCol = static_cast<int>(std::floor((playerPos.x - tileOffsetX) / tileSize));
     int playerRow = static_cast<int>(std::floor((playerPos.y - tileOffsetY) / tileSize));
 
-    std::cout << " PICKUP ATTEMPT \n";
-    std::cout << "Player at world pos (" << playerPos.x << ", " << playerPos.y << ")\n";
-    std::cout << "Player at tile (" << playerCol << ", " << playerRow << ")\n";
-    std::cout << "Tile offset: (" << tileOffsetX << ", " << tileOffsetY << "), Tile size: " << tileSize << "\n";
-
-    int collectiblesFound = 0;
-
-    // Search all collectibles – find discovered (isDiscovered==true)
-    // because getCollectibleAtTile() only returns undiscovered ones.
-    auto& allCollectibles = fossilManager.getAllCollectibles();
+	auto& allCollectibles = fossilManager.getAllCollectibles();
     
-    std::cout << "Total collectibles in world: " << allCollectibles.size() << "\n";
-
-    for (auto& collectible : allCollectibles)
+    for (auto& c : allCollectibles)
     {
-        int dy = collectible.gridRow - playerRow;
-        int dx = collectible.gridCol - playerCol;
 
-        // Debug: Print first few collectibles to see their positions
-        static int debugCount = 0;
-        if (debugCount < 10)
-        {
-            std::cout << "  Collectible #" << debugCount << " at grid (" << collectible.gridCol << ", " 
-                << collectible.gridRow << ") world (" << collectible.sprite.getPosition().x << ", " 
-                << collectible.sprite.getPosition().y << ") - dy=" << dy << " dx=" << dx << "\n";
-            debugCount++;
-        }
+        if (c.isPickedUp) continue;
 
-        // Only check within a 1-tile radius
-        if (std::abs(dy) > 1 || std::abs(dx) > 1)
+        // Must be within 2-tile radius
+        if (std::abs(c.gridRow - playerRow) > 2 || std::abs(c.gridCol - playerCol) > 2)
             continue;
 
-        int hardness = map.getTileHardness(collectible.gridRow, collectible.gridCol);
+        // Build the inventory item
+        CollectedItem item;
+        item.collectibleIndex = c.collectibleIndex;
+        item.monetaryValue = c.monetaryValue;
 
-        collectiblesFound++;
-        std::cout << "  Found collectible at (" << collectible.gridCol << ", " << collectible.gridRow
-            << ") - Discovered: " << (collectible.isDiscovered ? "YES" : "NO")
-            << " - Hardness: " << hardness << "\n";
-
-        // A collectible is pickupable when:
-        // 1. It has been discovered (tile was mined, revealing the fossil)
-        // 2. The tile covering it has been completely mined (hardness == 0)
-        if (collectible.isDiscovered && hardness == 0)
+        if (c.collectibleIndex <= 6)
         {
-            CollectedItem item;
-            item.collectibleIndex = collectible.collectibleIndex;
-            item.type = (collectible.collectibleIndex <= 6) ? "fossil" :
-                (collectible.collectibleIndex <= 8) ? "amber" : "trash";
-            item.monetaryValue = collectible.monetaryValue;
-
-            if (item.type == "fossil")
-            {
-                item.dinosaurName = collectible.assignedDinosaurName;
-                item.pieceId = collectible.assignedPieceId;
-                item.category = collectible.assignedCategory;
-                item.name = collectible.assignedPieceId + " of " + collectible.assignedDinosaurName;
-            }
-            else
-            {
-                item.name = item.type;
-            }
-
-            m_inventory.push_back(item);
-			m_newPickups.push_back(item);
-
-            std::cout << " PICKED UP: " << item.name << " (Type: " << item.type << ") \n";
-            std::cout << "    Inventory size: " << m_inventory.size() << "\n";
-
-            // Remove from world by moving far off-screen and marking collected
-            collectible.sprite.setPosition(sf::Vector2f(-10000.f, -10000.f));
-            collectible.gridRow = -1;
-            collectible.gridCol = -1;
-            // NOTE: don't revert isDiscovered - keep it true to indicate it was found
-
-            return; // Only pick up one item per press
+            item.type = "fossil";
+            item.dinosaurName = c.assignedDinosaurName;
+            item.pieceId = c.assignedPieceId;
+            item.category = c.assignedCategory;
+            item.name = c.assignedPieceId + " of " + c.assignedDinosaurName;
         }
-    }
+        else if (c.collectibleIndex <= 8)
+        {
+            item.type = "amber";
+            item.name = (c.monetaryValue == 50) ? "Small Amber" : "Large Amber";
+            m_money += c.monetaryValue;
+        }
+        else
+        {
+            item.type = "trash";
+            item.name = "Trash";
+        }
 
-    if (collectiblesFound == 0)
-    {
-        std::cout << "  No collectibles found in 1-tile radius\n";
-    }
-    else
-    {
-        std::cout << "  Found " << collectiblesFound << " collectible(s) but tile(s) not yet mined\n";
-        std::cout << "===================\n";
+        m_inventory.push_back(item);
+        m_newPickups.push_back(item);
+
+        // Mark as collected and move off-screen
+        c.isPickedUp = true;
+        c.sprite.setPosition(sf::Vector2f(-10000.f, -10000.f));
+
+        std::cout << "[Pickup] " << item.name << " (type=" << item.type << ")" << " | Inventory size: " << m_inventory.size() << "\n";
+
+        return; // one item per key press
     }
 }
 
@@ -636,32 +595,21 @@ void Player::updatePickaxe(const sf::RenderWindow& window, Map& map)
 
     m_pickaxeTip = m_pickaxeSprite.getPosition() + tipOffset;
 }
-
-
-
-
-    
+  
 void Player::checkPickaxeHit(const sf::RenderWindow& window, Map& map)
 {
-    if (!m_isSwinging)
-        return;
+    if (!m_isSwinging) return;
 
     const float radius = m_pickaxeTipRadius;
     const sf::Vector2f tip = m_pickaxeTip;
-
     float tileSize = map.getTileSize();
-
-    sf::Vector2f playerPos = m_sprite.getPosition();
-    sf::Vector2i playerTile = worldToTile(playerPos, map);
+    sf::Vector2i playerTile = worldToTile(m_sprite.getPosition(), map);
 
     auto circleIntersectsRect = [](sf::Vector2f c, float r, const sf::FloatRect& rect)
         {
-            float closestX = std::clamp(c.x, rect.position.x, rect.position.x + rect.size.x);
-            float closestY = std::clamp(c.y, rect.position.y, rect.position.y + rect.size.y);
-
-            float dx = c.x - closestX;
-            float dy = c.y - closestY;
-
+            float cx = std::clamp(c.x, rect.position.x, rect.position.x + rect.size.x);
+            float cy = std::clamp(c.y, rect.position.y, rect.position.y + rect.size.y);
+            float dx = c.x - cx, dy = c.y - cy;
             return (dx * dx + dy * dy) <= (r * r);
         };
 
@@ -673,11 +621,7 @@ void Player::checkPickaxeHit(const sf::RenderWindow& window, Map& map)
                 continue;
 
             sf::Vector2f tilePos = map.tileToWorld({ c, r });
-
-            sf::FloatRect tileRect(
-                { tilePos.x - tileSize / 2.f, tilePos.y - tileSize / 2.f },
-                { tileSize, tileSize }
-            );
+            sf::FloatRect tileRect({ tilePos.x - tileSize / 2.f, tilePos.y - tileSize / 2.f }, { tileSize, tileSize });
 
             if (circleIntersectsRect(tip, radius, tileRect))
             {
@@ -690,8 +634,6 @@ void Player::checkPickaxeHit(const sf::RenderWindow& window, Map& map)
         }
     }
 }
-
-
 
 void Player::updatePickaxeAnimation(sf::Time dt)
 {
@@ -718,7 +660,5 @@ void Player::updatePickaxeAnimation(sf::Time dt)
     int left = m_pickaxeCurrentFrame * frameWidth;
     int top = 0;
 
-    m_pickaxeSprite.setTextureRect(
-        sf::IntRect({ left, top }, { frameWidth, frameHeight })
-    );
+    m_pickaxeSprite.setTextureRect(sf::IntRect({ left, top }, { frameWidth, frameHeight }));
 }

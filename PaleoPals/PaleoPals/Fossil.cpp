@@ -101,7 +101,130 @@ bool FossilManager::loadFossilsFromConfig(const std::string& filepath)
         return false;
     }
 
+    if (!m_collectibleTypes.empty())
+    {
+        const std::string& sheetPath = m_collectibleTypes[0].texture;
+
+        if (!m_collectibleTexture.loadFromFile(sheetPath))
+        {
+            std::cerr << "Failed to load collectibles sheet: " << sheetPath << "\n";
+            return false;
+        }
+
+        m_textureLoaded = true;
+        std::cout << "Collectibles sheet loaded: " << sheetPath << "\n";
+    }
+    else
+    {
+        std::cerr << "No collectible types loaded, cannot load texture\n";
+        return false;
+    }
+
     return true;
+}
+
+
+// Called by Map after generateGrid
+void FossilManager::cacheGridOffsets(float offsetX, float offsetY)
+{
+    m_cachedOffsetX = offsetX;
+    m_cachedOffsetY = offsetY;
+}
+
+
+// Called every time a tile is fully destroyed.
+// Rolls m_spawnChancePercent; on success, builds a Collectible
+bool FossilManager::trySpawnCollectible(int row, int col, float tileSize, float windowWidth, float windowHeight)
+{
+    if (!m_textureLoaded)
+    {
+        std::cerr << "FossilManager: texture not loaded, cannot spawn collectible\n";
+        return false;
+    }
+
+    // Drop-chance roll
+    static std::random_device rd;
+    static std::mt19937 gen(rd());
+    static std::uniform_int_distribution<> chanceRoll(0, 99);
+
+    if (chanceRoll(gen) >= m_spawnChancePercent)
+        return false;
+
+    // World position = centre of the tile that just broke
+    float xPos = col * tileSize + m_cachedOffsetX + tileSize / 2.0f;
+    float yPos = row * tileSize + m_cachedOffsetY + tileSize / 2.0f;
+
+    int collectibleIndex = pickRandomCollectibleIndex();
+
+    // Build the Collectible
+    Collectible c(m_collectibleTexture, sf::Vector2f(xPos, yPos), collectibleIndex, row, col);
+
+    // 64x64, displayed at half size
+    c.sprite.setScale(sf::Vector2f(0.5f, 0.5f));
+
+    if (collectibleIndex < static_cast<int>(m_collectibleTypes.size()))
+    {
+        const CollectibleType& cfg = m_collectibleTypes[collectibleIndex];
+
+        c.sprite.setTextureRect(sf::IntRect({ cfg.frameIndex * cfg.frameWidth, 0 }, { cfg.frameWidth, cfg.frameHeight }));
+
+        c.monetaryValue = cfg.monetaryValue;
+    }
+    else
+    {
+        // Fallback if config table is incomplete
+        c.sprite.setTextureRect(sf::IntRect({ collectibleIndex * 64, 0 }, { 64, 64 }));
+    }
+
+    // Fossil: assign a random dinosaur piece
+    if (collectibleIndex <= 6)
+        assignRandomFossilToPiece(c);
+
+    // Debug log
+    const char* typeName = (collectibleIndex <= 6) ? "Fossil" :
+        (collectibleIndex <= 8) ? "Amber" : "Trash";
+    std::cout << "[Drop] " << typeName << " (idx=" << collectibleIndex
+        << ") at tile (" << row << "," << col << ")\n";
+
+    m_collectibles.push_back(std::move(c));
+    return true;
+}
+
+void FossilManager::drawCollectibles(sf::RenderWindow& window)
+{
+    sf::View view = window.getView();
+    sf::Vector2f vc = view.getCenter();
+    sf::Vector2f vs = view.getSize();
+    const float pad = 100.f;
+
+    sf::FloatRect viewBounds(
+        sf::Vector2f(vc.x - vs.x / 2.f - pad, vc.y - vs.y / 2.f - pad),
+        sf::Vector2f(vs.x + pad * 2.f, vs.y + pad * 2.f));
+
+    for (auto& c : m_collectibles)
+    {
+        if (c.isPickedUp) continue;
+
+        if (!viewBounds.findIntersection(c.sprite.getGlobalBounds()))
+            continue;
+
+        c.sprite.setColor(sf::Color::White);
+        window.draw(c.sprite);
+    }
+}
+
+Collectible* FossilManager::getCollectibleNearTile(int playerRow, int playerCol, int range)
+{
+    for (auto& c : m_collectibles)
+    {
+        if (c.isPickedUp) continue;
+        if (std::abs(c.gridRow - playerRow) <= range &&
+            std::abs(c.gridCol - playerCol) <= range)
+        {
+            return &c;
+        }
+    }
+    return nullptr;
 }
 
 //------------------------------------------------------------
@@ -136,463 +259,33 @@ void FossilManager::assignRandomFossilToPiece(Collectible& collectible)
     collectible.assignedCategory = selectedDino.category;
 }
 
-//------------------------------------------------------------
-// generateFossils
-// Purpose: Places collectibles randomly across the map grid
-// Splits work into fossil generation and amber/trash generation
-// Parameters:
-//   collectiblesPerTile - How many collectibles per 100 tiles (0-100%)
-//                        1 = sparse, 5 = moderate, 10+ = dense
-//------------------------------------------------------------
-void FossilManager::generateFossils(int totalRows, int totalCols, float tileSize, float windowWidth, float windowHeight, int collectiblesPerTile)
+// pickRandomCollectibleIndex
+// Weighted distribution:
+//   Fossils (0-6)  60%
+//   Amber   (7-8)  25%   (small amber more common than large)
+//   Trash   (9-11) 15%
+int FossilManager::pickRandomCollectibleIndex()
 {
-    // Clear any existing collectibles (in case this is called multiple times)
-    m_collectibles.clear();
-    m_collectibleTextures.clear();
-    m_collectedPiecesPerDino.clear();
+    static std::random_device rd;
+    static std::mt19937 gen(rd());
+    static std::uniform_int_distribution<> roll(0, 99);
 
-    // === LOAD COLLECTIBLES SHEET TEXTURE ===
-    sf::Texture collectiblesSheetTexture;
-    if (!collectiblesSheetTexture.loadFromFile("ASSETS/IMAGES/Fossils/1. Pickups/Collectibles_Sheet.png"))
+    int r = roll(gen);
+
+    if (r < 60)
     {
-        std::cerr << "Failed to load collectibles sheet texture\n";
-        return;
+        std::uniform_int_distribution<> fossilDist(0, 6);
+        return fossilDist(gen);
     }
-    m_collectibleTextures.push_back(std::move(collectiblesSheetTexture));
-
-    // === CALCULATE HOW MANY COLLECTIBLES TO SPAWN ===
-    int totalTiles = totalRows * totalCols;
-    int collectibleCount = (totalTiles * collectiblesPerTile) / 100;
-    
-    // Clamp to reasonable values
-    collectibleCount = std::max(10, std::min(collectibleCount, totalTiles / 2));
-
-    std::cout << "Spawning " << collectibleCount << " total collectibles (spawn rate: " << collectiblesPerTile << "% per 100 tiles)\n";
-
-    // === CALCULATE DISTRIBUTION: 70% fossils, 20% amber, 10% trash ===
-    int fossilCount = (collectibleCount * 70) / 100;
-    int amberTrashCount = collectibleCount - fossilCount;
-
-    // === GENERATE EACH TYPE SEPARATELY ===
-    generateFossilCollectibles(totalRows, totalCols, tileSize, windowWidth, windowHeight, fossilCount);
-    generateAmberAndTrashCollectibles(totalRows, totalCols, tileSize, windowWidth, windowHeight, amberTrashCount);
-
-    // Initialize collected pieces per dino counter
-    for (const auto& dino : m_dinosaurData)
+    else if (r < 85)
     {
-        m_collectedPiecesPerDino[dino.name] = 0;
+        // 60% small (7), 40% large (8)
+        std::uniform_int_distribution<> amberRoll(0, 9);
+        return (amberRoll(gen) < 6) ? 7 : 8;
     }
-
-    // Count collectible types for debug
-    int fossilCountFinal = 0, amberCount = 0, trashCount = 0;
-    for (const auto& c : m_collectibles)
+    else
     {
-        if (c.collectibleIndex < 7) fossilCountFinal++;
-        else if (c.collectibleIndex < 9) amberCount++;
-        else trashCount++;
+        std::uniform_int_distribution<> trashDist(9, 11);
+        return trashDist(gen);
     }
-
-    std::cout << "FINAL COLLECTIBLE COUNT \n";
-    std::cout << "Total: " << m_collectibles.size() << " | Fossils: " << fossilCountFinal << " | Amber: " << amberCount << " | Trash: " << trashCount << "\n";
-}
-
-//------------------------------------------------------------
-// generateFossilCollectibles
-// Purpose: Spawn only fossil pieces (indices 0-6)
-//------------------------------------------------------------
-void FossilManager::generateFossilCollectibles(int totalRows, int totalCols, float tileSize, 
-    float windowWidth, float windowHeight, int fossilCount)
-{
-    // Calculate the offset to center the grid on screen
-    float offsetY = windowHeight / 2.0f;
-    float offsetX = (windowWidth - (totalCols * tileSize)) / 2.0f;
-
-    // === RANDOM NUMBER GENERATION ===
-    std::random_device rd;
-    std::mt19937 gen(rd());
-
-    // Skip the first 6 rows (topsoil/near-surface area)
-    // But cap at row 35 so fossils aren't spawned too deep
-    int minRow = 6;
-    int maxRow = std::min(35, totalRows - 1);
-
-    std::uniform_int_distribution<> rowDist(minRow, maxRow);
-    std::uniform_int_distribution<> colDist(0, totalCols - 1);
-    std::uniform_int_distribution<> fossilTypeDist(0, 6); // 7 fossil types
-
-    const sf::Texture& texRef = m_collectibleTextures[0];
-
-    std::cout << "Generating " << fossilCount << " fossil collectibles...\n";
-
-    //  SPAWN FOSSILS 
-    for (int i = 0; i < fossilCount; ++i)
-    {
-        // Find unique position
-        int row, col;
-        int attempts = 0;
-        const int maxAttempts = 50;
-
-        do
-        {
-            row = rowDist(gen);
-            col = colDist(gen);
-            attempts++;
-        } while (isPositionOccupied(row, col) && attempts < maxAttempts);
-
-        if (attempts >= maxAttempts)
-            continue;
-
-        // Calculate world position
-        float xPos = col * tileSize + offsetX + (tileSize / 2.0f);
-        float yPos = row * tileSize + offsetY + (tileSize / 2.0f);
-
-        // Random fossil type (0-6)
-        int collectibleIndex = fossilTypeDist(gen);
-
-        // CREATE THE COLLECTIBLE 
-        Collectible collectible(texRef, sf::Vector2f(xPos, yPos), collectibleIndex, row, col);
-
-        // SCALE & POSITION
-        collectible.sprite.setScale(sf::Vector2f(0.5f, 0.5f));
-        collectible.sprite.setOrigin(sf::Vector2f(texRef.getSize().x / 2.0f, texRef.getSize().y / 2.0f));
-
-        //  SET TEXTURE RECT FOR FRAME -
-        if (collectibleIndex < m_collectibleTypes.size())
-        {
-            const CollectibleType& config = m_collectibleTypes[collectibleIndex];
-            int frameIndex = config.frameIndex;
-            int frameX = frameIndex * config.frameWidth;
-            int frameY = 0;
-            collectible.sprite.setTextureRect(sf::IntRect({ frameX, frameY }, { config.frameWidth, config.frameHeight }));
-        }
-        else
-        {
-            // Fallback if config not loaded
-            int frameX = collectibleIndex * 64;
-            int frameY = 0;
-            collectible.sprite.setTextureRect(sf::IntRect({ frameX, frameY }, { 64, 64 }));
-        }
-
-        // Assign random dinosaur piece
-        assignRandomFossilToPiece(collectible);
-        collectible.monetaryValue = 0;
-
-        // Add to collection
-        m_collectibles.push_back(std::move(collectible));
-    }
-}
-
-//------------------------------------------------------------
-// generateAmberAndTrashCollectibles
-// Purpose: Spawn amber (7-8) and trash (9-11) pieces
-//------------------------------------------------------------
-void FossilManager::generateAmberAndTrashCollectibles(int totalRows, int totalCols, float tileSize, 
-    float windowWidth, float windowHeight, int amberTrashCount)
-{
-    // Calculate the offset to center the grid on screen
-    float offsetY = windowHeight / 2.0f;
-    float offsetX = (windowWidth - (totalCols * tileSize)) / 2.0f;
-
-    //  RANDOM NUMBER GENERATION 
-    std::random_device rd;
-    std::mt19937 gen(rd());
-
-    // Skip the first 1 rows (topsoil/near-surface area)
-    // But cap at row 40 so amber/trash aren't spawned too deep
-    int minRow = 1;
-    int maxRow = std::min(40, totalRows - 1);
-
-    std::uniform_int_distribution<> rowDist(minRow, maxRow);
-    std::uniform_int_distribution<> colDist(0, totalCols - 1);
-    std::uniform_int_distribution<> amberVsTrashDist(0, 9); // 60% amber, 40% trash
-
-    const sf::Texture& texRef = m_collectibleTextures[0];
-
-    std::cout << "Generating " << amberTrashCount << " amber/trash collectibles...\n";
-
-    //  SPAWN AMBER AND TRASH 
-    for (int i = 0; i < amberTrashCount; ++i)
-    {
-        // Find unique position
-        int row, col;
-        int attempts = 0;
-        const int maxAttempts = 50;
-
-        do
-        {
-            row = rowDist(gen);
-            col = colDist(gen);
-            attempts++;
-        } 
-        while (isPositionOccupied(row, col) && attempts < maxAttempts);
-
-        if (attempts >= maxAttempts)
-            continue;
-
-        // Calculate world position
-        float xPos = col * tileSize + offsetX + (tileSize / 2.0f);
-        float yPos = row * tileSize + offsetY + (tileSize / 2.0f);
-
-        //  DETERMINE TYPE: Amber or Trash 
-        int collectibleIndex;
-        int roll = amberVsTrashDist(gen);
-        
-        if (roll < 6)
-        {
-            // 60% Amber
-            if (roll < 3)
-                collectibleIndex = 7; // Small amber
-            else
-                collectibleIndex = 8; // Large amber
-        }
-        else
-        {
-            // 40% Trash (9-11)
-            std::uniform_int_distribution<> trashDist(9, 11);
-            collectibleIndex = trashDist(gen);
-        }
-
-        // CREATE THE COLLECTIBLE 
-        Collectible collectible(texRef, sf::Vector2f(xPos, yPos), collectibleIndex, row, col);
-
-        // SCALE & POSITION
-        collectible.sprite.setScale(sf::Vector2f(0.5f, 0.5f));
-        collectible.sprite.setOrigin(sf::Vector2f(texRef.getSize().x / 2.0f, texRef.getSize().y / 2.0f));
-
-        //  SET TEXTURE RECT
-        if (collectibleIndex < m_collectibleTypes.size())
-        {
-            const CollectibleType& config = m_collectibleTypes[collectibleIndex];
-            int frameIndex = config.frameIndex;
-            int frameX = frameIndex * config.frameWidth;
-            int frameY = 0;
-            collectible.sprite.setTextureRect(sf::IntRect({ frameX, frameY }, { config.frameWidth, config.frameHeight }));
-        }
-        else
-        {
-            // Fallback if config not loaded
-            int frameX = collectibleIndex * 64;
-            int frameY = 0;
-            collectible.sprite.setTextureRect(sf::IntRect(sf::Vector2i(frameX, frameY), sf::Vector2i(64, 64)));
-        }
-
-        //  ASSIGN MONETARY VALUE 
-        if (collectibleIndex == 7)
-        {
-            collectible.monetaryValue = 50;
-            std::cout << "Spawned Small Amber at (" << row << "," << col << ")\n";
-        }
-        else if (collectibleIndex == 8)
-        {
-            collectible.monetaryValue = 100;
-            std::cout << "Spawned Large Amber at (" << row << "," << col << ")\n";
-        }
-        else // Trash (9-11)
-        {
-            collectible.monetaryValue = 0;
-            std::cout << "Spawned Trash (idx=" << collectibleIndex << ") at (" << row << "," << col << ")\n";
-        }
-
-        // Add to collection
-        m_collectibles.push_back(std::move(collectible));
-    }
-}
-
-//------------------------------------------------------------
-// drawFossils
-// Purpose: Renders all collectibles to the screen (with frustum culling)
-//------------------------------------------------------------
-void FossilManager::drawFossils(sf::RenderWindow& window)
-{
-    // Get the current camera view bounds for culling
-    sf::View currentView = window.getView();
-    sf::Vector2f viewCenter = currentView.getCenter();
-    sf::Vector2f viewSize = currentView.getSize();
-    
-    // Calculate view bounds with proper FloatRect constructor (left, top, width, height)
-    float padding = 100.0f;
-    float viewLeft = viewCenter.x - viewSize.x / 2.0f - padding;
-    float viewTop = viewCenter.y - viewSize.y / 2.0f - padding;
-    float viewWidth = viewSize.x + padding * 2.0f;
-    float viewHeight = viewSize.y + padding * 2.0f;
-    
-    sf::FloatRect viewBounds(sf::Vector2f(viewLeft, viewTop), sf::Vector2f(viewWidth, viewHeight));
-
-    int drawnCount = 0, culledCount = 0, skippedPickedUp = 0;
-
-    // Loop through every collectible
-    for (auto& collectible : m_collectibles)
-    {
-        // Skip collectibles that have been picked up
-        if (collectible.gridRow == -1 || collectible.gridCol == -1)
-        {
-            skippedPickedUp++;
-            continue;
-        }
-
-        // Frustum culling: skip collectibles outside the view bounds
-        if (!viewBounds.findIntersection(collectible.sprite.getGlobalBounds()))
-        {
-            culledCount++;
-            continue;
-        }
-
-        drawnCount++;
-
-        // Check discovery status
-        if (!collectible.isDiscovered)
-        {
-            // UNDISCOVERED COLLECTIBLES: semi-transparent (alpha = 200 for better visibility)
-            collectible.sprite.setColor(sf::Color(255, 255, 255, 200));
-        }
-        else
-        {
-            // DISCOVERED COLLECTIBLES: Make fully visible (alpha = 255)
-            collectible.sprite.setColor(sf::Color::White);
-        }
-
-        // Draw the collectible sprite to the window
-        window.draw(collectible.sprite);
-    }
-
-    static int frameCount = 0;
-    frameCount++;
-    if (frameCount % 60 == 0)  // Print every 60 frames (once per second at 60fps)
-    {
-        std::cout << "Collectibles - Drawn: " << drawnCount << " | Culled: " << culledCount 
-            << " | Picked up (skipped): " << skippedPickedUp << "\n";
-    }
-}
-
-//------------------------------------------------------------
-// getCollectibleAtTile
-// Purpose: Check if there's an undiscovered collectible at a specific grid position
-//------------------------------------------------------------
-Collectible* FossilManager::getCollectibleAtTile(int row, int col)
-{
-    // Search through all collectibles
-    for (auto& collectible : m_collectibles)
-    {
-        // Check if this collectible is at the specified grid position
-        // AND hasn't been discovered yet
-        if (collectible.gridRow == row && collectible.gridCol == col && !collectible.isDiscovered)
-        {
-            return &collectible; // Return pointer to this collectible
-        }
-    }
-
-    // No collectible found at this position
-    return nullptr;
-}
-
-
-// getDiscoveredPiecesForDinosaur
-// Purpose: Get all discovered pieces for a specific dinosaur species
-std::vector<Collectible*> FossilManager::getDiscoveredPiecesForDinosaur(const std::string& dinoName)
-{
-    std::vector<Collectible*> pieces;
-
-    // Search through all collectibles
-    for (auto& collectible : m_collectibles)
-    {
-        // Check if this collectible is a fossil (index 0-6)
-        // AND belongs to the requested dinosaur
-        // AND is discovered
-        if (collectible.collectibleIndex < 7 && 
-            collectible.assignedDinosaurName == dinoName && 
-            collectible.isDiscovered)
-        {
-            pieces.push_back(&collectible);
-        }
-    }
-
-    // Return the collection of discovered pieces
-    // If all 4 pieces found, pieces.size() will be 4
-    return pieces;
-}
-
-int FossilManager::getDiscoveredCount() const
-{
-    int count = 0;
-
-    // Loop through all collectibles and count the discovered ones
-    for (const auto& collectible : m_collectibles)
-    {
-        if (collectible.isDiscovered)
-        {
-            count++;
-        }
-    }
-
-    return count;
-}
-
-//------------------------------------------------------------
-// isPositionOccupied
-// Purpose: Check if a grid position already has a collectible
-// Returns true if a collectible is already there, false if empty prevent collectibles from spawning on top of each other
-//------------------------------------------------------------
-bool FossilManager::isPositionOccupied(int row, int col) const
-{
-    // Search through all existing collectibles
-    for (const auto& collectible : m_collectibles)
-    {
-        // If we find a collectible at this exact position
-        if (collectible.gridRow == row && collectible.gridCol == col)
-        {
-            return true; // Position is occupied
-        }
-    }
-
-    // No collectible found at this position
-    return false;
-}
-
-//------------------------------------------------------------
-// hasDinosaurSkeleton
-// Purpose: Check if all 4 pieces of a dinosaur have been collected
-//------------------------------------------------------------
-bool FossilManager::hasDinosaurSkeleton(const std::string& dinoName) const
-{
-    // Get the dinosaur data
-    for (const auto& dino : m_dinosaurData)
-    {
-        if (dino.name == dinoName)
-        {
-            // Found the dinosaur - it needs all of its pieces
-            // Count how many unique pieces we have discovered
-            std::vector<std::string> foundPieces;
-
-            for (const auto& collectible : m_collectibles)
-            {
-                if (collectible.collectibleIndex < 7 && 
-                    collectible.assignedDinosaurName == dinoName && 
-                    collectible.isDiscovered)
-                {
-                    // Check if we already have this piece ID
-                    bool hasPiece = false;
-                    for (const auto& found : foundPieces)
-                    {
-                        if (found == collectible.assignedPieceId)
-                        {
-                            hasPiece = true;
-                            break;
-                        }
-                    }
-
-                    // Add new unique piece
-                    if (!hasPiece)
-                    {
-                        foundPieces.push_back(collectible.assignedPieceId);
-                    }
-                }
-            }
-
-            // Check if we have all pieces (4 for each dino)
-            return foundPieces.size() >= dino.pieces.size();
-        }
-    }
-
-    // Dinosaur not found
-    return false;
 }

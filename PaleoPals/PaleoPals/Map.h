@@ -62,18 +62,20 @@ public:
 
     void removeTile(int row, int col);
     void removeTile(int row, int col, Player& player); // Auto-pickup version
+
     int getTileHardness(int row, int col) const;
+    int getTileCurrentHP(int row, int col) const;
+
+    void damageTile(int row, int col, int dmg);
 
     void drawMap(sf::RenderWindow& window);
+    void drawDebug(sf::RenderWindow& window);
 
     void updateHover(const sf::RenderWindow& window, float tileSize, int cols);
-    void drawDebug(sf::RenderWindow& window);
-    void damageTile(int row, int col, int dmg);
     void toggleDebugMode();
-
     void handleMouseHold(const sf::RenderWindow& window, float tileSize, int cols);
+
     sf::Vector2f tileToWorld(sf::Vector2i tilePos) const;
-    int getTileCurrentHP(int row, int col) const;
 
     // update museum sprite
 
@@ -89,12 +91,12 @@ public:
 
     //fossil system
     FossilManager& getFossilManager() { return m_fossilManager; }
-
-    // Direct access to buildings (for click detection in Game)
     Museum& getMuseum() { return m_museum; }
     Trader& getTrader() { return m_trader; }
 
-
+    void addLadder(int row, int col);
+    void removeLadder(int row, int col);
+    bool hasLadder(int row, int col) const;
 
 private:
 
@@ -104,8 +106,6 @@ private:
 
     int m_rowsGenerated = 0;      // How many rows are currently generated
     float m_tileSize = 0.f;
-    //int m_totalRows = 0;  // the TOTAL intended depth
-    //int m_batchSize = 50; // how many rows to generate at once
 
     float m_windowWidth = 0.f;
     float m_windowHeight = 0.f;
@@ -115,6 +115,7 @@ private:
 
     std::vector<LayerType> m_layerTypes; // list of all terrain textures
     std::vector<Tile> m_tiles;           // grid of tiles created from those textures
+    std::vector<bool> m_ladders; 
 
     int m_hoveredIndex = -1;
     sf::RectangleShape m_hoverOutline;
@@ -122,16 +123,9 @@ private:
 
     Museum m_museum;
     Trader m_trader;
-
     FossilManager m_fossilManager;
 
-    // Ladder supports: store indices of tiles that have ladder/support squares
-    std::vector<bool> m_ladders; // parallel to m_tiles, true means ladder present
 
-public:
-    void addLadder(int row, int col);
-    void removeLadder(int row, int col);
-    bool hasLadder(int row, int col) const;
 };
 
 #endif // !MAP_H
