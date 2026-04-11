@@ -251,7 +251,8 @@ void MuseumInterior::draw(sf::RenderWindow& window)
     {
         DinoDisplay& dino = *m_dinos[m_currentDinoIndex];
 		m_dinoNameText.setString(dino.name);
-        m_dinoNameText.setPosition(sf::Vector2f(WINDOW_X / 2.f - 180, 22.f));
+		m_dinoNameText.setOrigin(sf::Vector2f(m_dinoNameText.getLocalBounds().size.x / 2.f, m_dinoNameText.getLocalBounds().size.y / 2.f));
+        m_dinoNameText.setPosition(sf::Vector2f(WINDOW_X / 2.f, 190.f));
 		
         // Draw the dino background silhouette centred on screen
         sf::Vector2u bgSize = dino.backgroundTex.getSize();
@@ -277,7 +278,7 @@ void MuseumInterior::draw(sf::RenderWindow& window)
                 m_humanSprite.setOrigin(sf::Vector2f(static_cast<float>(humanSize.x) / 2.f, static_cast<float>(humanSize.y) / 2.f));
                 m_humanSprite.setPosition(settings.humanPosition);
                 m_humanSprite.setColor(sf::Color::White);
-                window.draw(m_humanSprite);
+                
             }
         }
 
@@ -300,8 +301,9 @@ void MuseumInterior::draw(sf::RenderWindow& window)
 
         // For now draw a small dark bar at the top
         sf::RectangleShape nameBar(sf::Vector2f(400.f, 30.f));
+		nameBar.setOrigin(sf::Vector2f(200.f, 15.f));
         nameBar.setFillColor(sf::Color(30, 30, 30, 200));
-        nameBar.setPosition(sf::Vector2f(WINDOW_X / 2.f - 200.f, 20.f));
+        nameBar.setPosition(sf::Vector2f(WINDOW_X / 2.f, 200.f));
         window.draw(nameBar);
 
         // Piece collection indicators (4 small squares near the bottom)
@@ -336,7 +338,7 @@ void MuseumInterior::draw(sf::RenderWindow& window)
     window.draw(m_leftArrow);
     window.draw(m_rightArrow);
     window.draw(m_backSprite);
-
+    window.draw(m_humanSprite);
     // Restore previous (world) view
     window.setView(prev);
 }

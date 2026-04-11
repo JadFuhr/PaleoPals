@@ -20,6 +20,12 @@ Game::Game() :
     m_menu.initMenu();
     m_pause.initPauseMenu();
 
+    m_uiFont.openFromFile("ASSETS/FONTS/Jersey20-Regular.ttf");
+    m_moneyText.setFont(m_uiFont);
+    m_moneyText.setCharacterSize(28);
+    m_moneyText.setFillColor(sf::Color::Yellow);
+
+
 }
 
 //------------------------------------------------------------
@@ -114,6 +120,30 @@ void Game::processEvents()
                         {
                             std::cout << "Researcher hiring not yet implemented\n";
                         }
+                        if (action == HireAction::Upgrade1)
+                        {
+                            int cost = m_traderMenu.getUpgrade1Cost();
+
+                            if (m_player.getMoney() >= cost)
+                            {
+                                m_player.spendMoney(cost);
+                                m_player.pickaxeRadiusLevel++;
+                                m_traderMenu.upgrade1Level++;
+                            }
+                        }
+                        else if (action == HireAction::Upgrade2)
+                        {
+                            int cost = m_traderMenu.getUpgrade2Cost();
+
+                            if (m_player.getMoney() >= cost)
+                            {
+                                m_player.spendMoney(cost);
+                                m_player.damageLevel++;
+                                m_traderMenu.upgrade2Level++;
+                            }
+                        }
+
+
                         continue;
                     }
 
@@ -250,6 +280,7 @@ void Game::update(sf::Time t_deltaTime)
         //}
         //break;
 
+        m_moneyText.setString("Money: " + std::to_string(m_player.getMoney()));
 
 
     case GameState::Paused:
@@ -283,9 +314,11 @@ void Game::render()
         break;
 
     case GameState::Gameplay:
+
         m_window.setView(m_cameraView);
 
         m_map.drawMap(m_window);
+        m_window.draw(m_moneyText);
 
         // local scope block to limit scope of viewCenter, viewSize and viewBounds
         {
@@ -320,6 +353,7 @@ void Game::render()
         m_map.drawDebug(m_window);
 
         m_window.setView(m_window.getDefaultView());
+        m_window.draw(m_moneyText);
 
         // Draw paleontologists while paused too
         for (auto& p : m_paleontologists)

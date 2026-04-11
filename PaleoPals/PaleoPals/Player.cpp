@@ -590,22 +590,20 @@ void Player::updatePickaxe(const sf::RenderWindow& window, Map& map)
     m_pickaxeSprite.setPosition(playerPos + offset);
     m_pickaxeSprite.setRotation(sf::degrees(angle + 45));
 
-    // Compute tip AFTER setting sprite position
-    sf::Vector2f tipOffset(
-        std::cos(rad) * m_pickaxeTipDistance,
-        std::sin(rad) * m_pickaxeTipDistance
-    );
-
+    sf::Vector2f tipOffset(std::cos(rad) * m_pickaxeTipDistance, std::sin(rad) * m_pickaxeTipDistance);
     m_pickaxeTip = m_pickaxeSprite.getPosition() + tipOffset;
+
 }
   
 void Player::checkPickaxeHit(const sf::RenderWindow& window, Map& map)
 {
     if (!m_isSwinging) return;
 
-    const float radius = m_pickaxeTipRadius;
+    float radius = getPickaxeRadius();
+
     const sf::Vector2f tip = m_pickaxeTip;
     float tileSize = map.getTileSize();
+
     sf::Vector2f bodyCentre = m_sprite.getPosition() - sf::Vector2f(0.f, tileSize * 0.8f);
     sf::Vector2i playerTile = worldToTile(bodyCentre, map);
 
@@ -617,27 +615,34 @@ void Player::checkPickaxeHit(const sf::RenderWindow& window, Map& map)
             return (dx * dx + dy * dy) <= (r * r);
         };
 
-    for (int r = playerTile.y - 2; r <= playerTile.y + 2; r++)
+    int range = static_cast<int>(std::ceil(radius / tileSize)) + 1;
+
+    for (int r = playerTile.y - range; r <= playerTile.y + range; r++)
     {
-        for (int c = playerTile.x - 2; c <= playerTile.x + 2; c++)
+        for (int c = playerTile.x - range; c <= playerTile.x + range; c++)
         {
             if (r < 0 || c < 0 || r >= map.getRowCount() || c >= map.getColumnCount())
                 continue;
 
             sf::Vector2f tilePos = map.tileToWorld({ c, r });
-            sf::FloatRect tileRect({ tilePos.x - tileSize / 2.f, tilePos.y - tileSize / 2.f }, { tileSize, tileSize });
+            sf::FloatRect tileRect(
+                { tilePos.x - tileSize / 2.f, tilePos.y - tileSize / 2.f },
+                { tileSize, tileSize }
+            );
 
             if (circleIntersectsRect(tip, radius, tileRect))
             {
                 if (map.getTileCurrentHP(r, c) > 0)
                 {
-                    map.damageTile(r, c, 1);
-                    return;
+                    int dmg = getPickaxeDamage();
+                    map.damageTile(r, c, dmg);
+                    // no return → can hit multiple tiles
                 }
             }
         }
     }
 }
+
 
 void Player::updatePickaxeAnimation(sf::Time dt)
 {
@@ -665,4 +670,15 @@ void Player::updatePickaxeAnimation(sf::Time dt)
     int top = 0;
 
     m_pickaxeSprite.setTextureRect(sf::IntRect({ left, top }, { frameWidth, frameHeight }));
+}
+
+
+float Player::getPickaxeRadius() const
+{
+    return m_pickaxeTipRadius * (1.0f + pickaxeRadiusLevel * 0.25f);
+}
+
+int Player::getPickaxeDamage() const
+{
+    return 1 + damageLevel; // each level adds +1 damage
 }

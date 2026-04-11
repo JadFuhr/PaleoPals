@@ -60,6 +60,28 @@ TraderMenu::TraderMenu()
     m_closeButton.setFillColor(sf::Color(200, 80, 80));
     m_closeButton.setOutlineColor(sf::Color(255, 255, 255));
     m_closeButton.setOutlineThickness(2.0f);
+
+    if (!m_font.openFromFile("ASSETS/FONTS/Jersey20-Regular.ttf"))
+    {
+        std::cout << "TraderMenu: failed to load font\n";
+    }
+
+    auto setupText = [&](sf::Text& text, const std::string& str)
+        {
+            text.setFont(m_font);
+            text.setString(str);
+            text.setCharacterSize(20);
+            text.setFillColor(sf::Color::White);
+        };
+
+    setupText(m_hirePaleoText, "Hire Paleontologist");
+    setupText(m_hireResearcherText, "Hire Researcher");
+    setupText(m_upgrade1Text, "Upgrade 1");
+    setupText(m_upgrade2Text, "Upgrade 2");
+    setupText(m_hiringTabText, "Hiring");
+    setupText(m_upgradesTabText, "Upgrades");
+
+
 }
 
 void TraderMenu::openAt(const sf::Vector2f& worldPos)
@@ -112,6 +134,16 @@ void TraderMenu::updateButtonPositions(const sf::RenderWindow& window)
 
     m_upgrade1Button.setPosition(sf::Vector2f(bgX + 50.0f, bgY + 100.0f));
     m_upgrade2Button.setPosition(sf::Vector2f(bgX + 50.0f, bgY + 190.0f));
+
+    m_hirePaleoText.setPosition(m_hirePaleontologistButton.getPosition() + sf::Vector2f(20.f, 15.f));
+    m_hireResearcherText.setPosition(m_hireResearcherButton.getPosition() + sf::Vector2f(20.f, 15.f));
+
+    m_upgrade1Text.setPosition(m_upgrade1Button.getPosition() + sf::Vector2f(20.f, 15.f));
+    m_upgrade2Text.setPosition(m_upgrade2Button.getPosition() + sf::Vector2f(20.f, 15.f));
+
+    m_hiringTabText.setPosition(m_hiringTabButton.getPosition() + sf::Vector2f(20.f, 10.f));
+    m_upgradesTabText.setPosition(m_upgradesTabButton.getPosition() + sf::Vector2f(20.f, 10.f));
+
 }
 
 HireAction TraderMenu::handleClick(const sf::Vector2f& screenPos, const sf::RenderWindow& window)
@@ -155,10 +187,14 @@ HireAction TraderMenu::handleClick(const sf::Vector2f& screenPos, const sf::Rend
     }
     else if (m_activeTab == ActiveTab::Upgrades)
     {
-        // Upgrades not implemented yet, just return None
-        if (containsPoint(m_upgrade1Button, screenPos) || containsPoint(m_upgrade2Button, screenPos))
+        // Upgrades 
+        if (containsPoint(m_upgrade1Button, screenPos) && !m_upgrade1Purchased)
         {
-            return HireAction::None;
+            return HireAction::Upgrade1;
+        }
+        if (containsPoint(m_upgrade2Button, screenPos) && !m_upgrade2Purchased)
+        {
+            return HireAction::Upgrade2;
         }
     }
 
@@ -174,6 +210,12 @@ HireAction TraderMenu::handleClick(const sf::Vector2f& screenPos, const sf::Rend
 
 void TraderMenu::draw(sf::RenderWindow& window)
 {
+
+    m_upgrade1Text.setString("Radius +" + std::to_string(upgrade1Level) +" ($" + std::to_string(getUpgrade1Cost()) + ")");
+
+    m_upgrade2Text.setString("Damage +" + std::to_string(upgrade2Level) +" ($" + std::to_string(getUpgrade2Cost()) + ")");
+
+
     if (!m_open) return;
 
     // Update button positions (same positions used for both draw and click detection)
@@ -193,27 +235,19 @@ void TraderMenu::draw(sf::RenderWindow& window)
     window.draw(m_hiringTabButton);
     window.draw(m_upgradesTabButton);
 
-    // Position and draw tab text labels
-    // Hiring tab label
-    sf::RectangleShape hiringLabel(sf::Vector2f(60.0f, 12.0f));
-    hiringLabel.setFillColor(sf::Color(255, 255, 255));
-    hiringLabel.setPosition(sf::Vector2f(bgX + 45.0f, bgY + 21.0f));
-    window.draw(hiringLabel);
-
-    // Upgrades tab label
-    sf::RectangleShape upgradesLabel(sf::Vector2f(75.0f, 12.0f));
-    upgradesLabel.setFillColor(sf::Color(255, 255, 255));
-    upgradesLabel.setPosition(sf::Vector2f(bgX + 200.0f, bgY + 21.0f));
-    window.draw(upgradesLabel);
+    window.draw(m_hiringTabText);
+    window.draw(m_upgradesTabText);
 
     // Draw active tab underline
     if (m_activeTab == ActiveTab::Hiring)
     {
         window.draw(m_hiringTabUnderline);
+
     }
     else
     {
         window.draw(m_upgradesTabUnderline);
+
     }
 
     // Draw close button (top right)
@@ -238,27 +272,10 @@ void TraderMenu::draw(sf::RenderWindow& window)
         window.draw(m_hirePaleontologistButton);
         window.draw(m_hireResearcherButton);
 
-        // Label: "Hire Paleontologist"
-        sf::RectangleShape paleLabel1(sf::Vector2f(35.0f, 10.0f));
-        paleLabel1.setFillColor(sf::Color(255, 255, 255));
-        paleLabel1.setPosition(sf::Vector2f(bgX + 63.0f, bgY + 107.0f));
-        window.draw(paleLabel1);
+        window.draw(m_hirePaleoText);
+        window.draw(m_hireResearcherText);
 
-        sf::RectangleShape paleLabel2(sf::Vector2f(100.0f, 10.0f));
-        paleLabel2.setFillColor(sf::Color(255, 255, 255));
-        paleLabel2.setPosition(sf::Vector2f(bgX + 100.0f, bgY + 107.0f));
-        window.draw(paleLabel2);
 
-        // Label: "Hire Researcher"
-        sf::RectangleShape reseLabel1(sf::Vector2f(35.0f, 10.0f));
-        reseLabel1.setFillColor(sf::Color(255, 255, 255));
-        reseLabel1.setPosition(sf::Vector2f(bgX + 63.0f, bgY + 197.0f));
-        window.draw(reseLabel1);
-
-        sf::RectangleShape reseLabel2(sf::Vector2f(75.0f, 10.0f));
-        reseLabel2.setFillColor(sf::Color(255, 255, 255));
-        reseLabel2.setPosition(sf::Vector2f(bgX + 100.0f, bgY + 197.0f));
-        window.draw(reseLabel2);
     }
     else if (m_activeTab == ActiveTab::Upgrades)
     {
@@ -266,18 +283,23 @@ void TraderMenu::draw(sf::RenderWindow& window)
         m_upgrade1Button.setPosition(sf::Vector2f(bgX + 50.0f, bgY + 100.0f));
         m_upgrade2Button.setPosition(sf::Vector2f(bgX + 50.0f, bgY + 190.0f));
 
+        if (m_upgrade1Purchased)
+        {
+            m_upgrade1Button.setFillColor(sf::Color(80, 80, 80));
+        }
+        if (m_upgrade2Purchased)
+        {
+            m_upgrade2Button.setFillColor(sf::Color(80, 80, 80));
+        }
+
         window.draw(m_upgrade1Button);
         window.draw(m_upgrade2Button);
 
-        // Placeholder labels for upgrades
-        sf::RectangleShape upgradeLabel1(sf::Vector2f(70.0f, 10.0f));
-        upgradeLabel1.setFillColor(sf::Color(255, 255, 255));
-        upgradeLabel1.setPosition(sf::Vector2f(bgX + 100.0f, bgY + 107.0f));
-        window.draw(upgradeLabel1);
 
-        sf::RectangleShape upgradeLabel2(sf::Vector2f(70.0f, 10.0f));
-        upgradeLabel2.setFillColor(sf::Color(255, 255, 255));
-        upgradeLabel2.setPosition(sf::Vector2f(bgX + 100.0f, bgY + 197.0f));
-        window.draw(upgradeLabel2);
+        window.draw(m_upgrade1Text);
+        window.draw(m_upgrade2Text);
+
+
+
     }
 }

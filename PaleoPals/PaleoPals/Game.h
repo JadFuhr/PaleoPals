@@ -40,6 +40,11 @@ private:
     void setupMap(); // loads and generates the map grid
     void moveCamera(sf::Time t_deltaTime);
 
+    bool upgradePickaxeRadius = false;
+    bool upgradeDamage = false;
+
+    sf::Font m_uiFont;
+    sf::Text m_moneyText{ m_uiFont };
 
 
     Map m_map;

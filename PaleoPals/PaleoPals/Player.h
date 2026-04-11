@@ -66,6 +66,10 @@ public:
     void checkPickaxeHit(const sf::RenderWindow& window, Map& map);
     void updatePickaxeAnimation(sf::Time dt);
 
+    float getPickaxeRadius() const;
+
+    int getPickaxeDamage() const;
+
     // Setters
     void setPosition(sf::Vector2f pos);
 
@@ -77,6 +81,11 @@ public:
     sf::Vector2f m_pickaxeTip;
     float m_pickaxeTipDistance = 32.f; 
     float m_pickaxeTipRadius = 6.f;    // collision circle radius
+
+    // upgrades
+    int pickaxeRadiusLevel = 0;
+    int damageLevel = 0;
+    void spendMoney(int amount) { m_money -= amount; }
 
 
 

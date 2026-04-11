@@ -8,7 +8,9 @@ enum class HireAction
 {
     None,
     HirePaleontologist,
-    HireResearcher
+    HireResearcher,
+	Upgrade1,
+	Upgrade2
 };
 
 // A larger tabbed UI for the trader interaction
@@ -25,6 +27,15 @@ public:
     // handle a click in screen coordinates, returns the action taken
     HireAction handleClick(const sf::Vector2f& screenPos, const sf::RenderWindow& window);
     void draw(sf::RenderWindow& window);
+
+    int upgrade1Level = 0;
+    int upgrade2Level = 0;
+
+    void markUpgrade1Purchased() { m_upgrade1Purchased = true; }
+    void markUpgrade2Purchased() { m_upgrade2Purchased = true; }
+
+    int getUpgrade1Cost() const { return 100 + upgrade1Level * 50; }
+    int getUpgrade2Cost() const { return 200 + upgrade2Level * 75; }
 
 private:
     // Helper to update all button positions (used by both draw and click detection)
@@ -64,6 +75,18 @@ private:
     // Close button
     sf::RectangleShape m_closeButton;
 
+    sf::Font m_font;
+    sf::Text m_hirePaleoText{ m_font };
+    sf::Text m_hireResearcherText{ m_font };
+    sf::Text m_upgrade1Text{ m_font };
+    sf::Text m_upgrade2Text{ m_font };
+    sf::Text m_hiringTabText{ m_font };
+    sf::Text m_upgradesTabText{ m_font };
+
+    // upgrade state
+    bool m_upgrade1Purchased = false;
+    bool m_upgrade2Purchased = false;
+   
 
 };
 
