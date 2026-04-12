@@ -57,6 +57,10 @@ private:
         std::string name;
         sf::Texture backgroundTex;
         sf::Sprite  backgroundSprite;
+        sf::Texture skinTex;
+        sf::Sprite  skinSprite{ skinTex };
+        bool hasSkin = false;
+        bool showSkin = false;
 
 
         // [0]=skull  [1]=torso  [2]=pelvis  [3]=tail
@@ -89,19 +93,25 @@ private:
     sf::Texture m_arrowsTex;
     sf::Sprite  m_leftArrow{ m_arrowsTex };
     sf::Sprite  m_rightArrow{ m_arrowsTex };
-    int         m_arrowFrameW = 0;
-    int         m_arrowFrameH = 0;
-    bool        m_hoverLeft = false;
-    bool        m_hoverRight = false;
+    int m_arrowFrameW = 0;
+    int m_arrowFrameH = 0;
+    bool m_hoverLeft = false;
+    bool m_hoverRight = false;
 
     sf::Texture m_backTex;
     sf::Sprite  m_backSprite{ m_backTex };
-    int         m_backFrameW = 0;
-    int         m_backFrameH = 0;
-    bool        m_hoverBack = false;
+    int m_backFrameW = 0;
+    int m_backFrameH = 0;
+    bool m_hoverBack = false;
 
     sf::Texture m_humanTex;
     sf::Sprite  m_humanSprite{ m_humanTex };
+
+
+    sf::Texture m_skinToggleTex;
+    sf::Sprite  m_skinToggleButton{m_skinToggleTex};
+
+    bool m_hoverSkinToggle = false;
 };
 
 #endif // MUSEUM_INTERIOR_H

@@ -26,6 +26,7 @@ struct DinosaurData
     std::string name;
     std::string category;
     std::string backgroundTexture;
+	std::string skinTexture;
 
     struct Piece
     {

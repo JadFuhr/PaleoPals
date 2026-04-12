@@ -74,6 +74,9 @@ bool FossilManager::loadFossilsFromConfig(const std::string& filepath)
             dino.name = dinoNode["name"].get<std::string>();
             dino.category = dinoNode["category"].get<std::string>();
             dino.backgroundTexture = dinoNode["background"].get<std::string>();
+            dino.skinTexture = dinoNode["skinTexture"].get<std::string>();
+            
+
 
             // Loop through each piece (skull, torso, pelvis, tail) for this dinosaur
             for (auto& pieceNode : dinoNode["pieces"])

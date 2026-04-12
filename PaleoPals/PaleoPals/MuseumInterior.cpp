@@ -11,6 +11,7 @@ MuseumInterior::MuseumInterior()
       m_rightArrow(m_arrowsTex),
       m_backSprite(m_backTex),
 	  m_interiorSprite(m_interiorTex),
+	  m_skinToggleButton(m_skinToggleTex),
 	  m_dinoNameText(m_font)
 {
 
@@ -74,6 +75,17 @@ MuseumInterior::MuseumInterior()
     m_humanSprite.setTextureRect(sf::IntRect({ 0, 0 }, { 72, 214 }));
     m_humanSprite.setOrigin(sf::Vector2f(36, 107));
 
+    if(!m_skinToggleTex.loadFromFile("ASSETS/IMAGES/Screens/SkinToggle.png"))
+    {
+        std::cout << "MuseumInterior: failed to load skin toggle texture\n";
+	}
+    m_skinToggleButton.setTexture(m_skinToggleTex);
+	m_skinToggleButton.setTextureRect(sf::IntRect({ 0, 0 }, { 241, 64 }));
+    m_skinToggleButton.setScale(sf::Vector2f(0.5f, 0.5f));
+    // skin toggle 
+    m_skinToggleButton.setPosition(sf::Vector2f(310, WINDOW_Y - m_backFrameH * m_backSprite.getScale().y - 224.f));
+
+
     if (!m_font.openFromFile("ASSETS/FONTS/Jersey20-Regular.ttf"))
     {
 		std::cout << "MuseumInterior: failed to load font\n";
@@ -125,6 +137,15 @@ bool MuseumInterior::loadAssets(const std::vector<DinosaurData>& dinoData)
             {
                 // Recreate the sprite with the loaded texture
                 display->pieceSprite[idx] = sf::Sprite(display->pieceTex[idx]);
+            }
+        }
+        
+        if (!data.skinTexture.empty())
+        {
+            if (display->skinTex.loadFromFile(data.skinTexture))
+            {
+                display->skinSprite = sf::Sprite(display->skinTex);
+                display->hasSkin = true;
             }
         }
 
@@ -198,6 +219,21 @@ bool MuseumInterior::handleClick(const sf::Vector2f& screenPos)
         }
     }
 
+    if (containsPoint(m_skinToggleButton, screenPos))
+    {
+        auto& dino = *m_dinos[m_currentDinoIndex];
+
+        bool complete = dino.collected[0] && dino.collected[1] &&
+            dino.collected[2] && dino.collected[3];
+
+        if (complete && dino.hasSkin)
+        {
+            dino.showSkin = !dino.showSkin;
+            std::cout << "Toggled skin: " << dino.showSkin << "\n";
+        }
+    }
+
+
     return false; // museum still open
 }
 
@@ -244,6 +280,7 @@ void MuseumInterior::draw(sf::RenderWindow& window)
     // Switch to default (screen) view so UI is fixed on screen
     sf::View prev = window.getView();
     window.setView(window.getDefaultView());
+
 	window.draw(m_interiorSprite);
 
     // Current dinosaur display
@@ -297,6 +334,7 @@ void MuseumInterior::draw(sf::RenderWindow& window)
             dino.pieceSprite[i].setPosition(settings.position);
 
             window.draw(dino.pieceSprite[i]);
+
         }
 
         // For now draw a small dark bar at the top
@@ -304,6 +342,7 @@ void MuseumInterior::draw(sf::RenderWindow& window)
 		nameBar.setOrigin(sf::Vector2f(200.f, 15.f));
         nameBar.setFillColor(sf::Color(30, 30, 30, 200));
         nameBar.setPosition(sf::Vector2f(WINDOW_X / 2.f, 200.f));
+
         window.draw(nameBar);
 
         // Piece collection indicators (4 small squares near the bottom)
@@ -330,15 +369,36 @@ void MuseumInterior::draw(sf::RenderWindow& window)
                 indicator.setOutlineColor(sf::Color(150, 150, 150));
             }
 
+            
+
             window.draw(indicator);
         }
+
+        if (dino.showSkin && dino.hasSkin)
+        {
+            sf::Vector2u skinSize = dino.skinTex.getSize();
+
+            auto settings = getDisplaySettings(dino.name, bgSize);
+
+            dino.skinSprite.setScale(sf::Vector2f(settings.scale, settings.scale));
+            dino.skinSprite.setOrigin(sf::Vector2f(skinSize.x / 2.f, skinSize.y / 2.f));
+            dino.skinSprite.setPosition(settings.position);
+
+            std::cout << "showSkin=" << dino.showSkin
+                << " hasSkin=" << dino.hasSkin << "\n";
+
+            window.draw(dino.skinSprite);
+        }
+
     }
+
 
     window.draw(m_dinoNameText);
     window.draw(m_leftArrow);
     window.draw(m_rightArrow);
     window.draw(m_backSprite);
     window.draw(m_humanSprite);
+	window.draw(m_skinToggleButton);
     // Restore previous (world) view
     window.setView(prev);
 }
@@ -358,6 +418,9 @@ void MuseumInterior::updateButtonPositions(const sf::RenderWindow& window)
 
     // Back button – bottom-left corner
     m_backSprite.setPosition(sf::Vector2f(310.f, winSize.y - m_backFrameH * m_backSprite.getScale().y - 160.f));
+
+   
+
 }
 
 //------------------------------------------------------------
