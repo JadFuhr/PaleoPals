@@ -4,16 +4,13 @@
 #include "Map.h"
 #include <iostream>
 
-
-//------------------------------------------------------------
-// Constructor
-//------------------------------------------------------------
 Game::Game() :
     m_window{ sf::VideoMode{sf::Vector2u{WINDOW_X, WINDOW_Y},32 }, "PaleoPals" },
     m_DELETEexitGame{ false }
 {
     m_cameraView.setSize(sf::Vector2f(WINDOW_X, WINDOW_Y));
     m_cameraView.setCenter(sf::Vector2f(WINDOW_X / 2, WINDOW_Y / 2));
+    m_cameraView.zoom(0.9f);
     m_window.setView(m_cameraView);
 
     setupMap();
@@ -28,16 +25,10 @@ Game::Game() :
 
 }
 
-//------------------------------------------------------------
-// Destructor
-//------------------------------------------------------------
 Game::~Game()
 {
 }
 
-//------------------------------------------------------------
-// Main Game Loop
-//------------------------------------------------------------
 void Game::run()
 {
     sf::Clock clock;
@@ -61,9 +52,6 @@ void Game::run()
     }
 }
 
-//------------------------------------------------------------
-// Process Events (inputs, system events)
-//------------------------------------------------------------
 void Game::processEvents()
 {
     while (const std::optional newEvent = m_window.pollEvent())
@@ -191,9 +179,6 @@ void Game::processEvents()
     }
 }
 
-//------------------------------------------------------------
-// Handle key presses
-//------------------------------------------------------------
 void Game::processKeys(const std::optional<sf::Event> t_event)
 {
     const sf::Event::KeyPressed* newKeypress = t_event->getIf<sf::Event::KeyPressed>();
@@ -224,9 +209,6 @@ void Game::processKeys(const std::optional<sf::Event> t_event)
     }
 }
 
-//------------------------------------------------------------
-// Check continuous keyboard state
-//------------------------------------------------------------
 void Game::checkKeyboardState()
 {
     if (m_currentState == GameState::MainMenu)
@@ -246,9 +228,6 @@ void Game::checkKeyboardState()
 
 }
 
-//------------------------------------------------------------
-// Update the game world
-//------------------------------------------------------------
 void Game::update(sf::Time t_deltaTime)
 {
 
@@ -276,6 +255,20 @@ void Game::update(sf::Time t_deltaTime)
         {
 
             m_player.update(t_deltaTime, m_map, m_window);
+
+			sf::Vector2f playerPos = m_player.getPosition();
+
+            float mapWidth = m_map.getColumnCount() * m_map.getTileSize();
+            float mapHeight = m_map.getRowCount() * m_map.getTileSize();
+
+            sf::Vector2f halfView(m_cameraView.getSize().x / 2.f, m_cameraView.getSize().y / 2.f);
+            sf::Vector2f camPos = playerPos;
+
+            camPos.x = std::clamp(camPos.x, halfView.x, mapWidth - halfView.x);
+            camPos.y = std::clamp(camPos.y, halfView.y, mapHeight - halfView.y);
+
+            m_cameraView.setCenter(camPos);
+
 
             for (const auto& item : m_player.getNewPickups())
             {
@@ -318,9 +311,6 @@ void Game::update(sf::Time t_deltaTime)
     }
 }
 
-//------------------------------------------------------------
-// Render everything
-//------------------------------------------------------------
 void Game::render()
 {
 
@@ -365,6 +355,7 @@ void Game::render()
         }
 
         // draw trader menu over everything if open
+		m_window.setView(m_window.getDefaultView());
         m_traderMenu.draw(m_window);
         m_museumInterior.draw(m_window);
 
@@ -394,9 +385,6 @@ void Game::render()
     m_window.display();
 }
 
-//------------------------------------------------------------
-// Setup Map
-//------------------------------------------------------------
 void Game::setupMap()
 {
     if (!m_map.loadMapFromConfig("ASSETS/CONFIG/map.json"))
@@ -446,82 +434,3 @@ void Game::moveCamera(sf::Time t_deltaTime)
 
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//------------------------------------------------------------
-// Load the font and setup text
-//------------------------------------------------------------
-//void Game::setupTexts()
-//{
-//    if (!m_jerseyFont.openFromFile("ASSETS/FONTS/Jersey20-Regular.ttf"))
-//    {
-//        std::cout << "Problem loading font\n";
-//    }
-//
-//    m_DELETEwelcomeMessage.setFont(m_jerseyFont);
-//    m_DELETEwelcomeMessage.setString("PaleoPals");
-//    m_DELETEwelcomeMessage.setPosition(sf::Vector2f{ 205.0f, 240.0f });
-//    m_DELETEwelcomeMessage.setCharacterSize(96U);
-//    m_DELETEwelcomeMessage.setOutlineColor(sf::Color::Black);
-//    m_DELETEwelcomeMessage.setFillColor(sf::Color::Red);
-//    m_DELETEwelcomeMessage.setOutlineThickness(2.0f);
-//}
-
-//------------------------------------------------------------
-// Load texture and setup logo sprite
-//------------------------------------------------------------
-//void Game::setupSprites()
-//{
-//    if (!m_DELETElogoTexture.loadFromFile("ASSETS/IMAGES/SFML-LOGO.png"))
-//    {
-//        std::cout << "Problem loading logo\n";
-//    }
-//
-//    m_DELETElogoSprite.setTexture(m_DELETElogoTexture, true);
-//    m_DELETElogoSprite.setPosition(sf::Vector2f{ 150.0f, 50.0f });
-//}
-
-//------------------------------------------------------------
-// Load audio
-//------------------------------------------------------------
-//void Game::setupAudio()
-//{
-//    if (!m_DELETEsoundBuffer.loadFromFile("ASSETS/AUDIO/beep.wav"))
-//    {
-//        std::cout << "Error loading beep sound\n";
-//    }
-//
-//    m_DELETEsound.setBuffer(m_DELETEsoundBuffer);
-//    m_DELETEsound.play();
-//}

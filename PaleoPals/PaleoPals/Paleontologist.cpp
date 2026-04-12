@@ -2,9 +2,7 @@
 #include "Map.h"
 #include <iostream>
 
-//------------------------------------------------------------
-// Constructor
-//------------------------------------------------------------
+
 Paleontologist::Paleontologist()
 {
     std::cout << "Paleontologist constructor START\n";
@@ -52,16 +50,12 @@ Paleontologist::Paleontologist()
     std::cout << "Paleontologist constructor END\n";
 }
 
-//------------------------------------------------------------
-// Destructor
-//------------------------------------------------------------
+
 Paleontologist::~Paleontologist()
 {
 }
 
-//------------------------------------------------------------
-// Update
-//------------------------------------------------------------
+
 void Paleontologist::update(sf::Time deltaTime, Map& map)
 {
     if (!m_behaviorManager)
@@ -75,9 +69,7 @@ void Paleontologist::update(sf::Time deltaTime, Map& map)
     updateProgressBar();
 }
 
-//------------------------------------------------------------
-// Update Animation
-//------------------------------------------------------------
+
 void Paleontologist::updateAnimation(sf::Time deltaTime)
 {
     BehaviorState currentState = getCurrentState();
@@ -104,9 +96,7 @@ void Paleontologist::updateAnimation(sf::Time deltaTime)
     }
 }
 
-//------------------------------------------------------------
-// Set Animation Frame
-//------------------------------------------------------------
+
 void Paleontologist::setFrame(int frame)
 {
     if (frame < 0 || frame >= m_totalFrames)
@@ -127,9 +117,7 @@ void Paleontologist::setFrame(int frame)
     m_sprite.setTextureRect(sf::IntRect({ xOffset, 0 }, { m_frameWidth, m_frameHeight }));
 }
 
-//------------------------------------------------------------
-// Draw
-//------------------------------------------------------------
+
 void Paleontologist::draw(sf::RenderWindow& window)
 {
     window.draw(m_sprite);
@@ -144,25 +132,19 @@ void Paleontologist::draw(sf::RenderWindow& window)
     }
 }
 
-//------------------------------------------------------------
-// Move
-//------------------------------------------------------------
+
 void Paleontologist::move(sf::Vector2f direction)
 {
     m_sprite.move(direction);
 }
 
-//------------------------------------------------------------
-// Get current behavior state
-//------------------------------------------------------------
+
 BehaviorState Paleontologist::getCurrentState() const
 {
     return m_behaviorManager->getCurrentState();
 }
 
-//------------------------------------------------------------
-// Update progress bar position and size
-//------------------------------------------------------------
+
 void Paleontologist::updateProgressBar()
 {
     sf::Vector2f spritePos = m_sprite.getPosition();

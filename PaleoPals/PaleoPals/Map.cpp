@@ -528,8 +528,6 @@ void Map::drawDebug(sf::RenderWindow& window)
     }
 }
 
-// coordinate helpers
-
 sf::Vector2f Map::tileToWorld(sf::Vector2i tilePos) const
 {
     float x = tilePos.x * m_tileSize + (m_windowWidth - m_cols * m_tileSize) / 2.0f + m_tileSize / 2.0f;
@@ -541,9 +539,6 @@ bool Map::isPointOnTrader(const sf::Vector2f& worldPos) const
     return m_trader.containsPoint(worldPos);
 }
 
-
-// building updates 
-
 void Map::updateMuseum(sf::RenderWindow& window)
 {
     m_museum.updateMuseumHover(window);
@@ -553,8 +548,6 @@ void Map::updateTrader(sf::RenderWindow& window)
 {
     m_trader.updateTraderHover(window);
 }
-
-// ladder helpers 
 
 void Map::addLadder(int row, int col)
 {

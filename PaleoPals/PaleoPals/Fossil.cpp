@@ -11,10 +11,6 @@ FossilManager::FossilManager()
 {
 }
 
-//------------------------------------------------------------
-// loadFossilsFromConfig
-// Purpose: Reads the JSON config file and extracts dinosaur data
-//------------------------------------------------------------
 bool FossilManager::loadFossilsFromConfig(const std::string& filepath)
 {
     // Open the JSON file for reading
@@ -126,17 +122,12 @@ bool FossilManager::loadFossilsFromConfig(const std::string& filepath)
     return true;
 }
 
-
-// Called by Map after generateGrid
 void FossilManager::cacheGridOffsets(float offsetX, float offsetY)
 {
     m_cachedOffsetX = offsetX;
     m_cachedOffsetY = offsetY;
 }
 
-
-// Called every time a tile is fully destroyed.
-// Rolls m_spawnChancePercent; on success, builds a Collectible
 bool FossilManager::trySpawnCollectible(int row, int col, float tileSize, float windowWidth, float windowHeight)
 {
     if (!m_textureLoaded)
@@ -232,10 +223,6 @@ Collectible* FossilManager::getCollectibleNearTile(int playerRow, int playerCol,
     return nullptr;
 }
 
-//------------------------------------------------------------
-// assignRandomFossilToPiece
-// Purpose: Randomly assign a dinosaur piece to a fossil collectible
-//------------------------------------------------------------
 void FossilManager::assignRandomFossilToPiece(Collectible& collectible)
 {
     if (m_dinosaurData.empty())
@@ -264,11 +251,6 @@ void FossilManager::assignRandomFossilToPiece(Collectible& collectible)
     collectible.assignedCategory = selectedDino.category;
 }
 
-// pickRandomCollectibleIndex
-// Weighted distribution:
-//   Fossils (0-6)  60%
-//   Amber   (7-8)  25%   (small amber more common than large)
-//   Trash   (9-11) 15%
 int FossilManager::pickRandomCollectibleIndex()
 {
     static std::random_device rd;
@@ -277,7 +259,7 @@ int FossilManager::pickRandomCollectibleIndex()
 
     int r = roll(gen);
 
-    if (r < 10)
+    if (r < 15)
     {
         std::uniform_int_distribution<> fossilDist(0, 6);
         return fossilDist(gen);

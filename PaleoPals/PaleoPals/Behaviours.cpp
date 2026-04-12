@@ -9,9 +9,7 @@
 #include <ctime>
 #include <limits>
 
-//------------------------------------------------------------
-// Behavior Manager Implementation
-//------------------------------------------------------------
+
 BehaviorManager::BehaviorManager() : m_currentState(BehaviorState::Idle)
 {
     // Seed random for behavior decisions
@@ -64,9 +62,7 @@ void BehaviorManager::changeState(BehaviorState newState, Paleontologist* agent)
     std::cout << "AI State changed to: " << static_cast<int>(newState) << std::endl;
 }
 
-//------------------------------------------------------------
-// Idle Behavior Implementation
-//------------------------------------------------------------
+
 void IdleBehavior::enter(Paleontologist* agent)
 {
     m_idleTimer = 0.0f;
@@ -99,9 +95,7 @@ void IdleBehavior::exit(Paleontologist* agent)
 {
 }
 
-//------------------------------------------------------------
-// Wandering Behavior Implementation
-//------------------------------------------------------------
+
 void WanderingBehavior::enter(Paleontologist* agent)
 {
     m_wanderTimer = 0.0f;
@@ -190,9 +184,7 @@ void WanderingBehavior::pickRandomWalkableTarget(Paleontologist* agent, Map& map
     //std::cout << "AI: Picked wander target at X=" << m_targetPosition.x << "\n";
 }
 
-//------------------------------------------------------------
-// Searching Behavior Implementation
-//------------------------------------------------------------
+
 void SearchingBehavior::enter(Paleontologist* agent)
 {
     m_hasPath = false;
@@ -536,9 +528,7 @@ float SearchingBehavior::heuristic(sf::Vector2i a, sf::Vector2i b)
     return static_cast<float>(std::abs(a.x - b.x) + std::abs(a.y - b.y));
 }
 
-//------------------------------------------------------------
-// Mining Behavior Implementation
-//------------------------------------------------------------
+
 void MiningBehavior::enter(Paleontologist* agent)
 {
     m_miningProgress = 0.0f;

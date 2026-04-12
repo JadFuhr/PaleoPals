@@ -235,6 +235,8 @@ HireAction TraderMenu::handleClick(const sf::Vector2f& screenPos, const sf::Rend
 
 void TraderMenu::draw(sf::RenderWindow& window)
 {
+    sf::View prev = window.getView();
+    window.setView(window.getDefaultView());
 
     m_upgrade1Text.setString("Radius +" + std::to_string(upgrade1Level) +" ($" + std::to_string(getUpgrade1Cost()) + ")");
 
@@ -323,4 +325,8 @@ void TraderMenu::draw(sf::RenderWindow& window)
 
 
     }
+
+
+    window.setView(prev);
+
 }

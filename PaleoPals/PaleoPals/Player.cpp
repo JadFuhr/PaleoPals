@@ -4,9 +4,6 @@
 #include <iostream>
 #include <cmath>
 
-//------------------------------------------------------------
-// Constructor
-//------------------------------------------------------------
 Player::Player()
 {
     std::cout << "Player constructor START\n";
@@ -49,16 +46,10 @@ Player::Player()
     std::cout << "Player constructor END\n";
 }
 
-//------------------------------------------------------------
-// Destructor
-//------------------------------------------------------------
 Player::~Player()
 {
 }
 
-//------------------------------------------------------------
-// Update
-//------------------------------------------------------------
 void Player::update(sf::Time deltaTime, Map& map, const sf::RenderWindow& window)
 {
     handleInput(deltaTime, map);
@@ -91,9 +82,6 @@ void Player::update(sf::Time deltaTime, Map& map, const sf::RenderWindow& window
 
 }
 
-//------------------------------------------------------------
-// Handle Input
-//------------------------------------------------------------
 void Player::handleInput(sf::Time deltaTime, Map& map)
 {
 
@@ -145,9 +133,6 @@ void Player::handleInput(sf::Time deltaTime, Map& map)
     eWasPressed = eIsPressed;
 }
 
-//------------------------------------------------------------
-// Apply Physics
-//------------------------------------------------------------
 void Player::applyPhysics(sf::Time deltaTime, Map& map)
 {
 
@@ -180,18 +165,6 @@ void Player::applyPhysics(sf::Time deltaTime, Map& map)
     }
 }
 
-//------------------------------------------------------------
-// Check Collisions
-//
-// The player sprite origin is at (frameWidth/2, frameHeight) i.e. bottom-centre.
-// At scale 0.2 the visible half-width is roughly (192*0.2)/2 = 19.2 px and the
-// height is 192*0.2 = 38.4 px, but we use a tighter hitbox so the
-// player fits inside a single-tile tunnel.
-//
-// playerPos.y  == bottom of the player (feet)
-// playerPos.y - playerHeight == top of the player (head)
-// playerPos.x  == horizontal centre of the player
-//------------------------------------------------------------
 void Player::checkCollisions(Map& map)
 {
     float tileSize = map.getTileSize();
@@ -333,9 +306,6 @@ void Player::checkCollisions(Map& map)
     }
 }
 
-//------------------------------------------------------------
-// Try Pickup Collectible
-//------------------------------------------------------------
 void Player::tryPickupCollectible(Map& map)
 {
     sf::Vector2f playerPos = m_sprite.getPosition();
@@ -403,9 +373,6 @@ void Player::tryPickupCollectible(Map& map)
     }
 }
 
-//------------------------------------------------------------
-// Update Animation
-//------------------------------------------------------------
 void Player::updateAnimation(sf::Time deltaTime)
 {
     // Idle and Mining: use frame 0
@@ -428,9 +395,6 @@ void Player::updateAnimation(sf::Time deltaTime)
     }
 }
 
-//------------------------------------------------------------
-// Set Frame
-//------------------------------------------------------------
 void Player::setFrame(int frame)
 {
     if (frame < 0 || frame >= m_totalFrames)
@@ -461,9 +425,6 @@ void Player::setFrame(int frame)
     m_sprite.setScale(scale);
 }
 
-//------------------------------------------------------------
-// Draw
-//------------------------------------------------------------
 void Player::draw(sf::RenderWindow& window)
 {
     // Draw interaction radius (debug)
@@ -482,9 +443,6 @@ void Player::draw(sf::RenderWindow& window)
 
 }
 
-//------------------------------------------------------------
-// World to Tile Conversion
-//------------------------------------------------------------
 sf::Vector2i Player::worldToTile(sf::Vector2f worldPos, Map& map)
 {
     float tileSize = map.getTileSize();
@@ -497,9 +455,6 @@ sf::Vector2i Player::worldToTile(sf::Vector2f worldPos, Map& map)
     return sf::Vector2i(col, row);
 }
 
-//------------------------------------------------------------
-// Tile to World Conversion
-//------------------------------------------------------------
 sf::Vector2f Player::tileToWorld(sf::Vector2i tilePos, Map& map)
 {
     float tileSize = map.getTileSize();
@@ -512,9 +467,6 @@ sf::Vector2f Player::tileToWorld(sf::Vector2i tilePos, Map& map)
     return sf::Vector2f(x, y);
 }
 
-//------------------------------------------------------------
-// Set Position
-//------------------------------------------------------------
 void Player::setPosition(sf::Vector2f pos)
 {
     m_sprite.setPosition(pos);
@@ -530,10 +482,6 @@ float Player::getJumpForce()
     return m_jumpForce + (jumpLevel * -40.0f);
 }
 
-
-//------------------------------------------------------------
-// Collect Fossil
-//------------------------------------------------------------
 void Player::collectFossil(const std::string& dinosaurName, const std::string& pieceId, const std::string& category)
 {
     CollectedItem item;
@@ -551,9 +499,6 @@ void Player::collectFossil(const std::string& dinosaurName, const std::string& p
     std::cout << "✓ Collected: " << item.name << "\n";
 }
 
-//------------------------------------------------------------
-// Collect Amber (and add to money)
-//------------------------------------------------------------
 void Player::collectAmber(int monetaryValue)
 {
     CollectedItem item;
@@ -568,9 +513,6 @@ void Player::collectAmber(int monetaryValue)
     std::cout << "✓ " << item.name << " (+$" << monetaryValue << " | Total: $" << m_money << ")\n";
 }
 
-//------------------------------------------------------------
-// Collect Trash (worthless)
-//------------------------------------------------------------
 void Player::collectTrash()
 {
     CollectedItem item;
@@ -668,7 +610,6 @@ void Player::checkPickaxeHit(const sf::RenderWindow& window, Map& map)
 
 }
 
-
 void Player::updatePickaxeAnimation(sf::Time dt)
 {
     m_pickaxeAnimationTimer += dt.asSeconds();
@@ -696,7 +637,6 @@ void Player::updatePickaxeAnimation(sf::Time dt)
 
     m_pickaxeSprite.setTextureRect(sf::IntRect({ left, top }, { frameWidth, frameHeight }));
 }
-
 
 float Player::getPickaxeRadius() const
 {

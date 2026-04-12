@@ -4,7 +4,6 @@
 
 Museum::Museum() = default;
 
-
 bool Museum::loadMuseumFromConfig(const nlohmann::json& data)
 {
 

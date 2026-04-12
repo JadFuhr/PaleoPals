@@ -3,9 +3,6 @@
 #include <iostream>
 #include <algorithm>
 
-//------------------------------------------------------------
-// Constructor
-//------------------------------------------------------------
 MuseumInterior::MuseumInterior()
     : m_leftArrow(m_arrowsTex),
       m_rightArrow(m_arrowsTex),
@@ -82,8 +79,7 @@ MuseumInterior::MuseumInterior()
     m_skinToggleButton.setTexture(m_skinToggleTex);
 	m_skinToggleButton.setTextureRect(sf::IntRect({ 0, 0 }, { 241, 64 }));
     m_skinToggleButton.setScale(sf::Vector2f(0.5f, 0.5f));
-    // skin toggle 
-    m_skinToggleButton.setPosition(sf::Vector2f(310, WINDOW_Y - m_backFrameH * m_backSprite.getScale().y - 224.f));
+   
 
 
     if (!m_font.openFromFile("ASSETS/FONTS/Jersey20-Regular.ttf"))
@@ -98,9 +94,6 @@ MuseumInterior::MuseumInterior()
 
 }
 
-// loadAssets
-// Loads per-dino textures from the paths in DinosaurData.
-// Called after FossilManager has finished loading the JSON.
 bool MuseumInterior::loadAssets(const std::vector<DinosaurData>& dinoData)
 {
     m_dinos.clear();
@@ -156,10 +149,6 @@ bool MuseumInterior::loadAssets(const std::vector<DinosaurData>& dinoData)
     return !m_dinos.empty();
 }
 
-//------------------------------------------------------------
-// onFossilCollected
-// Called by Player whenever a fossil piece is picked up
-//------------------------------------------------------------
 void MuseumInterior::onFossilCollected(const std::string& dinoName, const std::string& pieceId)
 {
     int idx = pieceIdToIndex(pieceId);
@@ -176,9 +165,6 @@ void MuseumInterior::onFossilCollected(const std::string& dinoName, const std::s
     }
 }
 
-//------------------------------------------------------------
-// open / close
-//------------------------------------------------------------
 void MuseumInterior::open()
 {
     m_open = true;
@@ -191,10 +177,6 @@ void MuseumInterior::close()
     m_open = false;
 }
 
-//------------------------------------------------------------
-// handleClick  (screen coordinates)
-// Returns true when the Back button was pressed (Game should close museum)
-//------------------------------------------------------------
 bool MuseumInterior::handleClick(const sf::Vector2f& screenPos)
 {
     if (!m_open) return false;
@@ -229,7 +211,7 @@ bool MuseumInterior::handleClick(const sf::Vector2f& screenPos)
         if (complete && dino.hasSkin)
         {
             dino.showSkin = !dino.showSkin;
-            std::cout << "Toggled skin: " << dino.showSkin << "\n";
+            
         }
     }
 
@@ -237,9 +219,6 @@ bool MuseumInterior::handleClick(const sf::Vector2f& screenPos)
     return false; // museum still open
 }
 
-//------------------------------------------------------------
-// update  – hover detection in screen coords
-//------------------------------------------------------------
 void MuseumInterior::update(const sf::RenderWindow& window)
 {
     if (!m_open) return;
@@ -270,9 +249,6 @@ void MuseumInterior::update(const sf::RenderWindow& window)
         { m_backFrameW, m_backFrameH }));
 }
 
-//------------------------------------------------------------
-// draw  – everything is in screen space (use default view)
-//------------------------------------------------------------
 void MuseumInterior::draw(sf::RenderWindow& window)
 {
     if (!m_open) return;
@@ -384,8 +360,7 @@ void MuseumInterior::draw(sf::RenderWindow& window)
             dino.skinSprite.setOrigin(sf::Vector2f(skinSize.x / 2.f, skinSize.y / 2.f));
             dino.skinSprite.setPosition(settings.position);
 
-            std::cout << "showSkin=" << dino.showSkin
-                << " hasSkin=" << dino.hasSkin << "\n";
+          
 
             window.draw(dino.skinSprite);
         }
@@ -403,9 +378,6 @@ void MuseumInterior::draw(sf::RenderWindow& window)
     window.setView(prev);
 }
 
-//------------------------------------------------------------
-// updateButtonPositions  (screen coords)
-//------------------------------------------------------------
 void MuseumInterior::updateButtonPositions(const sf::RenderWindow& window)
 {
     sf::Vector2u winSize = window.getSize();
@@ -419,15 +391,11 @@ void MuseumInterior::updateButtonPositions(const sf::RenderWindow& window)
     // Back button – bottom-left corner
     m_backSprite.setPosition(sf::Vector2f(310.f, winSize.y - m_backFrameH * m_backSprite.getScale().y - 160.f));
 
-   
+    // skin toggle 
+    m_skinToggleButton.setPosition(sf::Vector2f(310, winSize.y - m_backFrameH * m_backSprite.getScale().y - 224.f));
 
 }
 
-//------------------------------------------------------------
-// pieceIdToIndex
-// Maps a piece id string to [0]=skull [1]=torso [2]=pelvis [3]=tail
-// Works by looking for keywords anywhere in the id (case insensitive)
-//------------------------------------------------------------
 int MuseumInterior::pieceIdToIndex(const std::string& pieceId) const
 {
     // Lowercase copy for matching
@@ -443,14 +411,10 @@ int MuseumInterior::pieceIdToIndex(const std::string& pieceId) const
     return -1;
 }
 
-//------------------------------------------------------------
-// containsPoint helpers
-//------------------------------------------------------------
 bool MuseumInterior::containsPoint(const sf::Sprite& sprite, const sf::Vector2f& pt) const
 {
     return sprite.getGlobalBounds().contains(pt);
 }
-
   
 MuseumInterior::DisplaySettings MuseumInterior::getDisplaySettings(const std::string& dinoName, const sf::Vector2u& bgSize) const
 {
