@@ -142,6 +142,28 @@ void Game::processEvents()
                                 m_traderMenu.upgrade2Level++;
                             }
                         }
+                        if (action == HireAction::Upgrade3)
+                        {
+                            int cost = m_traderMenu.getUpgrade3Cost();
+                            if (m_player.getMoney() >= cost)
+                            {
+                                m_player.spendMoney(cost);
+                                m_player.pickupRadiusLevel++;
+                                m_traderMenu.upgrade3Level++;
+                            }
+                        }
+
+                        if (action == HireAction::Upgrade4)
+                        {
+                            int cost = m_traderMenu.getUpgrade4Cost();
+                            if (m_player.getMoney() >= cost)
+                            {
+                                m_player.spendMoney(cost);
+                                m_player.jumpLevel++;
+                                m_traderMenu.upgrade4Level++;
+                            }
+                        }
+
 
 
                         continue;

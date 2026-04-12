@@ -1,10 +1,10 @@
 {
   "map": {
     "layers": [
-      {"name": "Topsoil", "texture": "ASSETS/IMAGES/Terrain/Topsoil.png", "hardness": 4},
-      {"name": "Sediment", "texture": "ASSETS/IMAGES/Terrain/Sediment.png", "hardness": 8},
-      {"name": "Rock", "texture": "ASSETS/IMAGES/Terrain/Rock.png", "hardness": 12},
-      {"name": "Bedrock", "texture": "ASSETS/IMAGES/Terrain/Bedrock.png", "hardness": 16}
+      {"name": "Topsoil", "texture": "ASSETS/IMAGES/Terrain/Topsoil.png", "hardness": 5},
+      {"name": "Sediment", "texture": "ASSETS/IMAGES/Terrain/Sediment.png", "hardness": 30},
+      {"name": "Rock", "texture": "ASSETS/IMAGES/Terrain/Rock.png", "hardness": 200},
+      {"name": "Bedrock", "texture": "ASSETS/IMAGES/Terrain/Bedrock.png", "hardness": 500}
     ]
   },
 

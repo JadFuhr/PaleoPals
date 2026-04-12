@@ -55,6 +55,16 @@ TraderMenu::TraderMenu()
     m_upgrade2Button.setOutlineColor(sf::Color(200, 200, 200));
     m_upgrade2Button.setOutlineThickness(2.0f);
 
+    m_upgrade3Button.setSize(sf::Vector2f(250.f, 60.f));
+    m_upgrade3Button.setFillColor(sf::Color(180, 150, 100));
+    m_upgrade3Button.setOutlineColor(sf::Color(200, 200, 200));
+    m_upgrade3Button.setOutlineThickness(2.f);
+
+    m_upgrade4Button.setSize(sf::Vector2f(250.f, 60.f));
+    m_upgrade4Button.setFillColor(sf::Color(180, 150, 100));
+    m_upgrade4Button.setOutlineColor(sf::Color(200, 200, 200));
+    m_upgrade4Button.setOutlineThickness(2.f);
+
     // Close button (X in top right)
     m_closeButton.setSize(sf::Vector2f(30.0f, 30.0f));
     m_closeButton.setFillColor(sf::Color(200, 80, 80));
@@ -78,6 +88,8 @@ TraderMenu::TraderMenu()
     setupText(m_hireResearcherText, "Hire Researcher");
     setupText(m_upgrade1Text, "Upgrade 1");
     setupText(m_upgrade2Text, "Upgrade 2");
+    setupText(m_upgrade3Text, "Pickup Radius");
+    setupText(m_upgrade4Text, "Jump Height");
     setupText(m_hiringTabText, "Hiring");
     setupText(m_upgradesTabText, "Upgrades");
 
@@ -134,12 +146,17 @@ void TraderMenu::updateButtonPositions(const sf::RenderWindow& window)
 
     m_upgrade1Button.setPosition(sf::Vector2f(bgX + 50.0f, bgY + 100.0f));
     m_upgrade2Button.setPosition(sf::Vector2f(bgX + 50.0f, bgY + 190.0f));
+    m_upgrade3Button.setPosition(sf::Vector2f(bgX + 50.f, bgY + 280.f));
+    m_upgrade4Button.setPosition(sf::Vector2f(bgX + 50.f, bgY + 370.f));
 
     m_hirePaleoText.setPosition(m_hirePaleontologistButton.getPosition() + sf::Vector2f(20.f, 15.f));
     m_hireResearcherText.setPosition(m_hireResearcherButton.getPosition() + sf::Vector2f(20.f, 15.f));
 
     m_upgrade1Text.setPosition(m_upgrade1Button.getPosition() + sf::Vector2f(20.f, 15.f));
     m_upgrade2Text.setPosition(m_upgrade2Button.getPosition() + sf::Vector2f(20.f, 15.f));
+    m_upgrade3Text.setPosition(m_upgrade3Button.getPosition() + sf::Vector2f(20.f, 15.f));
+    m_upgrade4Text.setPosition(m_upgrade4Button.getPosition() + sf::Vector2f(20.f, 15.f));
+
 
     m_hiringTabText.setPosition(m_hiringTabButton.getPosition() + sf::Vector2f(20.f, 10.f));
     m_upgradesTabText.setPosition(m_upgradesTabButton.getPosition() + sf::Vector2f(20.f, 10.f));
@@ -196,6 +213,14 @@ HireAction TraderMenu::handleClick(const sf::Vector2f& screenPos, const sf::Rend
         {
             return HireAction::Upgrade2;
         }
+        if (containsPoint(m_upgrade3Button, screenPos))
+        {
+            return HireAction::Upgrade3;
+        }
+        if (containsPoint(m_upgrade4Button, screenPos))
+        {
+            return HireAction::Upgrade4;
+        }
     }
 
     // Click outside menu = close it
@@ -215,10 +240,13 @@ void TraderMenu::draw(sf::RenderWindow& window)
 
     m_upgrade2Text.setString("Damage +" + std::to_string(upgrade2Level) +" ($" + std::to_string(getUpgrade2Cost()) + ")");
 
+    m_upgrade3Text.setString("Pickup +" + std::to_string(upgrade3Level) + " ($" + std::to_string(getUpgrade3Cost()) + ")");
+
+    m_upgrade4Text.setString("Jump +" + std::to_string(upgrade4Level) + " ($" + std::to_string(getUpgrade4Cost()) + ")");
 
     if (!m_open) return;
 
-    // Update button positions (same positions used for both draw and click detection)
+    // Update button positions
     updateButtonPositions(window);
 
     // Draw overlay first (darkens everything behind)
@@ -279,26 +307,19 @@ void TraderMenu::draw(sf::RenderWindow& window)
     }
     else if (m_activeTab == ActiveTab::Upgrades)
     {
-        // Upgrades tab content (placeholder)
         m_upgrade1Button.setPosition(sf::Vector2f(bgX + 50.0f, bgY + 100.0f));
         m_upgrade2Button.setPosition(sf::Vector2f(bgX + 50.0f, bgY + 190.0f));
 
-        if (m_upgrade1Purchased)
-        {
-            m_upgrade1Button.setFillColor(sf::Color(80, 80, 80));
-        }
-        if (m_upgrade2Purchased)
-        {
-            m_upgrade2Button.setFillColor(sf::Color(80, 80, 80));
-        }
 
         window.draw(m_upgrade1Button);
         window.draw(m_upgrade2Button);
-
+        window.draw(m_upgrade3Button);
+        window.draw(m_upgrade4Button);
 
         window.draw(m_upgrade1Text);
         window.draw(m_upgrade2Text);
-
+        window.draw(m_upgrade3Text);
+        window.draw(m_upgrade4Text);
 
 
     }

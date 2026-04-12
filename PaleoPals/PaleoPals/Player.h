@@ -85,7 +85,21 @@ public:
     // upgrades
     int pickaxeRadiusLevel = 0;
     int damageLevel = 0;
+    int pickupRadiusLevel = 0;
+    int jumpLevel = 0;
+
+
+    // Physics
+    sf::Vector2f m_velocity;
+    float m_moveSpeed = 150.0f;
+    float m_jumpForce = -400.0f;
+    float m_gravity = 1200.0f;
+    bool m_isGrounded = false;
+    bool m_canJump = true;
+
     void spendMoney(int amount) { m_money -= amount; }
+    float getPickupRadius();
+    float getJumpForce();
 
 
 
@@ -115,13 +129,6 @@ private:
 	float m_pickaxeFrameTime = 0.01f; // 10ms per frame
 	int m_pickaxeTotalFrames = 4;
 
-    // Physics
-    sf::Vector2f m_velocity;
-    float m_moveSpeed = 150.0f;
-    float m_jumpForce = -400.0f;
-    float m_gravity = 1200.0f;
-    bool m_isGrounded = false;
-    bool m_canJump = true;
 
     // Player state
     PlayerState m_state = PlayerState::Idle;
@@ -144,6 +151,9 @@ private:
     bool isOnGround(Map& map);
     sf::Vector2i worldToTile(sf::Vector2f worldPos, Map& map);
     sf::Vector2f tileToWorld(sf::Vector2i tilePos, Map& map);
+
+    sf::CircleShape m_pickaxeDebugCircle;
+
 
 };
 

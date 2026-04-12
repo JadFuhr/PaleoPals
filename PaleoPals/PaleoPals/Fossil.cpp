@@ -274,12 +274,12 @@ int FossilManager::pickRandomCollectibleIndex()
 
     int r = roll(gen);
 
-    if (r < 60)
+    if (r < 10)
     {
         std::uniform_int_distribution<> fossilDist(0, 6);
         return fossilDist(gen);
     }
-    else if (r < 85)
+    else if (r < 95)
     {
         // 60% small (7), 40% large (8)
         std::uniform_int_distribution<> amberRoll(0, 9);

@@ -40,6 +40,12 @@ Player::Player()
     m_pickaxeSprite.setScale(sf::Vector2f(0.4f, 0.4f));
 
 
+    // Debug circle for pickaxe hit radius
+    m_pickaxeDebugCircle.setFillColor(sf::Color::Transparent);
+    m_pickaxeDebugCircle.setOutlineColor(sf::Color(255, 0, 0, 120)); // red outline
+    m_pickaxeDebugCircle.setOutlineThickness(1.5f);
+
+
     std::cout << "Player constructor END\n";
 }
 
@@ -116,7 +122,7 @@ void Player::handleInput(sf::Time deltaTime, Map& map)
     // Jumping
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space) && m_canJump && m_isGrounded)
     {
-        m_velocity.y = m_jumpForce;
+		m_velocity.y = getJumpForce();
         m_canJump = false;
         m_state = PlayerState::Jumping;
         //std::cout << "Player jumped!\n";
@@ -354,7 +360,7 @@ void Player::tryPickupCollectible(Map& map)
         sf::Vector2f collectiblePos = c.sprite.getPosition();
         sf::Vector2f diff = collectiblePos - bodyCentre;
         float distSq = diff.x * diff.x + diff.y * diff.y;
-		float pickupRadius = tileSize * 1.0f; // adjustable pickup radius (1 tiles)
+        float pickupRadius = getPickupRadius();
 
         if (distSq > pickupRadius * pickupRadius)
             continue;
@@ -470,6 +476,7 @@ void Player::draw(sf::RenderWindow& window)
 
     window.draw(m_sprite);
 
+    window.draw(m_pickaxeDebugCircle);
 
     m_sprite.setColor(sf::Color::Red);
 
@@ -512,6 +519,17 @@ void Player::setPosition(sf::Vector2f pos)
 {
     m_sprite.setPosition(pos);
 }
+
+float Player::getPickupRadius()
+{
+    return pickupRadius * (1.0f + pickupRadiusLevel * 0.15f);
+}
+
+float Player::getJumpForce()
+{
+    return m_jumpForce + (jumpLevel * -40.0f);
+}
+
 
 //------------------------------------------------------------
 // Collect Fossil
@@ -586,7 +604,7 @@ void Player::updatePickaxe(const sf::RenderWindow& window, Map& map)
     sf::Vector2f offset(std::cos(rad), std::sin(rad));
     offset *= m_pickaxeRadius;
 
-    // Set sprite position FIRST
+    // Set sprite position 
     m_pickaxeSprite.setPosition(playerPos + offset);
     m_pickaxeSprite.setRotation(sf::degrees(angle + 45));
 
@@ -641,6 +659,13 @@ void Player::checkPickaxeHit(const sf::RenderWindow& window, Map& map)
             }
         }
     }
+
+    // --- DEBUG VISUAL FOR PICKAXE RADIUS ---
+    float debugRadius = getPickaxeRadius();
+    m_pickaxeDebugCircle.setRadius(debugRadius);
+    m_pickaxeDebugCircle.setOrigin(sf::Vector2f(debugRadius, debugRadius));
+    m_pickaxeDebugCircle.setPosition(m_pickaxeTip);
+
 }
 
 
@@ -682,3 +707,4 @@ int Player::getPickaxeDamage() const
 {
     return 1 + damageLevel; // each level adds +1 damage
 }
+
