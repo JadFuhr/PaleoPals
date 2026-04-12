@@ -338,10 +338,13 @@ void Game::render()
     case GameState::Gameplay:
 
         m_window.setView(m_cameraView);
-
         m_map.drawMap(m_window);
+
+		m_window.setView(m_window.getDefaultView());
         m_window.draw(m_moneyText);
 
+
+		m_window.setView(m_cameraView);
         // local scope block to limit scope of viewCenter, viewSize and viewBounds
         {
             sf::Vector2f viewCenter = m_cameraView.getCenter();
