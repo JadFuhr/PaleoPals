@@ -135,7 +135,6 @@ void Player::handleInput(sf::Time deltaTime, Map& map)
 
 void Player::applyPhysics(sf::Time deltaTime, Map& map)
 {
-
     // Apply gravity
     m_velocity.y += m_gravity * deltaTime.asSeconds();
 
@@ -148,7 +147,7 @@ void Player::applyPhysics(sf::Time deltaTime, Map& map)
     // Move player
     m_sprite.move(m_velocity * deltaTime.asSeconds());
 
-    // Check ground collision
+    // Check ground/ceiling/wall collisions
     checkCollisions(map);
 
     // Update state based on velocity
@@ -163,7 +162,43 @@ void Player::applyPhysics(sf::Time deltaTime, Map& map)
             m_state = PlayerState::Falling;
         }
     }
+
+    // --- MAP BOUNDARY CLAMP (safe version that doesn't break jumping) ---
+    {
+        float tileSize = map.getTileSize();
+        int cols = map.getColumnCount();
+        int rows = map.getRowCount();
+
+        // These offsets match your grid placement
+        float offsetX = (WINDOW_X - cols * tileSize) / 2.0f;
+        float offsetY = WINDOW_Y / 2.0f;
+
+        // Horizontal clamp (left/right edges)
+        const float halfW = tileSize * 0.35f; // same as collision width
+        float minX = offsetX + halfW;
+        float maxX = offsetX + cols * tileSize - halfW;
+
+        sf::Vector2f pos = m_sprite.getPosition();
+
+        if (pos.x < minX) pos.x = minX;
+        if (pos.x > maxX) pos.x = maxX;
+
+        // Bottom clamp only (prevent falling past last row)
+        float maxY = offsetY + rows * tileSize - 1.0f;
+
+        if (pos.y > maxY)
+        {
+            pos.y = maxY;
+            m_velocity.y = 0;
+            m_isGrounded = true;
+        }
+
+        // IMPORTANT: no top clamp — allows jumping normally
+
+        m_sprite.setPosition(pos);
+    }
 }
+
 
 void Player::checkCollisions(Map& map)
 {
