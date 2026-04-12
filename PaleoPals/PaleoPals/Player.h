@@ -41,7 +41,7 @@ public:
     ~Player();
 
     // Core functions
-    void update(sf::Time deltaTime, Map& map, const sf::RenderWindow& window);
+    void update(sf::Time deltaTime, Map& map, const sf::RenderWindow& window, const sf::View& cameraView);
     void draw(sf::RenderWindow& window);
     void handleInput(sf::Time deltaTime, Map& map);
 
@@ -62,8 +62,8 @@ public:
     void collectTrash();
         
 	//pickaxe methods
-    void updatePickaxe(const sf::RenderWindow& window, Map& map);
-    void checkPickaxeHit(const sf::RenderWindow& window, Map& map);
+    void updatePickaxe(const sf::RenderWindow& window, Map& map, const sf::View& cameraView);
+    void checkPickaxeHit(const sf::RenderWindow& window, Map& map, const sf::View& cameraView);
     void updatePickaxeAnimation(sf::Time dt);
 
     float getPickaxeRadius() const;

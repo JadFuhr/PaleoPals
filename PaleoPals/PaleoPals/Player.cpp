@@ -21,11 +21,11 @@ Player::Player()
     m_sprite.setScale(sf::Vector2f(0.2f, 0.2f));
     m_sprite.setPosition(sf::Vector2f(400.0f, 300.0f));
 
-    m_pickupRadiusVisual.setRadius(pickupRadius);
-    m_pickupRadiusVisual.setOrigin(sf::Vector2f(pickupRadius, pickupRadius));
-    m_pickupRadiusVisual.setFillColor(sf::Color::Transparent);
-    m_pickupRadiusVisual.setOutlineColor(sf::Color(255, 255, 0, 80));
-    m_pickupRadiusVisual.setOutlineThickness(1.0f);
+    //m_pickupRadiusVisual.setRadius(pickupRadius);
+    //m_pickupRadiusVisual.setOrigin(sf::Vector2f(pickupRadius, pickupRadius));
+    //m_pickupRadiusVisual.setFillColor(sf::Color::Transparent);
+    //m_pickupRadiusVisual.setOutlineColor(sf::Color(255, 255, 0, 80));
+    //m_pickupRadiusVisual.setOutlineThickness(1.0f);
 
     if (!m_pickaxeTexture.loadFromFile("ASSETS/IMAGES/Items/pickaxe.png"))
     {
@@ -38,9 +38,9 @@ Player::Player()
 
 
     // Debug circle for pickaxe hit radius
-    m_pickaxeDebugCircle.setFillColor(sf::Color::Transparent);
-    m_pickaxeDebugCircle.setOutlineColor(sf::Color(255, 0, 0, 120)); // red outline
-    m_pickaxeDebugCircle.setOutlineThickness(1.5f);
+    //m_pickaxeDebugCircle.setFillColor(sf::Color::Transparent);
+    //m_pickaxeDebugCircle.setOutlineColor(sf::Color(255, 0, 0, 120)); // red outline
+    //m_pickaxeDebugCircle.setOutlineThickness(1.5f);
 
 
     std::cout << "Player constructor END\n";
@@ -50,14 +50,14 @@ Player::~Player()
 {
 }
 
-void Player::update(sf::Time deltaTime, Map& map, const sf::RenderWindow& window)
+void Player::update(sf::Time deltaTime, Map& map, const sf::RenderWindow& window, const sf::View& cameraView)
 {
     handleInput(deltaTime, map);
     applyPhysics(deltaTime, map);
     updateAnimation(deltaTime);
 
     // Update interaction radius position
-    m_pickupRadiusVisual.setPosition(m_sprite.getPosition() + sf::Vector2f(0.f, -16.f));
+    //m_pickupRadiusVisual.setPosition(m_sprite.getPosition() + sf::Vector2f(0.f, -16.f));
 
     bool mouseHeld = sf::Mouse::isButtonPressed(sf::Mouse::Button::Left);
 
@@ -67,8 +67,8 @@ void Player::update(sf::Time deltaTime, Map& map, const sf::RenderWindow& window
     if (m_isSwinging && m_pickaxeCooldown <= 0.0f)
     {
 		updatePickaxeAnimation(deltaTime);
-        updatePickaxe(window, map);
-		checkPickaxeHit(window, map);
+        updatePickaxe(window, map, cameraView);
+		checkPickaxeHit(window, map, cameraView);
         m_pickaxeCooldown = m_pickaxeHitDelay;
     }
 
@@ -427,8 +427,8 @@ void Player::setFrame(int frame)
 
 void Player::draw(sf::RenderWindow& window)
 {
-    // Draw interaction radius (debug)
-    window.draw(m_pickupRadiusVisual);
+    
+    //window.draw(m_pickupRadiusVisual);
 
     if (m_isSwinging)
     {
@@ -437,9 +437,9 @@ void Player::draw(sf::RenderWindow& window)
 
     window.draw(m_sprite);
 
-    window.draw(m_pickaxeDebugCircle);
+    //window.draw(m_pickaxeDebugCircle);
 
-    m_sprite.setColor(sf::Color::Red);
+    //m_sprite.setColor(sf::Color::Red);
 
 }
 
@@ -526,14 +526,14 @@ void Player::collectTrash()
     std::cout << "✓ Collected: Trash (worthless)\n";
 }
 
-void Player::updatePickaxe(const sf::RenderWindow& window, Map& map)
+void Player::updatePickaxe(const sf::RenderWindow& window, Map& map, const sf::View& cameraView)
 {
     sf::Vector2f playerPos = m_sprite.getPosition();
     playerPos.y -= 15.0f;
 
     // Mouse world position
     sf::Vector2i mousePixel = sf::Mouse::getPosition(window);
-    sf::Vector2f mouseWorld = window.mapPixelToCoords(mousePixel);
+    sf::Vector2f mouseWorld = window.mapPixelToCoords(mousePixel, cameraView);
 
     // Direction from player → mouse
     sf::Vector2f dir = mouseWorld - playerPos;
@@ -555,7 +555,7 @@ void Player::updatePickaxe(const sf::RenderWindow& window, Map& map)
 
 }
   
-void Player::checkPickaxeHit(const sf::RenderWindow& window, Map& map)
+void Player::checkPickaxeHit(const sf::RenderWindow& window, Map& map, const sf::View& cameraView)
 {
     if (!m_isSwinging) return;
 
