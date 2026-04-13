@@ -81,14 +81,20 @@
     <ClCompile Include="Fossil.cpp">
       <Filter>Source Files\Gameplay</Filter>
     </ClCompile>
-    <ClCompile Include="Player.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="MuseumInterior.cpp">
       <Filter>Source Files\Menus</Filter>
     </ClCompile>
     <ClCompile Include="TraderMenu.cpp">
       <Filter>Source Files\Menus</Filter>
+    </ClCompile>
+    <ClCompile Include="BehaviorTree.cpp">
+      <Filter>Source Files\Behaviours</Filter>
+    </ClCompile>
+    <ClCompile Include="Pathfinding.cpp">
+      <Filter>Source Files\Behaviours</Filter>
+    </ClCompile>
+    <ClCompile Include="Player.cpp">
+      <Filter>Source Files\Workers</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -122,13 +128,19 @@
     <ClInclude Include="Fossil.h">
       <Filter>Header Files\Gameplay</Filter>
     </ClInclude>
-    <ClInclude Include="TraderMenu.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="MuseumInterior.h">
+      <Filter>Header Files\Menus</Filter>
+    </ClInclude>
+    <ClInclude Include="BehaviorTree.h">
+      <Filter>Header Files\Behaviours</Filter>
+    </ClInclude>
+    <ClInclude Include="Pathfinding.h">
+      <Filter>Header Files\Behaviours</Filter>
     </ClInclude>
     <ClInclude Include="Player.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Workers</Filter>
     </ClInclude>
-    <ClInclude Include="MuseumInterior.h">
+    <ClInclude Include="TraderMenu.h">
       <Filter>Header Files\Menus</Filter>
     </ClInclude>
   </ItemGroup>

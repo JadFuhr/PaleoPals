@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="BehaviorTree.cpp" />
     <ClCompile Include="Behaviours.cpp" />
     <ClCompile Include="Fossil.cpp" />
     <ClCompile Include="Game.cpp" />
@@ -28,6 +29,7 @@
     <ClCompile Include="Museum.cpp" />
     <ClCompile Include="MuseumInterior.cpp" />
     <ClCompile Include="Paleontologist.cpp" />
+    <ClCompile Include="Pathfinding.cpp" />
     <ClCompile Include="Paused.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Researcher.cpp" />
@@ -35,6 +37,7 @@
     <ClCompile Include="TraderMenu.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BehaviorTree.h" />
     <ClInclude Include="Behaviours.h" />
     <ClInclude Include="constants.h" />
     <ClInclude Include="Fossil.h" />
@@ -44,6 +47,7 @@
     <ClInclude Include="Museum.h" />
     <ClInclude Include="MuseumInterior.h" />
     <ClInclude Include="Paleontologist.h" />
+    <ClInclude Include="Pathfinding.h" />
     <ClInclude Include="Paused.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="Researcher.h" />

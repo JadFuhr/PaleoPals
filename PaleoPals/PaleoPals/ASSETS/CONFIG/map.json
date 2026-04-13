@@ -101,7 +101,7 @@
       "frameWidth": 64,
       "frameHeight": 64,
       "frameIndex": 7,
-      "monetaryValue": 50
+      "monetaryValue": 75
     },
     {
       "index": 8,
@@ -111,7 +111,7 @@
       "frameWidth": 64,
       "frameHeight": 64,
       "frameIndex": 8,
-      "monetaryValue": 100
+      "monetaryValue": 150
     },
     {
       "index": 9,

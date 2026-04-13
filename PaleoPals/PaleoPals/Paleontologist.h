@@ -42,6 +42,12 @@ public:
 
     BehaviorState getCurrentState() const;
 
+    //void setMiningDamage(int dmg) { m_miningDamage = dmg; }
+    int getMiningDamage() const { return m_miningDamage; }
+
+    int m_miningDamage = 1;   // base damage
+
+
 private:
     // Rendering
     sf::Texture m_texture;

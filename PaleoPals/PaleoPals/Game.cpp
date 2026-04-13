@@ -247,6 +247,9 @@ void Game::update(sf::Time t_deltaTime)
         m_map.updateMuseum(m_window);
         m_map.updateTrader(m_window);
 
+        m_moneyText.setString("Money: " + std::to_string(m_player.getMoney()));
+
+
         if (m_museumInterior.isOpen())
         {
             m_museumInterior.update(m_window);
@@ -280,23 +283,19 @@ void Game::update(sf::Time t_deltaTime)
             m_player.clearNewPickups();
 
         }
-
-        //try
-        //{
-        //    // Update all paleontologists
-        //    for (auto& p : m_paleontologists) 
-        //    {
-        //        if (p) p->update(t_deltaTime, m_map);
-        //    }
-        //}
-        //catch (const std::exception& e)
-        //{
-        //    std::cerr << "Exception updating paleontologist: " << e.what() << "\n";
-        //}
-        //break;
-
-        m_moneyText.setString("Money: " + std::to_string(m_player.getMoney()));
-
+        try
+        {
+            // Update all paleontologists
+            for (auto& p : m_paleontologists) 
+            {
+                if (p) p->update(t_deltaTime, m_map);
+            }
+        }
+        catch (const std::exception& e)
+        {
+            std::cerr << "Exception updating paleontologist: " << e.what() << "\n";
+        }
+        break;
 
     case GameState::Paused:
         m_pause.updatePauseMenu(m_window);

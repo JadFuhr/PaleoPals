@@ -6,7 +6,7 @@
 #include <vector>
 #include <queue>
 #include <memory>
-
+#include <SFML/System/Time.hpp>
 // Forward declarations
 class Map;
 class Paleontologist;
@@ -21,22 +21,6 @@ enum class BehaviorState
     SearchingForFossil,
     MovingToTarget,
     Mining
-};
-
-//------------------------------------------------------------
-// Pathfinding Node (for A* algorithm)
-//------------------------------------------------------------
-struct PathNode
-{
-    int row, col;
-    float gCost; // Distance from start
-    float hCost; // Heuristic distance to goal
-    float fCost() const { return gCost + hCost; }
-    PathNode* parent;
-
-    PathNode(int r, int c) : row(r), col(c), gCost(0), hCost(0), parent(nullptr) {}
-
-    bool operator>(const PathNode& other) const { return fCost() > other.fCost(); }
 };
 
 //------------------------------------------------------------
@@ -99,21 +83,7 @@ private:
     std::vector<sf::Vector2i> m_path;
     int m_currentPathIndex = 0;
     sf::Vector2i m_targetTile;
-    sf::Vector2f m_surfacePosition; // Store surface position to return to
     bool m_hasPath = false;
-    bool m_returningToSurface = false;
-
-    // Mining state for each tile while digging
-    bool m_isMiningTile = false;
-    float m_miningProgress = 0.0f;
-    float m_currentTileDuration = 1.0f;
-
-    // Track the last tile that was mined so we can place/remove a ladder support
-    sf::Vector2i m_lastMinedTile{ -1, -1 };
-    bool m_hasLastMinedTile = false;
-
-    // Track all mined tiles (stack) so ladders can be removed as the agent climbs back up
-    std::vector<sf::Vector2i> m_minedTiles;
 
     bool findNearestFossil(Paleontologist* agent, Map& map);
     std::vector<sf::Vector2i> findPath(sf::Vector2i start, sf::Vector2i goal, Map& map);

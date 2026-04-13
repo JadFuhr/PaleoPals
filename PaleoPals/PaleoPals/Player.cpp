@@ -122,15 +122,10 @@ void Player::handleInput(sf::Time deltaTime, Map& map)
         m_canJump = true;
     }
 
-    static bool eWasPressed = false;
-    bool eIsPressed = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::E);
-
-
-    if (eIsPressed && !eWasPressed)
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::E))
     {
         tryPickupCollectible(map);
     }
-    eWasPressed = eIsPressed;
 }
 
 void Player::applyPhysics(sf::Time deltaTime, Map& map)

@@ -585,3 +585,37 @@ bool Map::hasLadder(int row, int col) const
     }
     return false;
 }
+
+bool Map::isWalkable(int row, int col) const
+{
+    // Walkable if inside bounds and hardness == 0 (dug) OR has ladder
+    if (row < 0 || col < 0 || row >= m_rows || col >= m_cols)
+        return false;
+
+    int index = row * m_cols + col;
+    if (index < 0 || index >= static_cast<int>(m_tiles.size()))
+        return false;
+
+    const Tile& t = m_tiles[index];
+
+    // Solid if hardness > 0
+    if (t.layerHardness > 0)
+        return false;
+
+    // Dug tile or ladder tile is walkable
+    return true;
+}
+
+sf::Vector2i Map::worldToTile(sf::Vector2f worldPos) const
+{
+    float offsetY = m_windowHeight / 2.0f;
+    float offsetX = (m_windowWidth - (m_cols * m_tileSize)) / 2.0f;
+
+    float localX = worldPos.x - offsetX;
+    float localY = worldPos.y - offsetY;
+
+    int col = static_cast<int>(std::floor(localX / m_tileSize));
+    int row = static_cast<int>(std::floor(localY / m_tileSize));
+
+    return sf::Vector2i(col, row);
+}

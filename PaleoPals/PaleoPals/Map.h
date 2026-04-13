@@ -98,6 +98,10 @@ public:
     void removeLadder(int row, int col);
     bool hasLadder(int row, int col) const;
 
+    bool isWalkable(int row, int col) const;
+    sf::Vector2i worldToTile(sf::Vector2f worldPos) const;
+
+
 private:
 
     sf::Texture m_backgroundTexture;
