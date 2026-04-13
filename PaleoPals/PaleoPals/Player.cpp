@@ -163,13 +163,13 @@ void Player::applyPhysics(sf::Time deltaTime, Map& map)
         }
     }
 
-    // --- MAP BOUNDARY CLAMP (safe version that doesn't break jumping) ---
+
     {
         float tileSize = map.getTileSize();
         int cols = map.getColumnCount();
         int rows = map.getRowCount();
 
-        // These offsets match your grid placement
+        
         float offsetX = (WINDOW_X - cols * tileSize) / 2.0f;
         float offsetY = WINDOW_Y / 2.0f;
 
@@ -193,12 +193,9 @@ void Player::applyPhysics(sf::Time deltaTime, Map& map)
             m_isGrounded = true;
         }
 
-        // IMPORTANT: no top clamp — allows jumping normally
-
         m_sprite.setPosition(pos);
     }
 }
-
 
 void Player::checkCollisions(Map& map)
 {
