@@ -14,11 +14,8 @@ class MuseumInterior
 public:
     MuseumInterior();
 
-    // Call once after FossilManager has loaded its dino data.
-    // all piece textures from the paths stored in DinosaurData.
     bool loadAssets(const std::vector<DinosaurData>& dinoData);
 
-    // Called by Game when the player picks up a fossil piece
     void onFossilCollected(const std::string& dinoName, const std::string& pieceId);
 
     void open();
@@ -47,11 +44,9 @@ private:
     bool containsPoint(const sf::Sprite& sprite, const sf::Vector2f& pt) const;
     int  pieceIdToIndex(const std::string& pieceId) const;
 
-    // state
     bool m_open = false;
     int  m_currentDinoIndex = 0;
 
-    // per-dino display data
     struct DinoDisplay
     {
         std::string name;
@@ -62,13 +57,10 @@ private:
         bool hasSkin = false;
         bool showSkin = false;
 
-
-        // [0]=skull  [1]=torso  [2]=pelvis  [3]=tail
         std::array<sf::Texture, 4> pieceTex;
         std::array<sf::Sprite, 4> pieceSprite;
         bool collected[4] = { false, false, false, false };
 
-        // Constructor: initialize all sprites with valid textures
         DinoDisplay()
             : backgroundSprite(backgroundTex),
               pieceSprite{{

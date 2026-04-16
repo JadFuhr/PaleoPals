@@ -5,14 +5,12 @@
 void PauseMenu::initPauseMenu()
 {
 
-    // Load pause background (dim overlay)
     if (!m_pauseTexture.loadFromFile("ASSETS/IMAGES/Screens/PausedScreen.png"))
     {
         std::cout << "Failed to load pause background\n";
     }
 
 
-    // Load buttons
     if (!m_resumeButtonTexture.loadFromFile("ASSETS/IMAGES/Screens/ResumeButton.png"))
     {
         std::cout << "Failed to load Resume button\n";
@@ -58,7 +56,6 @@ void PauseMenu::updatePauseMenu(const sf::RenderWindow& window)
 {
     sf::Vector2f mouse = window.mapPixelToCoords(sf::Mouse::getPosition(window));
 
-    // Hover effects
     if (m_resumeButton.getGlobalBounds().contains(mouse))
     {
         m_resumeButton.setTextureRect(sf::IntRect({ 92, 0 }, { 92, 34 }));
@@ -91,8 +88,6 @@ void PauseMenu::drawPauseMenu(sf::RenderWindow& window)
 {
 
     window.draw(m_pauseSprite);
-
-    // Draw buttons
     window.draw(m_resumeButton);
     window.draw(m_settingsButton);
     window.draw(m_quitButton);
@@ -107,17 +102,17 @@ GameState PauseMenu::handlePauseMenuClick(const sf::RenderWindow& window)
 
         if (m_resumeButton.getGlobalBounds().contains(mousePos))
         {
-            return GameState::Gameplay; // Resume the game
+            return GameState::Gameplay; 
         }
         if (m_settingsButton.getGlobalBounds().contains(mousePos))
         {
-            return GameState::Settings; // settings state
+            return GameState::Settings; 
         }
         if (m_quitButton.getGlobalBounds().contains(mousePos))
         {
-            return GameState::MainMenu; // Back to main menu
+            return GameState::MainMenu; 
         }
     }
 
-    return GameState::Paused; // Stay paused otherwise
+    return GameState::Paused; 
 }

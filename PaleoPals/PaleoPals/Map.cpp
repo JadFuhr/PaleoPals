@@ -11,6 +11,7 @@ Map::Map() {}
 bool Map::loadMapFromConfig(const std::string& filepath)
 {
     std::ifstream file(filepath);
+
     if (!file.is_open())
     {
         std::cerr << "Failed to open JSON config: " << filepath << "\n";
@@ -131,20 +132,18 @@ int Map::determineLayerAtDepth(int row, int totalRows)
         return 0; // Topsoil    
     }
 
-    // calc depth as a ratio
-
+   
     float depthRatio = static_cast<float>(row) / static_cast<float>(totalRows);
 
-    // generate random value for blending
+   
 
     float randVal = static_cast<float>(std::rand()) / RAND_MAX;
 
     if (depthRatio < 0.20f)
     {
-        // Near surface: mostly topsoil (0) transitioning to sediment (1)
         if (randVal < 0.7f)
         {
-            return 1; // Sediment
+            return 1;
         }
         else
         {
@@ -154,62 +153,57 @@ int Map::determineLayerAtDepth(int row, int totalRows)
     }
     else if (depthRatio < 0.40f)
     {
-        // Upper layers: mostly sediment
         if (randVal < 0.85f)
         {
-            return 1; // Sediment
+            return 1; 
         }
         else
         {
-            return 2; // Occasional rock
+            return 2; 
         }
     }
     else if (depthRatio < 0.60f)
     {
-        // Middle layers: sediment/rock mix
         if (randVal < 0.5f)
         {
-            return 1; // Sediment
+            return 1; 
         }
         else
         {
-            return 2; // Rock
+            return 2; 
         }
     }
     else if (depthRatio < 0.80f)
     {
-        // Deep layers: mostly rock
         if (randVal < 0.8f)
         {
-            return 2; // Rock
+            return 2; 
         }
         else
         {
-            return 3; // Some bedrock appearing
+            return 3; 
         }
     }
     else if (depthRatio < 0.90f)
     {
-        // Very deep: rock/bedrock transition
         if (randVal < 0.5f)
         {
-            return 2; // Rock
+            return 2; 
         }
         else
         {
-            return 3; // Bedrock
+            return 3; 
         }
     }
     else
     {
-        // Deepest layers: mostly bedrock
         if (randVal < 0.9f)
         {
-            return 3; // Bedrock
+            return 3; 
         }
         else
         {
-            return 2; // Occasional rock
+            return 2; 
         }
     }
 }
@@ -227,7 +221,6 @@ void Map::setupBackground()
 
     m_backgroundSprite.setTextureRect(sf::IntRect({ 0, 0 }, { WINDOW_X, BACKGROUND_LENGTH }));
 
-    // Position background at (0,0)
     m_backgroundSprite.setPosition(sf::Vector2f(0.f, 0.f));
 }
 
@@ -247,7 +240,6 @@ void Map::removeTile(int row, int col)
 
 	Tile& tile = m_tiles[index];
 
-    // already removed tiles 
     if (tile.sprite.getColor() == sf::Color::Transparent)
     {
         return;
@@ -261,7 +253,7 @@ void Map::removeTile(int row, int col)
 
 }
 
-void Map::removeTile(int row, int col, Player& player)  //calls the base removeTile; player pickup is handled by player::tryPickupCollectivle
+void Map::removeTile(int row, int col, Player& player)  
 {
     removeTile(row, col);
 }
@@ -327,14 +319,14 @@ void Map::damageTile(int row, int col, int dmg)
         t.crackedFrameIndex = 4;
     }
 
-    int frameWidth = 24; // crack sprite frame width 
+    int frameWidth = 24; 
 
     t.crackedSprite.setTextureRect(sf::IntRect({ t.crackedFrameIndex * frameWidth, 0 }, { frameWidth, frameWidth }));
 
 
     if (t.currentHP <= 0)
     {
-		removeTile(row, col);       // tile destroyed now triggers collectible spawn 
+		removeTile(row, col);      
     }
 }
 
@@ -342,18 +334,15 @@ void Map::drawMap(sf::RenderWindow& window)
 {
     window.draw(m_backgroundSprite);
 
-    // Get view bounds for frustum culling
     sf::View currentView = window.getView();
     sf::Vector2f viewCenter = currentView.getCenter();
     sf::Vector2f viewSize = currentView.getSize();
     sf::FloatRect viewBounds(sf::Vector2f(viewCenter.x - viewSize.x / 2.f, viewCenter.y - viewSize.y / 2.f), viewSize);
 
-    // Only draw tiles that intersect with the view
     for (int i = 0; i < static_cast<int>(m_tiles.size()); ++i)
     {
         const Tile& tile = m_tiles[i];
         
-        // Frustum culling: skip tiles outside the view
         if (!viewBounds.findIntersection(tile.sprite.getGlobalBounds()))
         {
             continue;
@@ -366,27 +355,16 @@ void Map::drawMap(sf::RenderWindow& window)
 			window.draw(tile.crackedSprite);
         }
 
-        // Draw ladder support if present
-        if (i >= 0 && i < static_cast<int>(m_ladders.size()) && m_ladders[i])
-        {
-            // Draw small white square centered on tile
-            sf::RectangleShape ladderShape;
-            ladderShape.setSize(sf::Vector2f(m_tileSize * 0.3f, m_tileSize * 0.3f));
-            ladderShape.setFillColor(sf::Color::White);
-            ladderShape.setPosition(sf::Vector2f(tile.sprite.getPosition().x + (m_tileSize - ladderShape.getSize().x) / 2.0f, tile.sprite.getPosition().y + (m_tileSize - ladderShape.getSize().y) / 2.0f));
-            window.draw(ladderShape);
-        }
+        
     }
 
     m_fossilManager.drawCollectibles(window);
 
-    // Only draw museum if it's in view
     if (viewBounds.findIntersection(m_museum.getSprite().getGlobalBounds()))
     {
         m_museum.drawMuseum(window);
     }
 
-    // Only draw trader if it's in view
     if (viewBounds.findIntersection(m_trader.getSprite().getGlobalBounds()))
     {
         m_trader.drawTrader(window);
@@ -409,14 +387,11 @@ void Map::toggleDebugMode()
 
 void Map::updateHover(const sf::RenderWindow& window, float tileSize, int cols)
 {
-    if (!m_debugMode) return; // (only if debug is active)
-
-
+    if (!m_debugMode) return; 
 
     sf::Vector2i mousePixel = sf::Mouse::getPosition(window);
     sf::Vector2f mouseWorld = window.mapPixelToCoords(mousePixel);
 
-    // Compute grid starting offsets (like generateGrid)
     int rows = static_cast<int>(m_tiles.size() / cols);
     float totalGridHeight = rows * tileSize;
     float totalGridWidth = cols * tileSize;
@@ -427,14 +402,12 @@ void Map::updateHover(const sf::RenderWindow& window, float tileSize, int cols)
     float localX = mouseWorld.x - offsetX;
     float localY = mouseWorld.y - offsetY;
 
-    // Skip if outside the grid bounds
     if (localX < 0 || localY < 0 || localX >= totalGridWidth || localY >= totalGridHeight)
     {
         m_hoveredIndex = -1;
         return;
     }
 
-    // Calculate which tile the mouse is over
     int tileX = static_cast<int>(localX / tileSize);
     int tileY = static_cast<int>(localY / tileSize);
     int index = tileY * cols + tileX;
@@ -458,10 +431,8 @@ void Map::updateHover(const sf::RenderWindow& window, float tileSize, int cols)
                 }
             }
 
-            //std::cout << "Tile type: " << tileName << " | Hardness: " << tileHardness << std::endl;
         }
 
-        // Draw outline on hovered tile
         const Tile& hoveredTile = m_tiles[m_hoveredIndex];
         m_hoverOutline.setSize(sf::Vector2f(tileSize, tileSize));
         m_hoverOutline.setPosition(hoveredTile.sprite.getPosition());
@@ -478,7 +449,7 @@ void Map::updateHover(const sf::RenderWindow& window, float tileSize, int cols)
 void Map::handleMouseHold(const sf::RenderWindow& window, float tileSize, int cols)
 {
 
-    if (!m_debugMode) return; // Only work in debug mode
+    if (!m_debugMode) return; 
 
     if (!sf::Mouse::isButtonPressed(sf::Mouse::Button::Left))
     {
@@ -488,7 +459,6 @@ void Map::handleMouseHold(const sf::RenderWindow& window, float tileSize, int co
     sf::Vector2i mousePixel = sf::Mouse::getPosition(window);
     sf::Vector2f mouseWorld = window.mapPixelToCoords(mousePixel);
 
-    // Compute grid starting offsets (same as updateHover)
     int rows = static_cast<int>(m_tiles.size() / cols);
     float totalGridHeight = rows * tileSize;
     float totalGridWidth = cols * tileSize;
@@ -498,23 +468,19 @@ void Map::handleMouseHold(const sf::RenderWindow& window, float tileSize, int co
     float localX = mouseWorld.x - offsetX;
     float localY = mouseWorld.y - offsetY;
 
-    // Skip if outside the grid bounds
     if (localX < 0 || localY < 0 || localX >= totalGridWidth || localY >= totalGridHeight)
     {
         return;
     }
 
-    // Calculate which tile was clicked
     int tileX = static_cast<int>(localX / tileSize);
     int tileY = static_cast<int>(localY / tileSize);
     int index = tileY * cols + tileX;
 
     if (index >= 0 && index < static_cast<int>(m_tiles.size()))
     {
-        // Only remove if not already transparent 
         if (m_tiles[index].sprite.getColor() != sf::Color::Transparent)
         {
-            // Call removeTile instead of just setting color transparent
             removeTile(tileY, tileX);
         }
     }
@@ -534,6 +500,7 @@ sf::Vector2f Map::tileToWorld(sf::Vector2i tilePos) const
     float y = tilePos.y * m_tileSize + m_windowHeight / 2.0f + m_tileSize / 2.0f;
     return sf::Vector2f(x, y);
 }
+
 bool Map::isPointOnTrader(const sf::Vector2f& worldPos) const
 {
     return m_trader.containsPoint(worldPos);

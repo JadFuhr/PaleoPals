@@ -10,7 +10,7 @@ Game::Game() :
 {
     m_cameraView.setSize(sf::Vector2f(WINDOW_X, WINDOW_Y));
     m_cameraView.setCenter(sf::Vector2f(WINDOW_X / 2, WINDOW_Y / 2));
-    m_cameraView.zoom(0.9f);
+    m_cameraView.zoom(0.5f);
     m_window.setView(m_cameraView);
 
     setupMap();
@@ -285,7 +285,6 @@ void Game::update(sf::Time t_deltaTime)
         }
         try
         {
-            // Update all paleontologists
             for (auto& p : m_paleontologists) 
             {
                 if (p) p->update(t_deltaTime, m_map);
@@ -318,7 +317,6 @@ void Game::render()
     switch (m_currentState)
     {
     case GameState::MainMenu:
-        //std::cout << "current state menu" << std::endl;
         m_window.setView(m_window.getDefaultView());
 
         m_menu.draw(m_window);
@@ -334,16 +332,15 @@ void Game::render()
 
 
 		m_window.setView(m_cameraView);
-        // local scope block to limit scope of viewCenter, viewSize and viewBounds
+
         {
             sf::Vector2f viewCenter = m_cameraView.getCenter();
             sf::Vector2f viewSize = m_cameraView.getSize();
             sf::FloatRect viewBounds(sf::Vector2f(viewCenter.x - viewSize.x / 2.f, viewCenter.y - viewSize.y / 2.f), viewSize);
 
-            // draw paleontologists only if in view
             for (auto& p : m_paleontologists)
             {
-                // Frustum culling: skip paleontologists outside the view
+             
                 if (viewBounds.findIntersection(p->getSprite().getGlobalBounds()))
                 {
                     p->draw(m_window);
@@ -353,7 +350,6 @@ void Game::render()
             m_player.draw(m_window);
         }
 
-        // draw trader menu over everything if open
 		m_window.setView(m_window.getDefaultView());
         m_traderMenu.draw(m_window);
         m_museumInterior.draw(m_window);
@@ -370,7 +366,6 @@ void Game::render()
         m_window.setView(m_window.getDefaultView());
         m_window.draw(m_moneyText);
 
-        // Draw paleontologists while paused too
         for (auto& p : m_paleontologists)
         {
             if (p) p->draw(m_window);
@@ -394,16 +389,13 @@ void Game::setupMap()
     int cols = 75;
     int totalRows = 100;
 
-    float tileSize = 24.0f; // 24x24 pixels per tile
+    float tileSize = 24.0f; 
 
     m_map.setupBackground();
     m_map.generateGrid(totalRows, cols, tileSize, WINDOW_X, WINDOW_Y);
 	m_museumInterior.loadAssets(m_map.getFossilManager().getDinosaurData());
 
-    // Setup paleontologist at surface
-    std::cout << "Setting up paleontologist...\n";
 
-    // Create an initial paleontologist and add to the vector
     auto initialPaleo = std::make_unique<Paleontologist>();
     initialPaleo->setPosition(sf::Vector2f(WINDOW_X / 2.0f, WINDOW_Y / 2.0f - 20.0f));
     initialPaleo->setSpeed(60.0f);
@@ -412,7 +404,6 @@ void Game::setupMap()
 
     m_player.setPosition(sf::Vector2f(WINDOW_X / 2.0f + 100.0f, WINDOW_Y / 2.0f));
 
-    // std::cout << "Initial paleontologist created. Total paleontologists: " << m_paleontologists.size() << "\n";
 }
 
 void Game::moveCamera(sf::Time t_deltaTime)

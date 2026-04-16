@@ -4,18 +4,15 @@
 
 TraderMenu::TraderMenu()
 {
-    // Full-screen semi-transparent overlay
-    m_overlay.setSize(sf::Vector2f(10000.0f, 10000.0f)); // Large enough to cover screen
+    m_overlay.setSize(sf::Vector2f(10000.0f, 10000.0f)); 
     m_overlay.setFillColor(sf::Color(0, 0, 0, 100));
     m_overlay.setPosition(sf::Vector2f(0.0f, 0.0f));
 
-    // Main menu background - centered, large
     m_background.setSize(sf::Vector2f(600.0f, 450.0f));
     m_background.setFillColor(sf::Color(40, 40, 50, 240));
     m_background.setOutlineColor(sf::Color(200, 200, 200));
     m_background.setOutlineThickness(3.0f);
 
-    // Tab buttons
     m_hiringTabButton.setSize(sf::Vector2f(150.0f, 40.0f));
     m_hiringTabButton.setFillColor(sf::Color(70, 130, 180));
     m_hiringTabButton.setOutlineColor(sf::Color(200, 200, 200));
@@ -26,14 +23,12 @@ TraderMenu::TraderMenu()
     m_upgradesTabButton.setOutlineColor(sf::Color(100, 100, 100));
     m_upgradesTabButton.setOutlineThickness(2.0f);
 
-    // Tab underlines (active indicator)
     m_hiringTabUnderline.setSize(sf::Vector2f(150.0f, 4.0f));
     m_hiringTabUnderline.setFillColor(sf::Color(100, 200, 255));
 
     m_upgradesTabUnderline.setSize(sf::Vector2f(150.0f, 4.0f));
     m_upgradesTabUnderline.setFillColor(sf::Color(100, 200, 255));
 
-    // Hire buttons
     m_hirePaleontologistButton.setSize(sf::Vector2f(250.0f, 60.0f));
     m_hirePaleontologistButton.setFillColor(sf::Color(100, 180, 100));
     m_hirePaleontologistButton.setOutlineColor(sf::Color(200, 200, 200));
@@ -44,7 +39,6 @@ TraderMenu::TraderMenu()
     m_hireResearcherButton.setOutlineColor(sf::Color(200, 200, 200));
     m_hireResearcherButton.setOutlineThickness(2.0f);
 
-    // Placeholder upgrade buttons
     m_upgrade1Button.setSize(sf::Vector2f(250.0f, 60.0f));
     m_upgrade1Button.setFillColor(sf::Color(180, 150, 100));
     m_upgrade1Button.setOutlineColor(sf::Color(200, 200, 200));
@@ -65,7 +59,6 @@ TraderMenu::TraderMenu()
     m_upgrade4Button.setOutlineColor(sf::Color(200, 200, 200));
     m_upgrade4Button.setOutlineThickness(2.f);
 
-    // Close button (X in top right)
     m_closeButton.setSize(sf::Vector2f(30.0f, 30.0f));
     m_closeButton.setFillColor(sf::Color(200, 80, 80));
     m_closeButton.setOutlineColor(sf::Color(255, 255, 255));
@@ -100,9 +93,8 @@ void TraderMenu::openAt(const sf::Vector2f& worldPos)
 {
     m_open = true;
     m_worldPosition = worldPos;
-    m_activeTab = ActiveTab::Hiring; // Default to hiring tab
+    m_activeTab = ActiveTab::Hiring; 
 
-    // Center menu on screen (will position in draw() relative to window)
 }
 
 void TraderMenu::close()
@@ -117,11 +109,9 @@ bool TraderMenu::containsPoint(const sf::RectangleShape& shape, const sf::Vector
 
 void TraderMenu::updateButtonPositions(const sf::RenderWindow& window)
 {
-    // Get window size to center menu
     sf::Vector2u windowSize = window.getSize();
     sf::Vector2f windowCenter(windowSize.x / 2.0f, windowSize.y / 2.0f);
 
-    // Position background in center of screen (in screen coordinates)
     m_background.setPosition(windowCenter - sf::Vector2f(m_background.getSize().x / 2.0f, m_background.getSize().y / 2.0f));
 
     sf::Vector2f bgPos = m_background.getPosition();
@@ -129,18 +119,14 @@ void TraderMenu::updateButtonPositions(const sf::RenderWindow& window)
     float bgY = bgPos.y;
     float bgWidth = m_background.getSize().x;
 
-    // Position tab buttons
     m_hiringTabButton.setPosition(sf::Vector2f(bgX + 20.0f, bgY + 15.0f));
     m_upgradesTabButton.setPosition(sf::Vector2f(bgX + 190.0f, bgY + 15.0f));
 
-    // Position tab underlines
     m_hiringTabUnderline.setPosition(m_hiringTabButton.getPosition() + sf::Vector2f(0.0f, m_hiringTabButton.getSize().y));
     m_upgradesTabUnderline.setPosition(m_upgradesTabButton.getPosition() + sf::Vector2f(0.0f, m_upgradesTabButton.getSize().y));
 
-    // Position close button (top right)
     m_closeButton.setPosition(sf::Vector2f(bgX + bgWidth - 40.0f, bgY + 10.0f));
 
-    // Position content buttons based on active tab
     m_hirePaleontologistButton.setPosition(sf::Vector2f(bgX + 50.0f, bgY + 100.0f));
     m_hireResearcherButton.setPosition(sf::Vector2f(bgX + 50.0f, bgY + 190.0f));
 
@@ -167,17 +153,14 @@ HireAction TraderMenu::handleClick(const sf::Vector2f& screenPos, const sf::Rend
 {
     if (!m_open) return HireAction::None;
 
-    // Update button positions before checking clicks
     updateButtonPositions(window);
 
-    // Check close button first
     if (containsPoint(m_closeButton, screenPos))
     {
         m_open = false;
         return HireAction::None;
     }
 
-    // Check tab buttons
     if (containsPoint(m_hiringTabButton, screenPos))
     {
         m_activeTab = ActiveTab::Hiring;
@@ -190,7 +173,6 @@ HireAction TraderMenu::handleClick(const sf::Vector2f& screenPos, const sf::Rend
         return HireAction::None;
     }
 
-    // Check content buttons based on active tab
     if (m_activeTab == ActiveTab::Hiring)
     {
         if (containsPoint(m_hirePaleontologistButton, screenPos))
@@ -223,7 +205,6 @@ HireAction TraderMenu::handleClick(const sf::Vector2f& screenPos, const sf::Rend
         }
     }
 
-    // Click outside menu = close it
     if (!containsPoint(m_background, screenPos))
     {
         m_open = false;
@@ -248,27 +229,22 @@ void TraderMenu::draw(sf::RenderWindow& window)
 
     if (!m_open) return;
 
-    // Update button positions
     updateButtonPositions(window);
 
-    // Draw overlay first (darkens everything behind)
     window.draw(m_overlay);
 
-    // Draw main background
     window.draw(m_background);
 
     sf::Vector2f bgPos = m_background.getPosition();
     float bgX = bgPos.x;
     float bgY = bgPos.y;
 
-    // Draw tab buttons
     window.draw(m_hiringTabButton);
     window.draw(m_upgradesTabButton);
 
     window.draw(m_hiringTabText);
     window.draw(m_upgradesTabText);
 
-    // Draw active tab underline
     if (m_activeTab == ActiveTab::Hiring)
     {
         window.draw(m_hiringTabUnderline);
@@ -280,10 +256,8 @@ void TraderMenu::draw(sf::RenderWindow& window)
 
     }
 
-    // Draw close button (top right)
     window.draw(m_closeButton);
 
-    // Draw X on close button - using two diagonal lines represented as thin rectangles
     sf::RectangleShape closeX1(sf::Vector2f(20.0f, 3.0f));
     closeX1.setFillColor(sf::Color::White);
     closeX1.setRotation(sf::degrees(45.0f));
@@ -296,7 +270,6 @@ void TraderMenu::draw(sf::RenderWindow& window)
     closeX2.setPosition(sf::Vector2f(bgX + m_background.getSize().x - 30.0f, bgY + 32.0f));
     window.draw(closeX2);
 
-    // Draw content based on active tab
     if (m_activeTab == ActiveTab::Hiring)
     {
         window.draw(m_hirePaleontologistButton);

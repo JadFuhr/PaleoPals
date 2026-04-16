@@ -8,7 +8,6 @@
 #include <string>
 #include <algorithm>
 
-// Forward declarations
 class Map;
 class Collectible;
 
@@ -16,10 +15,9 @@ struct CollectedItem
 {
     int collectibleIndex;
     std::string name;
-    std::string type; // "fossil", "amber", "trash"
+    std::string type; 
     int monetaryValue;
 
-    // Fossil-specific
     std::string dinosaurName;
     std::string pieceId;
     std::string category;
@@ -40,15 +38,12 @@ public:
     Player();
     ~Player();
 
-    // Core functions
     void update(sf::Time deltaTime, Map& map, const sf::RenderWindow& window, const sf::View& cameraView);
     void draw(sf::RenderWindow& window);
     void handleInput(sf::Time deltaTime, Map& map);
 
-    // Interaction
     void tryPickupCollectible(Map& map);
 
-    // Getters
     sf::Vector2f getPosition() const { return m_sprite.getPosition(); }
     const sf::Sprite& getSprite() const { return m_sprite; }
     const std::vector<CollectedItem>& getInventory() const { return m_inventory; }
@@ -56,12 +51,10 @@ public:
     void clearNewPickups() { m_newPickups.clear(); }
     int getMoney() const { return m_money; }
 
-    // Collection methods
     void collectFossil(const std::string& dinosaurName, const std::string& pieceId, const std::string& category);
     void collectAmber(int monetaryValue);
     void collectTrash();
-        
-	//pickaxe methods
+
     void updatePickaxe(const sf::RenderWindow& window, Map& map, const sf::View& cameraView);
     void checkPickaxeHit(const sf::RenderWindow& window, Map& map, const sf::View& cameraView);
     void updatePickaxeAnimation(sf::Time dt);
@@ -70,10 +63,8 @@ public:
 
     int getPickaxeDamage() const;
 
-    // Setters
     void setPosition(sf::Vector2f pos);
 
-    //Mining 
 
     bool m_isSwinging = false;
     float m_pickaxeAngle = 0.f;
@@ -82,14 +73,12 @@ public:
     float m_pickaxeTipDistance = 32.f; 
     float m_pickaxeTipRadius = 6.f;    // collision circle radius
 
-    // upgrades
     int pickaxeRadiusLevel = 0;
     int damageLevel = 0;
     int pickupRadiusLevel = 0;
     int jumpLevel = 0;
 
 
-    // Physics
     sf::Vector2f m_velocity;
     float m_moveSpeed = 150.0f;
     float m_jumpForce = -400.0f;
@@ -104,16 +93,14 @@ public:
 
 
 private:
-    // Rendering
     sf::Texture m_texture;
     sf::Sprite m_sprite{m_texture};
-    sf::CircleShape m_pickupRadiusVisual; // Visual debug circle
-	float pickupRadius = 24.0f; // 1 tile radius
+    sf::CircleShape m_pickupRadiusVisual; 
+	float pickupRadius = 24.0f; 
 
     sf::Texture m_pickaxeTexture;
     sf::Sprite m_pickaxeSprite{ m_pickaxeTexture };
 
-    // Animation
     int m_currentFrame = 0;
     float m_animationTimer = 0.0f;
     float m_frameTime = 0.15f;
@@ -122,28 +109,23 @@ private:
     const int m_totalFrames = 4;
     bool m_facingRight = true;
 
-    // pickaxe animation
 	int m_pickaxeCurrentFrame = 0;
 	int m_pickaxeFrameDirection = 1;
 	float m_pickaxeAnimationTimer = 0.0f;
-	float m_pickaxeFrameTime = 0.01f; // 10ms per frame
+	float m_pickaxeFrameTime = 0.01f; 
 	int m_pickaxeTotalFrames = 4;
 
 
-    // Player state
     PlayerState m_state = PlayerState::Idle;
 
-    // Inventory
     std::vector<CollectedItem> m_inventory;
-	std::vector<CollectedItem> m_newPickups; // Items picked up current frame
-    float m_interactionRadius = 24.0f; // 1 tile radius
-    int m_money = 0; // Money from selling amber/trash
+	std::vector<CollectedItem> m_newPickups; 
+    float m_interactionRadius = 24.0f; 
+    int m_money = 0; 
 
-    //mining cooldown
     float m_pickaxeCooldown = 0.0f;
-    float m_pickaxeHitDelay = 0.15f; // 150ms between hits
+    float m_pickaxeHitDelay = 0.15f; 
 
-    // Helper functions
     void updateAnimation(sf::Time deltaTime);
     void setFrame(int frame);
     void applyPhysics(sf::Time deltaTime, Map& map);

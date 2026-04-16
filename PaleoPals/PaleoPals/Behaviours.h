@@ -107,9 +107,6 @@ private:
     bool m_returningToSurface = false; // when true, move agent back up smoothly
 };
 
-//------------------------------------------------------------
-// Behavior Manager (State Machine)
-//------------------------------------------------------------
 class BehaviorManager
 {
 public:

@@ -11,7 +11,6 @@
 #include "Trader.h"
 #include "Fossil.h"
 
-// Forward declaration
 class Player;
 
 struct LayerType
@@ -46,7 +45,6 @@ public:
 		crackedSprite.setPosition(pos);
     }
 
-    // Delete default constructor 
     Tile() = delete;
 };
 
@@ -61,7 +59,7 @@ public:
     void setupBackground();
 
     void removeTile(int row, int col);
-    void removeTile(int row, int col, Player& player); // Auto-pickup version
+    void removeTile(int row, int col, Player& player); 
 
     int getTileHardness(int row, int col) const;
     int getTileCurrentHP(int row, int col) const;
@@ -77,12 +75,10 @@ public:
 
     sf::Vector2f tileToWorld(sf::Vector2i tilePos) const;
 
-    // update museum sprite
 
     void updateMuseum(sf::RenderWindow& window);
     void updateTrader(sf::RenderWindow& window);
 
-    // return true if the given world coordinate lies on the trader
     bool isPointOnTrader(const sf::Vector2f& worldPos) const;
 
     int getRowCount() const { return m_rows; }
@@ -106,9 +102,9 @@ private:
 
     sf::Texture m_backgroundTexture;
     sf::Sprite m_backgroundSprite{ m_backgroundTexture };
-	sf::Texture m_crackedOverlayTexture; // texture for the cracks 
+	sf::Texture m_crackedOverlayTexture; 
 
-    int m_rowsGenerated = 0;      // How many rows are currently generated
+    int m_rowsGenerated = 0;      
     float m_tileSize = 0.f;
 
     float m_windowWidth = 0.f;
@@ -117,13 +113,13 @@ private:
     int m_rows = 0;
     int m_cols = 0;
 
-    std::vector<LayerType> m_layerTypes; // list of all terrain textures
-    std::vector<Tile> m_tiles;           // grid of tiles created from those textures
+    std::vector<LayerType> m_layerTypes; 
+    std::vector<Tile> m_tiles;           
     std::vector<bool> m_ladders; 
 
     int m_hoveredIndex = -1;
     sf::RectangleShape m_hoverOutline;
-    bool m_debugMode = false; // toggle debug mode 
+    bool m_debugMode = false; 
 
     Museum m_museum;
     Trader m_trader;

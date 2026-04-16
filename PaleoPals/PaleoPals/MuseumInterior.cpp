@@ -22,12 +22,6 @@ MuseumInterior::MuseumInterior()
 	m_interiorSprite.setPosition(sf::Vector2f(WINDOW_X / 2.0f, WINDOW_Y / 2.0f));
 	m_interiorSprite.setScale(sf::Vector2f(0.6f, 0.6f));
 
-    // ---- Arrow buttons ----
-    // The sheet has 4 equal-width frames side by side:
-    //   col 0 = black  left  (normal)
-    //   col 1 = white  left  (hover)
-    //   col 2 = black  right (normal)
-    //   col 3 = white  right (hover)
     if (!m_arrowsTex.loadFromFile("ASSETS/IMAGES/Screens/DirectionArrows.png"))
     {
 		std::cout << "MuseumInterior: failed to load arrows texture\n";
@@ -35,20 +29,17 @@ MuseumInterior::MuseumInterior()
 
     {
         sf::Vector2u sz = m_arrowsTex.getSize();
-        m_arrowFrameW = static_cast<int>(sz.x) / 4;  // 4 frames wide
+        m_arrowFrameW = static_cast<int>(sz.x) / 4;  
         m_arrowFrameH = static_cast<int>(sz.y);
     }
 
     m_leftArrow.setTexture(m_arrowsTex);
     m_rightArrow.setTexture(m_arrowsTex);
 
-    // Scale arrows up a bit so they're easy to click
     float arrowScale = 0.5f;
     m_leftArrow.setScale(sf::Vector2f(arrowScale, arrowScale));
     m_rightArrow.setScale(sf::Vector2f(arrowScale, arrowScale));
 
-    // ---- Back button ----
-    // Sheet has 2 frames: col 0 = normal, col 1 = hover
     if (!m_backTex.loadFromFile("ASSETS/IMAGES/Screens/BackButton.png"))
     {
 		std::cout << "MuseumInterior: failed to load back button texture\n";
@@ -63,7 +54,6 @@ MuseumInterior::MuseumInterior()
     m_backSprite.setTexture(m_backTex);
     m_backSprite.setScale(sf::Vector2f(0.7f, 0.7f));
 
-    // ---- Human sprite for size comparison ----
     if (!m_humanTex.loadFromFile("ASSETS/IMAGES/Screens/Human1.png"))
     {
         std::cout << "MuseumInterior: failed to load human sprite texture\n";
@@ -80,8 +70,6 @@ MuseumInterior::MuseumInterior()
 	m_skinToggleButton.setTextureRect(sf::IntRect({ 0, 0 }, { 241, 64 }));
     m_skinToggleButton.setScale(sf::Vector2f(0.5f, 0.5f));
    
-
-
     if (!m_font.openFromFile("ASSETS/FONTS/Jersey20-Regular.ttf"))
     {
 		std::cout << "MuseumInterior: failed to load font\n";
@@ -104,18 +92,15 @@ bool MuseumInterior::loadAssets(const std::vector<DinosaurData>& dinoData)
         auto display = std::make_unique<DinoDisplay>();
         display->name = data.name;
 
-        // Load background texture and create sprite with it
         if (!display->backgroundTex.loadFromFile(data.backgroundTexture))
         {
             std::cerr << "MuseumInterior: failed to load background for " << data.name << "\n";
         }
         else
         {
-            // Recreate the sprite with the loaded texture
             display->backgroundSprite = sf::Sprite(display->backgroundTex);
         }
 
-        // Load piece textures and create sprites
         for (const auto& piece : data.pieces)
         {
             int idx = pieceIdToIndex(piece.id);
@@ -128,7 +113,6 @@ bool MuseumInterior::loadAssets(const std::vector<DinosaurData>& dinoData)
             }
             else
             {
-                // Recreate the sprite with the loaded texture
                 display->pieceSprite[idx] = sf::Sprite(display->pieceTex[idx]);
             }
         }
@@ -232,18 +216,14 @@ void MuseumInterior::update(const sf::RenderWindow& window)
     m_hoverRight = containsPoint(m_rightArrow, screenPos);
     m_hoverBack = containsPoint(m_backSprite, screenPos);
 
-    // Set arrow frames based on hover
-    // Left arrow: col 0 = normal black, col 1 = hover white
     m_leftArrow.setTextureRect(sf::IntRect(
         { m_hoverLeft ? m_arrowFrameW : 0, 0 },
         { m_arrowFrameW, m_arrowFrameH }));
 
-    // Right arrow: col 2 = normal black, col 3 = hover white
     m_rightArrow.setTextureRect(sf::IntRect(
         { m_hoverRight ? m_arrowFrameW * 3 : m_arrowFrameW * 2, 0 },
         { m_arrowFrameW, m_arrowFrameH }));
 
-    // Back button: col 0 = normal, col 1 = hover
     m_backSprite.setTextureRect(sf::IntRect(
         { m_hoverBack ? m_backFrameW : 0, 0 },
         { m_backFrameW, m_backFrameH }));
@@ -253,13 +233,11 @@ void MuseumInterior::draw(sf::RenderWindow& window)
 {
     if (!m_open) return;
 
-    // Switch to default (screen) view so UI is fixed on screen
     sf::View prev = window.getView();
     window.setView(window.getDefaultView());
 
 	window.draw(m_interiorSprite);
 
-    // Current dinosaur display
     if (!m_dinos.empty() && m_dinos[m_currentDinoIndex])
     {
         DinoDisplay& dino = *m_dinos[m_currentDinoIndex];
@@ -267,23 +245,19 @@ void MuseumInterior::draw(sf::RenderWindow& window)
 		m_dinoNameText.setOrigin(sf::Vector2f(m_dinoNameText.getLocalBounds().size.x / 2.f, m_dinoNameText.getLocalBounds().size.y / 2.f));
         m_dinoNameText.setPosition(sf::Vector2f(WINDOW_X / 2.f, 190.f));
 		
-        // Draw the dino background silhouette centred on screen
         sf::Vector2u bgSize = dino.backgroundTex.getSize();
         if (bgSize.x > 0 && bgSize.y > 0)
         {
-            // Get display settings for this dinosaur (includes custom scale/position)
             auto settings = getDisplaySettings(dino.name, bgSize);
 
             dino.backgroundSprite.setScale(sf::Vector2f(settings.scale, settings.scale));
             dino.backgroundSprite.setOrigin(sf::Vector2f(static_cast<float>(bgSize.x) / 2.f, static_cast<float>(bgSize.y) / 2.f));
             dino.backgroundSprite.setPosition(settings.position);
 
-            // Draw as a dim silhouette (greyed out)
             dino.backgroundSprite.setColor(sf::Color(180, 180, 180, 180));
             window.draw(dino.backgroundSprite);
             dino.backgroundSprite.setColor(sf::Color::White); // reset
 
-            // Draw human sprite for size comparison
             sf::Vector2u humanSize = m_humanTex.getSize();
             if (humanSize.x > 0 && humanSize.y > 0)
             {
@@ -295,7 +269,6 @@ void MuseumInterior::draw(sf::RenderWindow& window)
             }
         }
 
-        // Draw each collected piece on top at the same position/scale
         for (int i = 0; i < 4; ++i)
         {
             if (!dino.collected[i]) continue;
@@ -313,7 +286,6 @@ void MuseumInterior::draw(sf::RenderWindow& window)
 
         }
 
-        // For now draw a small dark bar at the top
         sf::RectangleShape nameBar(sf::Vector2f(400.f, 30.f));
 		nameBar.setOrigin(sf::Vector2f(200.f, 15.f));
         nameBar.setFillColor(sf::Color(30, 30, 30, 200));
@@ -321,7 +293,6 @@ void MuseumInterior::draw(sf::RenderWindow& window)
 
         window.draw(nameBar);
 
-        // Piece collection indicators (4 small squares near the bottom)
         std::string pieceNames[4] = { "Skull", "Torso", "Pelvis", "Tail" };
         float indicatorSize = 24.f;
         float spacing = 40.f;
@@ -336,12 +307,12 @@ void MuseumInterior::draw(sf::RenderWindow& window)
 
             if (dino.collected[i])
             {
-                indicator.setFillColor(sf::Color(100, 220, 100));    // green = have it
+                indicator.setFillColor(sf::Color(100, 220, 100));    
                 indicator.setOutlineColor(sf::Color(50, 180, 50));
             }
             else
             {
-                indicator.setFillColor(sf::Color(50, 50, 50, 150));  // dark = missing
+                indicator.setFillColor(sf::Color(50, 50, 50, 150));  
                 indicator.setOutlineColor(sf::Color(150, 150, 150));
             }
 
@@ -374,7 +345,6 @@ void MuseumInterior::draw(sf::RenderWindow& window)
     window.draw(m_backSprite);
     window.draw(m_humanSprite);
 	window.draw(m_skinToggleButton);
-    // Restore previous (world) view
     window.setView(prev);
 }
 
@@ -382,23 +352,18 @@ void MuseumInterior::updateButtonPositions(const sf::RenderWindow& window)
 {
     sf::Vector2u winSize = window.getSize();
 
-    // Left arrow – vertically centred, close to left edge
     m_leftArrow.setPosition(sf::Vector2f(310.f, winSize.y / 2.f - m_arrowFrameH * m_leftArrow.getScale().y / 2.f));
 
-    // Right arrow – mirrored on the right edge
     m_rightArrow.setPosition(sf::Vector2f(winSize.x - 310.f - m_arrowFrameW * m_rightArrow.getScale().x, winSize.y / 2.f - m_arrowFrameH * m_rightArrow.getScale().y / 2.f));
 
-    // Back button – bottom-left corner
     m_backSprite.setPosition(sf::Vector2f(310.f, winSize.y - m_backFrameH * m_backSprite.getScale().y - 160.f));
 
-    // skin toggle 
     m_skinToggleButton.setPosition(sf::Vector2f(310, winSize.y - m_backFrameH * m_backSprite.getScale().y - 224.f));
 
 }
 
 int MuseumInterior::pieceIdToIndex(const std::string& pieceId) const
 {
-    // Lowercase copy for matching
     std::string lower = pieceId;
     std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
 
@@ -422,9 +387,9 @@ MuseumInterior::DisplaySettings MuseumInterior::getDisplaySettings(const std::st
     float scale = targetH / static_cast<float>(bgSize.y);
     float posX = WINDOW_X / 2.f;
     float posY = WINDOW_Y / 2.f;
-    float humanScale = 0.8f;  // default human scale
-    float humanPosX = WINDOW_X * 0.25f;  // default left side for comparison
-    float humanPosY = WINDOW_Y * 0.65f;  // default bottom alignment
+    float humanScale = 0.8f;  
+    float humanPosX = WINDOW_X * 0.25f; 
+    float humanPosY = WINDOW_Y * 0.65f; 
 
     if (dinoName.find("Tyrannosaurus rex") != std::string::npos)
     {

@@ -9,9 +9,6 @@
 #include <ctime>
 #include <limits>
 
-//------------------------------------------------------------
-// BehaviorManager
-//------------------------------------------------------------
 BehaviorManager::BehaviorManager() : m_currentState(BehaviorState::Idle)
 {
     std::srand(static_cast<unsigned>(std::time(nullptr)));
@@ -60,12 +57,9 @@ void BehaviorManager::changeState(BehaviorState newState, Paleontologist* agent)
     m_currentBehavior = m_behaviors[static_cast<int>(newState)].get();
     m_currentBehavior->enter(agent);
 
-    std::cout << "AI State changed to: " << static_cast<int>(newState) << std::endl;
 }
 
-//------------------------------------------------------------
-// IdleBehavior
-//------------------------------------------------------------
+
 void IdleBehavior::enter(Paleontologist* agent)
 {
     m_idleTimer = 0.0f;
@@ -96,9 +90,7 @@ void IdleBehavior::exit(Paleontologist* agent)
 {
 }
 
-//------------------------------------------------------------
-// WanderingBehavior
-//------------------------------------------------------------
+
 void WanderingBehavior::enter(Paleontologist* agent)
 {
     m_wanderTimer = 0.0f;
@@ -176,9 +168,7 @@ void WanderingBehavior::pickRandomWalkableTarget(Paleontologist* agent, Map& map
     m_targetPosition.x = std::max(minX, std::min(m_targetPosition.x, maxX));
 }
 
-//------------------------------------------------------------
-// SearchingBehavior
-//------------------------------------------------------------
+
 void SearchingBehavior::enter(Paleontologist* agent)
 {
     m_hasPath = false;
@@ -327,9 +317,7 @@ float SearchingBehavior::heuristic(sf::Vector2i a, sf::Vector2i b)
     return static_cast<float>(std::abs(a.x - b.x) + std::abs(a.y - b.y));
 }
 
-//------------------------------------------------------------
-// MiningBehavior
-//------------------------------------------------------------
+
 void MiningBehavior::enter(Paleontologist* agent)
 {
     m_miningProgress = 0.0f;

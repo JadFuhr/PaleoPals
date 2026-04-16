@@ -8,7 +8,6 @@ Player::Player()
 {
     std::cout << "Player constructor START\n";
 
-    // Load texture
     if (!m_texture.loadFromFile("ASSETS/IMAGES/Sprites/Characters/paleontologist_walk.png"))
     {
         std::cerr << "Failed to load player texture!\n";
@@ -85,7 +84,6 @@ void Player::update(sf::Time deltaTime, Map& map, const sf::RenderWindow& window
 void Player::handleInput(sf::Time deltaTime, Map& map)
 {
 
-    // Horizontal movement
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A))
     {
         m_velocity.x = -m_moveSpeed;
@@ -107,16 +105,13 @@ void Player::handleInput(sf::Time deltaTime, Map& map)
         }
     }
 
-    // Jumping
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space) && m_canJump && m_isGrounded)
     {
 		m_velocity.y = getJumpForce();
         m_canJump = false;
         m_state = PlayerState::Jumping;
-        //std::cout << "Player jumped!\n";
     }
 
-    // Release jump key to allow next jump
     if (!sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space))
     {
         m_canJump = true;
@@ -130,22 +125,17 @@ void Player::handleInput(sf::Time deltaTime, Map& map)
 
 void Player::applyPhysics(sf::Time deltaTime, Map& map)
 {
-    // Apply gravity
     m_velocity.y += m_gravity * deltaTime.asSeconds();
 
-    // Clamp vertical velocity
     if (m_velocity.y > 600.0f)
     {
         m_velocity.y = 600.0f;
     }
 
-    // Move player
     m_sprite.move(m_velocity * deltaTime.asSeconds());
 
-    // Check ground/ceiling/wall collisions
     checkCollisions(map);
 
-    // Update state based on velocity
     if (!m_isGrounded)
     {
         if (m_velocity.y < 0)
@@ -168,7 +158,6 @@ void Player::applyPhysics(sf::Time deltaTime, Map& map)
         float offsetX = (WINDOW_X - cols * tileSize) / 2.0f;
         float offsetY = WINDOW_Y / 2.0f;
 
-        // Horizontal clamp (left/right edges)
         const float halfW = tileSize * 0.35f; // same as collision width
         float minX = offsetX + halfW;
         float maxX = offsetX + cols * tileSize - halfW;
@@ -178,7 +167,6 @@ void Player::applyPhysics(sf::Time deltaTime, Map& map)
         if (pos.x < minX) pos.x = minX;
         if (pos.x > maxX) pos.x = maxX;
 
-        // Bottom clamp only (prevent falling past last row)
         float maxY = offsetY + rows * tileSize - 1.0f;
 
         if (pos.y > maxY)
@@ -196,29 +184,27 @@ void Player::checkCollisions(Map& map)
 {
     float tileSize = map.getTileSize();
 
-    // Hitbox dimensions - keep narrower than a tile so the player fits in dug tunnels
-    const float halfW = tileSize * 0.35f;   // 8.4 px  (side clearance from centre)
-    const float playerHeight = tileSize * 1.6f; // 38 px  (two tiles tall)
+    const float halfW = tileSize * 0.35f;   
+    const float playerHeight = tileSize * 1.6f; 
 
     m_isGrounded = false;
 
 
-    // Helper lambdas: tile position helpers
     float tileOffsetX = (WINDOW_X - map.getColumnCount() * tileSize) / 2.0f;
     float tileOffsetY = WINDOW_Y / 2.0f;
 
-    // Convert world pos to tile col/row 
     auto toTileCol = [&](float worldX) -> int {
         return static_cast<int>(std::floor((worldX - tileOffsetX) / tileSize));
         };
+
     auto toTileRow = [&](float worldY) -> int {
         return static_cast<int>(std::floor((worldY - tileOffsetY) / tileSize));
         };
-    // Left edge of a tile in world space
+
     auto tileLeft = [&](int col) -> float {
         return col * tileSize + tileOffsetX;
         };
-    // Top edge of a tile in world space
+
     auto tileTop = [&](int row) -> float {
         return row * tileSize + tileOffsetY;
         };
@@ -231,24 +217,20 @@ void Player::checkCollisions(Map& map)
         return inBounds(row, col) && map.getTileHardness(row, col) > 0;
         };
 
-    sf::Vector2f pos = m_sprite.getPosition(); // feet centre
+    sf::Vector2f pos = m_sprite.getPosition(); 
 
 
-    // VERTICAL COLLISION
     if (m_velocity.y >= 0)
     {
-        // GROUND: check tile(s) directly under both bottom corners
-        float feetY = pos.y;                    // feet are at pos.y
-        int   footRow = toTileRow(feetY);        // row the feet are sitting on top of
+        float feetY = pos.y;                    
+        int   footRow = toTileRow(feetY);        
 
         int colL = toTileCol(pos.x - halfW + 1.f);
         int colR = toTileCol(pos.x + halfW - 1.f);
 
-        // The tile whose top the player should land on is footRow
-        // because tileTop(footRow) <= feetY < tileTop(footRow+1)
         if (solid(footRow, colL) || solid(footRow, colR))
         {
-            float surfaceY = tileTop(footRow); // top edge of that tile
+            float surfaceY = tileTop(footRow); 
 
             if (feetY >= surfaceY - 2.0f)
             {
@@ -261,7 +243,7 @@ void Player::checkCollisions(Map& map)
     }
     else
     {
-        // CEILING: check tile(s) above head 
+       
         float headY = pos.y - playerHeight;
         int   headRow = toTileRow(headY);
 
@@ -270,7 +252,6 @@ void Player::checkCollisions(Map& map)
 
         if (solid(headRow, colL) || solid(headRow, colR))
         {
-            // Bottom edge of the tile the head hit
             float ceilBottom = tileTop(headRow) + tileSize;
             m_sprite.setPosition(sf::Vector2f(pos.x, ceilBottom + playerHeight));
             m_velocity.y = 0;
@@ -279,20 +260,17 @@ void Player::checkCollisions(Map& map)
     }
 
 
-    // HORIZONTAL COLLISION
-    // Checks three vertical points: head, mid, feet
     if (m_velocity.x != 0)
     {
-        // Sample rows: just below head, mid-body, just above feet
         float sampleYs[3] = {
-            pos.y - playerHeight + 2.f,   // head region
-            pos.y - playerHeight * 0.5f,  // mid
-            pos.y - 2.f                   // feet region
+            pos.y - playerHeight + 2.f,   
+            pos.y - playerHeight * 0.5f,  
+            pos.y - 2.f                   
         };
 
         if (m_velocity.x < 0)
         {
-            // Moving left – check left edge
+           
             float leftEdge = pos.x - halfW;
             int leftCol = toTileCol(leftEdge);
 
@@ -305,14 +283,12 @@ void Player::checkCollisions(Map& map)
             if (hit)
             {
                 m_velocity.x = 0;
-                // Push right so left edge aligns with right side of blocking tile
                 float newX = tileLeft(leftCol) + tileSize + halfW;
                 m_sprite.setPosition(sf::Vector2f(newX, pos.y));
             }
         }
         else
         {
-            // Moving right – check right edge
             float rightEdge = pos.x + halfW;
             int rightCol = toTileCol(rightEdge);
 
@@ -325,7 +301,6 @@ void Player::checkCollisions(Map& map)
             if (hit)
             {
                 m_velocity.x = 0;
-                // Push left so right edge aligns with left side of blocking tile
                 float newX = tileLeft(rightCol) - halfW;
                 m_sprite.setPosition(sf::Vector2f(newX, pos.y));
             }
@@ -342,7 +317,6 @@ void Player::tryPickupCollectible(Map& map)
     float tileOffsetY = WINDOW_Y / 2.0f;
 
     
-    // player tile pos (feet)
     sf::Vector2f bodyCentre = playerPos - sf::Vector2f(0.f, tileSize * 0.8f);
     int playerCol = static_cast<int>(std::floor((bodyCentre.x - tileOffsetX) / tileSize));
     int playerRow = static_cast<int>(std::floor((bodyCentre.y - tileOffsetY) / tileSize));
@@ -362,7 +336,6 @@ void Player::tryPickupCollectible(Map& map)
         if (distSq > pickupRadius * pickupRadius)
             continue;
 
-        // Build the inventory item
         CollectedItem item;
         item.collectibleIndex = c.collectibleIndex;
         item.monetaryValue = c.monetaryValue;
@@ -390,25 +363,22 @@ void Player::tryPickupCollectible(Map& map)
         m_inventory.push_back(item);
         m_newPickups.push_back(item);
         
-        // Mark as collected and move off-screen
         c.isPickedUp = true;
         c.sprite.setPosition(sf::Vector2f(-10000.f, -10000.f));
 
         std::cout << "[Pickup] " << item.name << " (type=" << item.type << ")" << " | Inventory size: " << m_inventory.size() << "\n";
 
-        return; // one item per key press
+        return; 
     }
 }
 
 void Player::updateAnimation(sf::Time deltaTime)
 {
-    // Idle and Mining: use frame 0
     if (m_state == PlayerState::Idle)
     {
         setFrame(0);
         m_animationTimer = 0.0f;
     }
-    // Walking: animate walk cycle
     else if (m_state == PlayerState::Walking)
     {
         m_animationTimer += deltaTime.asSeconds();
@@ -439,7 +409,6 @@ void Player::setFrame(int frame)
     int xOffset = frame * m_frameWidth;
     m_sprite.setTextureRect(sf::IntRect({ xOffset, 0 }, { m_frameWidth, m_frameHeight }));
 
-    // Flip sprite based on facing direction
     sf::Vector2f scale = m_sprite.getScale();
     if (m_facingRight)
     {
@@ -512,7 +481,7 @@ float Player::getJumpForce()
 void Player::collectFossil(const std::string& dinosaurName, const std::string& pieceId, const std::string& category)
 {
     CollectedItem item;
-    item.collectibleIndex = 0; // Fossil type
+    item.collectibleIndex = 0; 
     item.type = "fossil";
     item.monetaryValue = 0;
     item.dinosaurName = dinosaurName;
@@ -558,22 +527,18 @@ void Player::updatePickaxe(const sf::RenderWindow& window, Map& map, const sf::V
     sf::Vector2f playerPos = m_sprite.getPosition();
     playerPos.y -= 15.0f;
 
-    // Mouse world position
     sf::Vector2i mousePixel = sf::Mouse::getPosition(window);
     sf::Vector2f mouseWorld = window.mapPixelToCoords(mousePixel, cameraView);
 
-    // Direction from player → mouse
     sf::Vector2f dir = mouseWorld - playerPos;
     float angle = std::atan2(dir.y, dir.x) * 180.f / 3.14159f;
 
     m_pickaxeAngle = angle;
 
-    // Position pickaxe at radius around player
     float rad = angle * 0.01745f;
     sf::Vector2f offset(std::cos(rad), std::sin(rad));
     offset *= m_pickaxeRadius;
 
-    // Set sprite position 
     m_pickaxeSprite.setPosition(playerPos + offset);
     m_pickaxeSprite.setRotation(sf::degrees(angle + 45));
 
@@ -598,7 +563,8 @@ void Player::checkPickaxeHit(const sf::RenderWindow& window, Map& map, const sf:
         {
             float cx = std::clamp(c.x, rect.position.x, rect.position.x + rect.size.x);
             float cy = std::clamp(c.y, rect.position.y, rect.position.y + rect.size.y);
-            float dx = c.x - cx, dy = c.y - cy;
+            float dx = c.x - cx;
+            float dy = c.y - cy;
             return (dx * dx + dy * dy) <= (r * r);
         };
 
@@ -629,7 +595,6 @@ void Player::checkPickaxeHit(const sf::RenderWindow& window, Map& map, const sf:
         }
     }
 
-    // --- DEBUG VISUAL FOR PICKAXE RADIUS ---
     float debugRadius = getPickaxeRadius();
     m_pickaxeDebugCircle.setRadius(debugRadius);
     m_pickaxeDebugCircle.setOrigin(sf::Vector2f(debugRadius, debugRadius));
@@ -645,17 +610,14 @@ void Player::updatePickaxeAnimation(sf::Time dt)
     {
         m_pickaxeAnimationTimer = 0.f;
 
-        // Advance forward only
         m_pickaxeCurrentFrame++;
 
-        // Loop back to 0 when reaching the end
         if (m_pickaxeCurrentFrame >= m_pickaxeTotalFrames)
         {
             m_pickaxeCurrentFrame = 0;
         }
     }
 
-    // --- This MUST be outside the if-block ---
     int frameWidth = static_cast<int>(m_pickaxeTexture.getSize().x / m_pickaxeTotalFrames);
     int frameHeight = static_cast<int>(m_pickaxeTexture.getSize().y);
 
@@ -672,6 +634,6 @@ float Player::getPickaxeRadius() const
 
 int Player::getPickaxeDamage() const
 {
-    return 1 + damageLevel; // each level adds +1 damage
+    return 1 + damageLevel; 
 }
 

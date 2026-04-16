@@ -8,10 +8,7 @@ static float manhattan(const GridPos& a, const GridPos& b)
     return static_cast<float>(std::abs(a.row - b.row) + std::abs(a.col - b.col));
 }
 
-std::vector<GridPos> AStarPathfinder::findPath(
-    const Map& map,
-    const GridPos& start,
-    const GridPos& goal)
+std::vector<GridPos> AStarPathfinder::findPath(const Map& map,const GridPos& start,const GridPos& goal)
 {
     const int rows = map.getRowCount();
     const int cols = map.getColumnCount();
@@ -26,11 +23,9 @@ std::vector<GridPos> AStarPathfinder::findPath(
             return inBounds(r, c) && map.isWalkable(r, c);
         };
 
-    // Early out if start/goal not walkable
     if (!walkable(start.row, start.col) || !walkable(goal.row, goal.col))
         return {};
 
-    // For each tile, store index into node list or -1
     std::vector<int> nodeIndex(rows * cols, -1);
 
     std::vector<PathNode> nodes;
@@ -114,7 +109,7 @@ std::vector<GridPos> AStarPathfinder::findPath(
             if (closed[nFlat])
                 continue;
 
-            float gNew = current.gCost + 1.f; // cost per step
+            float gNew = current.gCost + 1.f; 
             float hNew = manhattan(next, goal);
             int nIdx = addOrUpdateNode(next, gNew, hNew, currentIdx);
             open.push({ nIdx, nodes[nIdx].fCost() });
@@ -125,7 +120,6 @@ std::vector<GridPos> AStarPathfinder::findPath(
     if (goalNodeIdx == -1)
         return path;
 
-    // Reconstruct path
     int idx = goalNodeIdx;
     while (idx != -1)
     {

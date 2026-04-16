@@ -13,10 +13,8 @@ FossilManager::FossilManager()
 
 bool FossilManager::loadFossilsFromConfig(const std::string& filepath)
 {
-    // Open the JSON file for reading
     std::ifstream file(filepath);
 
-    // Check if file opened successfully
     if (!file.is_open())
     {
         std::cerr << "Failed to open JSON config for fossils: " << filepath << std::endl;
@@ -25,11 +23,9 @@ bool FossilManager::loadFossilsFromConfig(const std::string& filepath)
 
     try
     {
-        // Parse the JSON file into a json object
         json config;
         file >> config;
 
-        // Load collectible types from config
         if (config.contains("collectibles"))
         {
             auto collectibles = config["collectibles"];
@@ -50,23 +46,18 @@ bool FossilManager::loadFossilsFromConfig(const std::string& filepath)
             std::cout << "Loaded " << m_collectibleTypes.size() << " collectible types from config\n";
         }
 
-        // Check if the "dinosaurs" section exists in the JSON
         if (!config.contains("dinosaurs"))
         {
             std::cerr << "No dinosaurs section found in config\n";
             return false;
         }
 
-        // Get the array of dinosaurs from the JSON
         auto dinosaurs = config["dinosaurs"];
 
-        // Loop through each dinosaur in the array
         for (auto& dinoNode : dinosaurs)
         {
-            // Create a new DinosaurData struct to hold this dino's info
             DinosaurData dino;
 
-            // Extract basic info: name, category (Carnivore/Herbivore/Pterosaur)
             dino.name = dinoNode["name"].get<std::string>();
             dino.category = dinoNode["category"].get<std::string>();
             dino.backgroundTexture = dinoNode["background"].get<std::string>();
@@ -74,28 +65,21 @@ bool FossilManager::loadFossilsFromConfig(const std::string& filepath)
             
 
 
-            // Loop through each piece (skull, torso, pelvis, tail) for this dinosaur
             for (auto& pieceNode : dinoNode["pieces"])
             {
-                // Create a Piece struct to hold this fossil piece's data
                 DinosaurData::Piece piece;
                 piece.id = pieceNode["id"].get<std::string>();          
                 piece.texturePath = pieceNode["texture"].get<std::string>(); 
 
-                // Add this piece to the dinosaur's list of pieces
                 dino.pieces.push_back(piece);
             }
 
-            // Add this complete dinosaur (with all its pieces) to our data collection
             m_dinosaurData.push_back(std::move(dino));
         }
 
-        // Success message showing how many species we loaded
-        //std::cout << "Loaded " << m_dinosaurData.size() << " dinosaur species\n";
     }
     catch (const std::exception& e)
     {
-        // If any error occurs during JSON parsing, catch it and report
         std::cerr << "Error loading JSON fossil config: " << e.what() << std::endl;
         return false;
     }
@@ -136,7 +120,6 @@ bool FossilManager::trySpawnCollectible(int row, int col, float tileSize, float 
         return false;
     }
 
-    // Drop-chance roll
     static std::random_device rd;
     static std::mt19937 gen(rd());
     static std::uniform_int_distribution<> chanceRoll(0, 99);
@@ -144,16 +127,13 @@ bool FossilManager::trySpawnCollectible(int row, int col, float tileSize, float 
     if (chanceRoll(gen) >= m_spawnChancePercent)
         return false;
 
-    // World position = centre of the tile that just broke
     float xPos = col * tileSize + m_cachedOffsetX + tileSize / 2.0f;
     float yPos = row * tileSize + m_cachedOffsetY + tileSize / 2.0f;
 
     int collectibleIndex = pickRandomCollectibleIndex();
 
-    // Build the Collectible
     Collectible c(m_collectibleTexture, sf::Vector2f(xPos, yPos), collectibleIndex, row, col);
 
-    // 64x64, displayed at half size
     c.sprite.setScale(sf::Vector2f(0.5f, 0.5f));
 
     if (collectibleIndex < static_cast<int>(m_collectibleTypes.size()))
@@ -167,20 +147,17 @@ bool FossilManager::trySpawnCollectible(int row, int col, float tileSize, float 
     }
     else
     {
-        // Fallback if config table is incomplete
         c.sprite.setTextureRect(sf::IntRect({ collectibleIndex * 64, 0 }, { 64, 64 }));
 		c.sprite.setOrigin(sf::Vector2f(32.f, 32.f));
     }
 
-    // Fossil: assign a random dinosaur piece
     if (collectibleIndex <= 6)
         assignRandomFossilToPiece(c);
 
-    // Debug log
     const char* typeName = (collectibleIndex <= 6) ? "Fossil" :
         (collectibleIndex <= 8) ? "Amber" : "Trash";
-    std::cout << "[Drop] " << typeName << " (idx=" << collectibleIndex
-        << ") at tile (" << row << "," << col << ")\n";
+
+    std::cout << "[Drop] " << typeName << " (idx=" << collectibleIndex << ") at tile (" << row << "," << col << ")\n";
 
     m_collectibles.push_back(std::move(c));
     return true;
@@ -231,21 +208,17 @@ void FossilManager::assignRandomFossilToPiece(Collectible& collectible)
         return;
     }
 
-    // Random number generation
     static std::random_device rd;
     static std::mt19937 gen(rd());
 
-    // Pick a random dinosaur
     std::uniform_int_distribution<> dinoDist(0, m_dinosaurData.size() - 1);
     int dinoIndex = dinoDist(gen);
     const DinosaurData& selectedDino = m_dinosaurData[dinoIndex];
 
-    // Pick a random piece from that dinosaur
     std::uniform_int_distribution<> pieceDist(0, selectedDino.pieces.size() - 1);
     int pieceIndex = pieceDist(gen);
     const DinosaurData::Piece& selectedPiece = selectedDino.pieces[pieceIndex];
 
-    // Assign to collectible
     collectible.assignedDinosaurName = selectedDino.name;
     collectible.assignedPieceId = selectedPiece.id;
     collectible.assignedCategory = selectedDino.category;
