@@ -89,7 +89,7 @@ void PauseMenu::drawPauseMenu(sf::RenderWindow& window)
 
     window.draw(m_pauseSprite);
     window.draw(m_resumeButton);
-    window.draw(m_settingsButton);
+    //window.draw(m_settingsButton);
     window.draw(m_quitButton);
 
 }

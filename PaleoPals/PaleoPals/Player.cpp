@@ -347,17 +347,19 @@ void Player::tryPickupCollectible(Map& map)
             item.pieceId = c.assignedPieceId;
             item.category = c.assignedCategory;
             item.name = c.assignedPieceId + " of " + c.assignedDinosaurName;
+			m_money += c.monetaryValue;
         }
         else if (c.collectibleIndex <= 8)
         {
             item.type = "amber";
-            item.name = (c.monetaryValue == 50) ? "Small Amber" : "Large Amber";
+            item.name = (c.monetaryValue == 75) ? "Small Amber" : "Large Amber";
             m_money += c.monetaryValue;
         }
         else
         {
             item.type   = "trash";
             item.name = "Trash";
+			m_money += c.monetaryValue;
         }
 
         m_inventory.push_back(item);
@@ -578,6 +580,7 @@ void Player::checkPickaxeHit(const sf::RenderWindow& window, Map& map, const sf:
                 continue;
 
             sf::Vector2f tilePos = map.tileToWorld({ c, r });
+
             sf::FloatRect tileRect(
                 { tilePos.x - tileSize / 2.f, tilePos.y - tileSize / 2.f },
                 { tileSize, tileSize }

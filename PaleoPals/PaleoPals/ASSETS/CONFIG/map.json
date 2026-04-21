@@ -1,10 +1,10 @@
 {
   "map": {
     "layers": [
-      {"name": "Topsoil", "texture": "ASSETS/IMAGES/Terrain/Topsoil.png", "hardness": 5},
-      {"name": "Sediment", "texture": "ASSETS/IMAGES/Terrain/Sediment.png", "hardness": 30},
-      {"name": "Rock", "texture": "ASSETS/IMAGES/Terrain/Rock.png", "hardness": 200},
-      {"name": "Bedrock", "texture": "ASSETS/IMAGES/Terrain/Bedrock.png", "hardness": 500}
+      {"name": "Topsoil", "texture": "ASSETS/IMAGES/Terrain/Topsoil.png", "hardness": 8},
+      {"name": "Sediment", "texture": "ASSETS/IMAGES/Terrain/Sediment.png", "hardness": 35},
+      {"name": "Rock", "texture": "ASSETS/IMAGES/Terrain/Rock.png", "hardness": 250},
+      {"name": "Bedrock", "texture": "ASSETS/IMAGES/Terrain/Bedrock.png", "hardness": 600}
     ]
   },
 
@@ -31,7 +31,7 @@
       "frameWidth": 64,
       "frameHeight": 64,
       "frameIndex": 0,
-      "monetaryValue": 0
+      "monetaryValue": 40
     },
     {
       "index": 1,
@@ -41,7 +41,7 @@
       "frameWidth": 64,
       "frameHeight": 64,
       "frameIndex": 1,
-      "monetaryValue": 0
+      "monetaryValue": 40
     },
     {
       "index": 2,
@@ -51,7 +51,7 @@
       "frameWidth": 64,
       "frameHeight": 64,
       "frameIndex": 2,
-      "monetaryValue": 0
+      "monetaryValue": 40
     },
     {
       "index": 3,
@@ -61,7 +61,7 @@
       "frameWidth": 64,
       "frameHeight": 64,
       "frameIndex": 3,
-      "monetaryValue": 0
+      "monetaryValue": 40
     },
     {
       "index": 4,
@@ -71,7 +71,7 @@
       "frameWidth": 64,
       "frameHeight": 64,
       "frameIndex": 4,
-      "monetaryValue": 0
+      "monetaryValue": 40
     },
     {
       "index": 5,
@@ -91,7 +91,7 @@
       "frameWidth": 64,
       "frameHeight": 64,
       "frameIndex": 6,
-      "monetaryValue": 0
+      "monetaryValue": 40
     },
     {
       "index": 7,
@@ -121,7 +121,7 @@
       "frameWidth": 64,
       "frameHeight": 64,
       "frameIndex": 9,
-      "monetaryValue": 0
+      "monetaryValue": 10
     },
     {
       "index": 10,
@@ -131,7 +131,7 @@
       "frameWidth": 64,
       "frameHeight": 64,
       "frameIndex": 10,
-      "monetaryValue": 0
+      "monetaryValue": 10
     },
     {
       "index": 11,
@@ -141,7 +141,7 @@
       "frameWidth": 64,
       "frameHeight": 64,
       "frameIndex": 11,
-      "monetaryValue": 0
+      "monetaryValue": 10
     }
   ],
 
