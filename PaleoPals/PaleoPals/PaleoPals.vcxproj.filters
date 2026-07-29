@@ -63,9 +63,6 @@
     <ClCompile Include="Map.cpp">
       <Filter>Source Files\Gameplay</Filter>
     </ClCompile>
-    <ClCompile Include="Paleontologist.cpp">
-      <Filter>Source Files\Workers</Filter>
-    </ClCompile>
     <ClCompile Include="Researcher.cpp">
       <Filter>Source Files\Workers</Filter>
     </ClCompile>
@@ -75,9 +72,6 @@
     <ClCompile Include="Paused.cpp">
       <Filter>Source Files\Menus</Filter>
     </ClCompile>
-    <ClCompile Include="Behaviours.cpp">
-      <Filter>Source Files\Behaviours</Filter>
-    </ClCompile>
     <ClCompile Include="Fossil.cpp">
       <Filter>Source Files\Gameplay</Filter>
     </ClCompile>
@@ -86,12 +80,6 @@
     </ClCompile>
     <ClCompile Include="TraderMenu.cpp">
       <Filter>Source Files\Menus</Filter>
-    </ClCompile>
-    <ClCompile Include="BehaviorTree.cpp">
-      <Filter>Source Files\Behaviours</Filter>
-    </ClCompile>
-    <ClCompile Include="Pathfinding.cpp">
-      <Filter>Source Files\Behaviours</Filter>
     </ClCompile>
     <ClCompile Include="Player.cpp">
       <Filter>Source Files\Workers</Filter>
@@ -116,26 +104,14 @@
     <ClInclude Include="Museum.h">
       <Filter>Header Files\Gameplay</Filter>
     </ClInclude>
-    <ClInclude Include="Paleontologist.h">
-      <Filter>Header Files\Workers</Filter>
-    </ClInclude>
     <ClInclude Include="Researcher.h">
       <Filter>Header Files\Workers</Filter>
-    </ClInclude>
-    <ClInclude Include="Behaviours.h">
-      <Filter>Header Files\Behaviours</Filter>
     </ClInclude>
     <ClInclude Include="Fossil.h">
       <Filter>Header Files\Gameplay</Filter>
     </ClInclude>
     <ClInclude Include="MuseumInterior.h">
       <Filter>Header Files\Menus</Filter>
-    </ClInclude>
-    <ClInclude Include="BehaviorTree.h">
-      <Filter>Header Files\Behaviours</Filter>
-    </ClInclude>
-    <ClInclude Include="Pathfinding.h">
-      <Filter>Header Files\Behaviours</Filter>
     </ClInclude>
     <ClInclude Include="Player.h">
       <Filter>Header Files\Workers</Filter>

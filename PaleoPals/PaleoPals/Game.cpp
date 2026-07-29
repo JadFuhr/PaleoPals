@@ -99,10 +99,7 @@ void Game::processEvents()
 
                         if (action == HireAction::HirePaleontologist)
                         {
-                            auto newPaleo = std::make_unique<Paleontologist>();
-                            newPaleo->setPosition(worldPos + sf::Vector2f(16.f, 0.f));
-                            newPaleo->setSpeed(60.0f);
-                            m_paleontologists.push_back(std::move(newPaleo));
+                           
                         }
                         else if (action == HireAction::HireResearcher)
                         {
@@ -285,10 +282,7 @@ void Game::update(sf::Time t_deltaTime)
         }
         try
         {
-            for (auto& p : m_paleontologists) 
-            {
-                if (p) p->update(t_deltaTime, m_map);
-            }
+            
         }
         catch (const std::exception& e)
         {
@@ -338,14 +332,6 @@ void Game::render()
             sf::Vector2f viewSize = m_cameraView.getSize();
             sf::FloatRect viewBounds(sf::Vector2f(viewCenter.x - viewSize.x / 2.f, viewCenter.y - viewSize.y / 2.f), viewSize);
 
-            for (auto& p : m_paleontologists)
-            {
-             
-                if (viewBounds.findIntersection(p->getSprite().getGlobalBounds()))
-                {
-                    p->draw(m_window);
-                }
-            }
 
             m_player.draw(m_window);
         }
@@ -394,14 +380,7 @@ void Game::setupMap()
     m_map.setupBackground();
     m_map.generateGrid(totalRows, cols, tileSize, WINDOW_X, WINDOW_Y);
 	m_museumInterior.loadAssets(m_map.getFossilManager().getDinosaurData());
-
-
-    auto initialPaleo = std::make_unique<Paleontologist>();
-    initialPaleo->setPosition(sf::Vector2f(WINDOW_X / 2.0f, WINDOW_Y / 2.0f - 20.0f));
-    initialPaleo->setSpeed(60.0f);
-    m_paleontologists.push_back(std::move(initialPaleo));
-
-
+   
     m_player.setPosition(sf::Vector2f(WINDOW_X / 2.0f + 100.0f, WINDOW_Y / 2.0f));
 
 }

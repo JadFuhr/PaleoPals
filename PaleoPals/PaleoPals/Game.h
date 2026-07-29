@@ -9,7 +9,6 @@
 #include "Map.h"
 #include "Menu.h"
 #include "Paused.h"
-#include "Paleontologist.h"
 #include <json.hpp>
 #include <fstream>
 #include "constants.h"
@@ -52,7 +51,6 @@ private:
     PauseMenu m_pause;
     Museum m_museum;
 	MuseumInterior m_museumInterior;
-    std::vector<std::unique_ptr<Paleontologist>> m_paleontologists; // multiple paleontologist instances
     Player m_player;
 
     sf::RenderWindow m_window; // main SFML window
