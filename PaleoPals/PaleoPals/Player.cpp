@@ -480,50 +480,6 @@ float Player::getJumpForce()
     return m_jumpForce + (jumpLevel * -40.0f);
 }
 
-void Player::collectFossil(const std::string& dinosaurName, const std::string& pieceId, const std::string& category)
-{
-    CollectedItem item;
-    item.collectibleIndex = 0; 
-    item.type = "fossil";
-    item.monetaryValue = 0;
-    item.dinosaurName = dinosaurName;
-    item.pieceId = pieceId;
-    item.category = category;
-    item.name = pieceId + " of " + dinosaurName;
-
-    m_inventory.push_back(item);
-    m_newPickups.push_back(item);
-
-    std::cout << "✓ Collected: " << item.name << "\n";
-}
-
-void Player::collectAmber(int monetaryValue)
-{
-    CollectedItem item;
-    item.collectibleIndex = 7; // Amber type
-    item.type = "amber";
-    item.monetaryValue = monetaryValue;
-    item.name = (monetaryValue == 50) ? "Small Amber" : "Large Amber";
-
-    m_inventory.push_back(item);
-    m_money += monetaryValue;
-
-    std::cout << "✓ " << item.name << " (+$" << monetaryValue << " | Total: $" << m_money << ")\n";
-}
-
-void Player::collectTrash()
-{
-    CollectedItem item;
-    item.collectibleIndex = 9; // Trash type
-    item.type = "trash";
-    item.monetaryValue = 0;
-    item.name = "Trash";
-
-    m_inventory.push_back(item);
-
-    std::cout << "✓ Collected: Trash (worthless)\n";
-}
-
 void Player::updatePickaxe(const sf::RenderWindow& window, Map& map, const sf::View& cameraView)
 {
     sf::Vector2f playerPos = m_sprite.getPosition();
@@ -581,10 +537,7 @@ void Player::checkPickaxeHit(const sf::RenderWindow& window, Map& map, const sf:
 
             sf::Vector2f tilePos = map.tileToWorld({ c, r });
 
-            sf::FloatRect tileRect(
-                { tilePos.x - tileSize / 2.f, tilePos.y - tileSize / 2.f },
-                { tileSize, tileSize }
-            );
+            sf::FloatRect tileRect({ tilePos.x - tileSize / 2.f, tilePos.y - tileSize / 2.f }, { tileSize, tileSize });
 
             if (circleIntersectsRect(tip, radius, tileRect))
             {

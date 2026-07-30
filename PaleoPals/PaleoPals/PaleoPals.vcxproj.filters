@@ -63,9 +63,6 @@
     <ClCompile Include="Map.cpp">
       <Filter>Source Files\Gameplay</Filter>
     </ClCompile>
-    <ClCompile Include="Researcher.cpp">
-      <Filter>Source Files\Workers</Filter>
-    </ClCompile>
     <ClCompile Include="Menu.cpp">
       <Filter>Source Files\Menus</Filter>
     </ClCompile>
@@ -103,9 +100,6 @@
     </ClInclude>
     <ClInclude Include="Museum.h">
       <Filter>Header Files\Gameplay</Filter>
-    </ClInclude>
-    <ClInclude Include="Researcher.h">
-      <Filter>Header Files\Workers</Filter>
     </ClInclude>
     <ClInclude Include="Fossil.h">
       <Filter>Header Files\Gameplay</Filter>
