@@ -368,7 +368,7 @@ void Player::tryPickupCollectible(Map& map)
         c.isPickedUp = true;
         c.sprite.setPosition(sf::Vector2f(-10000.f, -10000.f));
 
-        std::cout << "[Pickup] " << item.name << " (type=" << item.type << ")" << " | Inventory size: " << m_inventory.size() << "\n";
+        std::cout << "[Pickup] " << item.name << " (type: " << item.type << ")" << " | Inventory size: " << m_inventory.size() << "\n";
 
         return; 
     }

@@ -46,14 +46,11 @@ public:
 
     sf::Vector2f getPosition() const { return m_sprite.getPosition(); }
     const sf::Sprite& getSprite() const { return m_sprite; }
-    const std::vector<CollectedItem>& getInventory() const { return m_inventory; }
+
     const std::vector<CollectedItem>& getNewPickups() const { return m_newPickups; }
+
     void clearNewPickups() { m_newPickups.clear(); }
     int getMoney() const { return m_money; }
-
-    void collectFossil(const std::string& dinosaurName, const std::string& pieceId, const std::string& category);
-    void collectAmber(int monetaryValue);
-    void collectTrash();
 
     void updatePickaxe(const sf::RenderWindow& window, Map& map, const sf::View& cameraView);
     void checkPickaxeHit(const sf::RenderWindow& window, Map& map, const sf::View& cameraView);
