@@ -30,7 +30,7 @@ private:
     NPCState m_state = NPCState::WANDERTHESURFACE;
 
     sf::Vector2f m_velocity;
-    float m_moveSpeed = 80.0f; // slower than player
+    float m_moveSpeed = 80.0f; // slower speed
 
     bool m_facingRight = true;
 
