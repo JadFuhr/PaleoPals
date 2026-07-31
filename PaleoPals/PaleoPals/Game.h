@@ -15,6 +15,7 @@
 #include "TraderMenu.h"
 #include "MuseumInterior.h"
 #include "Player.h"
+#include "NPC.h"
 #include <vector>
 #include <memory>
 
@@ -52,6 +53,7 @@ private:
     Museum m_museum;
 	MuseumInterior m_museumInterior;
     Player m_player;
+    NPC m_npc;
 
     sf::RenderWindow m_window; // main SFML window
     sf::View m_cameraView;

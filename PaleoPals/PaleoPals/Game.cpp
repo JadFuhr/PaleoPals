@@ -334,6 +334,7 @@ void Game::render()
 
 
             m_player.draw(m_window);
+            m_npc.drawNPC(m_window);
         }
 
 		m_window.setView(m_window.getDefaultView());
@@ -352,10 +353,7 @@ void Game::render()
         m_window.setView(m_window.getDefaultView());
         m_window.draw(m_moneyText);
 
-        //for (auto& p : m_paleontologists)
-        //{
-        //    if (p) p->draw(m_window);
-        //}
+
 
         m_pause.drawPauseMenu(m_window);
     default:
