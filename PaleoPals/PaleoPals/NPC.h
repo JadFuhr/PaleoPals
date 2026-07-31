@@ -18,10 +18,10 @@ class NPC
 public:
 	NPC();
 
-	void update(sf::Time dt, Map& map);
-	void draw(sf::RenderWindow& window);
+    void updateNPC(sf::Time dt, Map& map);
+	void drawNPC(sf::RenderWindow& window);
 
-	sf::Vector2f getPosition() const { return m_sprite.getPosition(); }
+	sf::Vector2f getNPCPosition() const { return m_sprite.getPosition(); }
 private:
 
     sf::Texture m_texture;
@@ -42,8 +42,8 @@ private:
     const int m_totalFrames = 4;
 
     void updateSurfaceWandering(sf::Time dt, Map& map);
-    void updateAnimation(sf::Time dt);
-    void setFrame(int frame);
+    void updateNPCAnimation(sf::Time dt);
+    void setNPCFrames(int frame);
 };
 
 #endif
