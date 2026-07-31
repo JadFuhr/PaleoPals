@@ -127,7 +127,6 @@ private:
     void setFrame(int frame);
     void applyPhysics(sf::Time deltaTime, Map& map);
     void checkCollisions(Map& map);
-    bool isOnGround(Map& map);
     sf::Vector2i worldToTile(sf::Vector2f worldPos, Map& map);
     sf::Vector2f tileToWorld(sf::Vector2i tilePos, Map& map);
 
@@ -136,4 +135,4 @@ private:
 
 };
 
-#endif // !PLAYER_H
+#endif 

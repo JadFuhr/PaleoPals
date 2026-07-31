@@ -26,6 +26,7 @@
     <ClCompile Include="Menu.cpp" />
     <ClCompile Include="Museum.cpp" />
     <ClCompile Include="MuseumInterior.cpp" />
+    <ClCompile Include="NPC.cpp" />
     <ClCompile Include="Paused.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Trader.cpp" />
@@ -39,6 +40,7 @@
     <ClInclude Include="Menu.h" />
     <ClInclude Include="Museum.h" />
     <ClInclude Include="MuseumInterior.h" />
+    <ClInclude Include="NPC.h" />
     <ClInclude Include="Paused.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="TraderMenu.h" />

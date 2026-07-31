@@ -81,6 +81,9 @@
     <ClCompile Include="Player.cpp">
       <Filter>Source Files\Workers</Filter>
     </ClCompile>
+    <ClCompile Include="NPC.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="constants.h">
@@ -112,6 +115,9 @@
     </ClInclude>
     <ClInclude Include="TraderMenu.h">
       <Filter>Header Files\Menus</Filter>
+    </ClInclude>
+    <ClInclude Include="NPC.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
