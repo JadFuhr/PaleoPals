@@ -25,10 +25,15 @@ NPC::NPC()
 
 void NPC::updateNPC(sf::Time dt, Map& map)
 {
+	switch (m_state)
+	{
+	case NPCState::WANDERTHESURFACE:
+		updateSurfaceWandering(dt, map);
+		break;
+	}
 
 	updateNPCAnimation(dt);
 
-	std::cout << "updating npc \n";
 
 }
 
@@ -42,8 +47,41 @@ void NPC::drawNPC(sf::RenderWindow& window)
 void NPC::updateSurfaceWandering(sf::Time dt, Map& map)
 {
 
+	float tileSize = map.getTileSize();
+	int cols = map.getColumnCount();
+	int rows = map.getRowCount();
 
+	// same offset logic as Player
+	float offsetX = (WINDOW_X - cols * tileSize) / 2.0f;
+	float offsetY = WINDOW_Y / 2.0f;
 
+	sf::Vector2f pos = m_sprite.getPosition();
+
+	// horizontal wandering: move left/right
+	m_velocity.x = m_facingRight ? m_moveSpeed : -m_moveSpeed;
+
+	pos += m_velocity * dt.asSeconds();
+
+	// clamp to surface horizontally
+	const float halfW = tileSize * 0.35f;
+	float minX = offsetX + halfW;
+	float maxX = offsetX + cols * tileSize - halfW;
+
+	if (pos.x < minX)
+	{
+		pos.x = minX;
+		m_facingRight = true;
+	}
+	else if (pos.x > maxX)
+	{
+		pos.x = maxX;
+		m_facingRight = false;
+	}
+
+	float surfaceY = offsetY + tileSize * 0.0f; // row 0
+	pos.y = surfaceY;
+
+	m_sprite.setPosition(pos);
 }
 
 void NPC::updateNPCAnimation(sf::Time dt)
