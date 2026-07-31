@@ -7,17 +7,17 @@ NPC::NPC()
 
 	if (!m_texture.loadFromFile("ASSETS/IMAGES/Sprites/Characters/paleontologist_walk.png"))
 	{
-		std::cerr << "failed to load npc sprite/ \n";
+		std::cerr << "failed to load npc sprite \n";
 	}
 	else
 	{
-		std::cout << "npc loaded \n";
+		std::cout << "npc loaded from file \n";
 	}
 
 	m_sprite.setTexture(m_texture);
 	m_sprite.setTextureRect(sf::IntRect({ 0,0 }, { m_frameWidth,m_frameHeight }));
 	m_sprite.setOrigin(sf::Vector2f(m_frameWidth / 2.0f, m_frameHeight));
-	m_sprite.setScale(sf::Vector2f(0.2f, 0.2f));
+	m_sprite.setScale(sf::Vector2f(0.12f, 0.12f));
 	m_sprite.setColor(sf::Color::Cyan);
 
 	m_sprite.setPosition(sf::Vector2f(WINDOW_X / 2.0f - 150.0f, WINDOW_Y / 2.0f));
@@ -26,7 +26,9 @@ NPC::NPC()
 void NPC::updateNPC(sf::Time dt, Map& map)
 {
 
+	updateNPCAnimation(dt);
 
+	std::cout << "updating npc \n";
 
 }
 
@@ -47,12 +49,36 @@ void NPC::updateSurfaceWandering(sf::Time dt, Map& map)
 void NPC::updateNPCAnimation(sf::Time dt)
 {
 
+	m_animationTimer += dt.asSeconds();
 
+	if (m_animationTimer >= m_frameTime)
+	{
+		m_animationTimer -= m_frameTime;
+		m_currentFrame = (m_currentFrame + 1) % m_totalFrames;
+		setNPCFrames(m_currentFrame);
+	}
 
 }
 
 void NPC::setNPCFrames(int frame)
 {
+	if (frame < 0 || frame >= m_totalFrames)
+	{
+		frame = 0;
+	}
 
+	m_currentFrame = frame;
+
+	if (m_texture.getSize().x == 0 || m_texture.getSize().y == 0)
+	{
+		return;
+	}
+
+	int xOffset = frame * m_frameWidth;
+	m_sprite.setTextureRect(sf::IntRect({ xOffset, 0 }, { m_frameWidth, m_frameHeight }));
+
+	sf::Vector2f scale = m_sprite.getScale();
+	scale.x = m_facingRight ? std::abs(scale.x) : -std::abs(scale.x);
+	m_sprite.setScale(scale);
 
 }

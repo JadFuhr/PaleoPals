@@ -255,6 +255,7 @@ void Game::update(sf::Time t_deltaTime)
         {
 
             m_player.update(t_deltaTime, m_map, m_window, m_cameraView);
+            m_npc.updateNPC(t_deltaTime, m_map);
 
 			sf::Vector2f playerPos = m_player.getPosition();
 
