@@ -258,6 +258,19 @@ void Map::removeTile(int row, int col, Player& player)
     removeTile(row, col);
 }
 
+void Map::colourTile(int row, int col, sf::Color color)
+{
+    if (row < 0 || col < 0 || row >= m_rows || col >= m_cols)
+        return;
+
+    int index = row * m_cols + col;
+    if (index < 0 || index >= static_cast<int>(m_tiles.size()))
+        return;
+
+    m_tiles[index].sprite.setColor(color);
+
+}
+
 int Map::getTileHardness(int row, int col) const
 {
     if (row < 0 || col < 0 || row >= m_rows || col >= m_cols)

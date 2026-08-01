@@ -21,6 +21,15 @@ public:
     void updateNPC(sf::Time dt, Map& map);
 	void drawNPC(sf::RenderWindow& window);
 
+    std::vector<sf::Vector2i> m_miningPath;   // DFS/BFS result
+    int m_miningIndex = 0;
+    bool m_useDFS = true;
+
+    void updateMining(sf::Time dt, Map& map);
+    void generateMiningPath(Map& map);
+
+    sf::Vector2i worldToTile(sf::Vector2f pos, Map& map);
+    sf::Vector2f tileToWorld(sf::Vector2i tile, Map& map);
 	sf::Vector2f getNPCPosition() const { return m_sprite.getPosition(); }
 private:
 

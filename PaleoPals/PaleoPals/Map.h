@@ -61,6 +61,9 @@ public:
     void removeTile(int row, int col);
     void removeTile(int row, int col, Player& player); 
 
+    void colourTile(int row, int col, sf::Color color);
+
+
     int getTileHardness(int row, int col) const;
     int getTileCurrentHP(int row, int col) const;
 
