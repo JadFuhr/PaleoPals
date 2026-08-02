@@ -137,12 +137,12 @@ void NPC::generateMiningPath(Map& map)
 			stackAndQueue.pop_back();
 			std::cout << "dfs used \n"; 
 		}
-		else	// bfs treat as queue (frst in frst out)
-		{
-			currentTile = stackAndQueue.front();
-			stackAndQueue.erase(stackAndQueue.begin());
-			std::cout << "bfs used \n"; 
-		}
+		//else	// bfs treat as queue (frst in frst out)
+		//{
+		//	currentTile = stackAndQueue.front();
+		//	stackAndQueue.erase(stackAndQueue.begin());
+		//	std::cout << "bfs used \n"; 
+		//}
 
 		if (!inBounds(currentTile)) continue;		// not ibounds = skip
 
