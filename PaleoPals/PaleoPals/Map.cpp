@@ -594,8 +594,8 @@ sf::Vector2i Map::worldToTile(sf::Vector2f worldPos) const
     float localX = worldPos.x - offsetX;
     float localY = worldPos.y - offsetY;
 
-    int col = static_cast<int>(std::floor(localX / m_tileSize));
-    int row = static_cast<int>(std::floor(localY / m_tileSize));
+    int col = static_cast<int>((localX / m_tileSize));
+    int row = static_cast<int>((localY / m_tileSize));
 
     return sf::Vector2i(col, row);
 }

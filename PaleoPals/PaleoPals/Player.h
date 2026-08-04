@@ -7,6 +7,9 @@
 #include <vector>
 #include <string>
 #include <algorithm>
+#include <SFML/Graphics/Vertex.hpp>
+#include <SFML/Graphics/PrimitiveType.hpp>
+
 
 class Map;
 class Collectible;
@@ -52,26 +55,22 @@ public:
     void clearNewPickups() { m_newPickups.clear(); }
     int getMoney() const { return m_money; }
 
-    void updatePickaxe(const sf::RenderWindow& window, Map& map, const sf::View& cameraView);
-    void checkPickaxeHit(const sf::RenderWindow& window, Map& map, const sf::View& cameraView);
-    void updatePickaxeAnimation(sf::Time dt);
+    float getRayLength() const;
 
-    float getPickaxeRadius() const;
-
-    int getPickaxeDamage() const;
+    int getRayDamage() const;
 
     void setPosition(sf::Vector2f pos);
 
+    void updateMiningRay(sf::Time dt, Map& map, const sf::RenderWindow& window, const sf::View& cameraView);
 
-    bool m_isSwinging = false;
-    float m_pickaxeAngle = 0.f;
-    float m_pickaxeRadius = 20.f; // 1 tile radius
-    sf::Vector2f m_pickaxeTip;
-    float m_pickaxeTipDistance = 32.f; 
-    float m_pickaxeTipRadius = 6.f;    // collision circle radius
+    float m_rayBaseLength = 40.0f;
+    float m_rayTickDelay = 0.12f; 
+    float m_rayDamageCooldown = 0.0f;
 
-    int pickaxeRadiusLevel = 0;
-    int damageLevel = 0;
+    bool m_isMining = false;
+
+    int pickaxeRadiusLevel = 0; // is now used for ray  radius upgrade
+    int damageLevel = 0;        // is now used for ray damage upgrade
     int pickupRadiusLevel = 0;
     int jumpLevel = 0;
 
@@ -95,9 +94,6 @@ private:
     sf::CircleShape m_pickupRadiusVisual; 
 	float pickupRadius = 24.0f; 
 
-    sf::Texture m_pickaxeTexture;
-    sf::Sprite m_pickaxeSprite{ m_pickaxeTexture };
-
     int m_currentFrame = 0;
     float m_animationTimer = 0.0f;
     float m_frameTime = 0.15f;
@@ -106,22 +102,12 @@ private:
     const int m_totalFrames = 4;
     bool m_facingRight = true;
 
-	int m_pickaxeCurrentFrame = 0;
-	int m_pickaxeFrameDirection = 1;
-	float m_pickaxeAnimationTimer = 0.0f;
-	float m_pickaxeFrameTime = 0.01f; 
-	int m_pickaxeTotalFrames = 4;
-
-
     PlayerState m_state = PlayerState::Idle;
 
     std::vector<CollectedItem> m_inventory;
 	std::vector<CollectedItem> m_newPickups; 
     float m_interactionRadius = 24.0f; 
-    int m_money = 0; 
-
-    float m_pickaxeCooldown = 0.0f;
-    float m_pickaxeHitDelay = 0.15f; 
+    int m_money = 0;  
 
     void updateAnimation(sf::Time deltaTime);
     void setFrame(int frame);
@@ -129,9 +115,6 @@ private:
     void checkCollisions(Map& map);
     sf::Vector2i worldToTile(sf::Vector2f worldPos, Map& map);
     sf::Vector2f tileToWorld(sf::Vector2i tilePos, Map& map);
-
-    sf::CircleShape m_pickaxeDebugCircle;
-
 
 };
 

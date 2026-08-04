@@ -32,6 +32,9 @@ void NPC::updateNPC(sf::Time dt, Map& map)
 	case NPCState::WANDERTHESURFACE:
 		updateSurfaceWandering(dt, map);
 		
+		//generateMiningPath((map));
+		//m_state = NPCState::MINING;
+
 		if (std::abs(m_sprite.getPosition().x - WINDOW_X / 2.f) < 10.f) // for now triggering mining when NPC reaches center
 		{
 			generateMiningPath(map);
@@ -152,7 +155,7 @@ void NPC::generateMiningPath(Map& map)
 
 		m_miningPath.push_back(currentTile);	// Add tile to path
 
-		map.colourTile(currentTile.y, currentTile.x, sf::Color::Red);	// Colour tile red
+		//map.colourTile(currentTile.y, currentTile.x, sf::Color::Red);	// Colour tile red
 
 		auto neigh = neighbours(currentTile);
 		std::shuffle(neigh.begin(), neigh.end(), std::mt19937(std::random_device{}()));	// sshuffe to make pathing feel more organic 

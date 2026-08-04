@@ -20,28 +20,6 @@ Player::Player()
     m_sprite.setScale(sf::Vector2f(0.2f, 0.2f));
     m_sprite.setPosition(sf::Vector2f(400.0f, 300.0f));
 
-    //m_pickupRadiusVisual.setRadius(pickupRadius);
-    //m_pickupRadiusVisual.setOrigin(sf::Vector2f(pickupRadius, pickupRadius));
-    //m_pickupRadiusVisual.setFillColor(sf::Color::Transparent);
-    //m_pickupRadiusVisual.setOutlineColor(sf::Color(255, 255, 0, 80));
-    //m_pickupRadiusVisual.setOutlineThickness(1.0f);
-
-    if (!m_pickaxeTexture.loadFromFile("ASSETS/IMAGES/Items/pickaxe.png"))
-    {
-        std::cerr << "Failed to load pickaxe texture!\n";
-    }
-    m_pickaxeSprite.setTexture(m_pickaxeTexture);
-    m_pickaxeSprite.setOrigin(sf::Vector2f(0.f, m_pickaxeTexture.getSize().y));
-    m_pickaxeSprite.setTextureRect(sf::IntRect({ 0,0 }, { 64,64 }));
-    m_pickaxeSprite.setScale(sf::Vector2f(0.4f, 0.4f));
-
-
-    // Debug circle for pickaxe hit radius
-    //m_pickaxeDebugCircle.setFillColor(sf::Color::Transparent);
-    //m_pickaxeDebugCircle.setOutlineColor(sf::Color(255, 0, 0, 120)); // red outline
-    //m_pickaxeDebugCircle.setOutlineThickness(1.5f);
-
-
     std::cout << "Player constructor END\n";
 }
 
@@ -55,30 +33,18 @@ void Player::update(sf::Time deltaTime, Map& map, const sf::RenderWindow& window
     applyPhysics(deltaTime, map);
     updateAnimation(deltaTime);
 
-    // Update interaction radius position
-    //m_pickupRadiusVisual.setPosition(m_sprite.getPosition() + sf::Vector2f(0.f, -16.f));
-
     bool mouseHeld = sf::Mouse::isButtonPressed(sf::Mouse::Button::Left);
 
-    m_isSwinging = mouseHeld;
-    m_pickaxeCooldown -= deltaTime.asSeconds();
-
-    if (m_isSwinging && m_pickaxeCooldown <= 0.0f)
+    m_isMining = mouseHeld;
+    if (m_isMining)
     {
-		updatePickaxeAnimation(deltaTime);
-        updatePickaxe(window, map, cameraView);
-		checkPickaxeHit(window, map, cameraView);
-        m_pickaxeCooldown = m_pickaxeHitDelay;
+        updateMiningRay(deltaTime, map, window, cameraView);
     }
 
     if (!mouseHeld)
     {
-		m_isSwinging = false;
-		m_pickaxeCurrentFrame = 0;
-		m_pickaxeFrameDirection = 1;
+		m_isMining = false;
     }
-    
-
 }
 
 void Player::handleInput(sf::Time deltaTime, Map& map)
@@ -425,19 +391,32 @@ void Player::setFrame(int frame)
 
 void Player::draw(sf::RenderWindow& window)
 {
-    
-    //window.draw(m_pickupRadiusVisual);
-
-    if (m_isSwinging)
+    if (m_isMining)
     {
-		window.draw(m_pickaxeSprite);
+        sf::Vector2f start = m_sprite.getPosition();
+        start.y -= 15.f;
+
+        sf::Vector2i mousePixel = sf::Mouse::getPosition(window);
+        sf::Vector2f mouseWorld = window.mapPixelToCoords(mousePixel);
+
+        sf::Vector2f dir = mouseWorld - start;
+        float len = std::sqrt(dir.x * dir.x + dir.y * dir.y);
+        if (len > 0) dir /= len;
+
+        float rayLength = m_rayBaseLength + pickaxeRadiusLevel * 10.f;
+        sf::Vector2f end = start + dir * rayLength;
+
+        sf::Vertex line[2];
+        line[0].position = start;
+        line[0].color = sf::Color::Yellow;
+
+        line[1].position = end;
+        line[1].color = sf::Color::Red;
+
+        window.draw(line, 2, sf::PrimitiveType::Lines);
     }
 
     window.draw(m_sprite);
-
-    //window.draw(m_pickaxeDebugCircle);
-
-    //m_sprite.setColor(sf::Color::Red);
 
 }
 
@@ -470,6 +449,45 @@ void Player::setPosition(sf::Vector2f pos)
     m_sprite.setPosition(pos);
 }
 
+void Player::updateMiningRay(sf::Time dt, Map& map, const sf::RenderWindow& window, const sf::View& cameraView)
+{
+    m_rayDamageCooldown -= dt.asSeconds();
+    if (m_rayDamageCooldown > 0.f)
+        return;
+
+    sf::Vector2f playerPos = m_sprite.getPosition();
+    playerPos.y -= 15.f;
+
+    sf::Vector2i mousePixel = sf::Mouse::getPosition(window);
+    sf::Vector2f mouseWorld = window.mapPixelToCoords(mousePixel, cameraView);
+
+    sf::Vector2f dir = mouseWorld - playerPos;
+    float len = std::sqrt(dir.x * dir.x + dir.y * dir.y);
+    if (len == 0) return;
+    dir /= len;
+
+    float rayLength = m_rayBaseLength + pickaxeRadiusLevel * 10.f;
+    float tileSize = map.getTileSize();
+
+    for (float t = 0; t < rayLength; t += tileSize * 0.5f)
+    {
+        sf::Vector2f samplePoint = playerPos + dir * t;
+        sf::Vector2i tile = worldToTile(samplePoint, map);
+
+        if (tile.x < 0 || tile.y < 0 || tile.x >= map.getColumnCount() || tile.y >= map.getRowCount())
+            continue;
+
+        if (map.getTileHardness(tile.y, tile.x) > 0)
+        {
+            map.damageTile(tile.y, tile.x, getRayDamage());
+            //break;
+        }
+    }
+
+    m_rayDamageCooldown = m_rayTickDelay;
+
+}
+
 float Player::getPickupRadius()
 {
     return pickupRadius * (1.0f + pickupRadiusLevel * 0.15f);
@@ -478,117 +496,14 @@ float Player::getPickupRadius()
 float Player::getJumpForce()
 {
     return m_jumpForce + (jumpLevel * -40.0f);
-}
+}   
 
-void Player::updatePickaxe(const sf::RenderWindow& window, Map& map, const sf::View& cameraView)
+float Player::getRayLength() const
 {
-    sf::Vector2f playerPos = m_sprite.getPosition();
-    playerPos.y -= 15.0f;
-
-    sf::Vector2i mousePixel = sf::Mouse::getPosition(window);
-    sf::Vector2f mouseWorld = window.mapPixelToCoords(mousePixel, cameraView);
-
-    sf::Vector2f dir = mouseWorld - playerPos;
-    float angle = std::atan2(dir.y, dir.x) * 180.f / 3.14159f;
-
-    m_pickaxeAngle = angle;
-
-    float rad = angle * 0.01745f;
-    sf::Vector2f offset(std::cos(rad), std::sin(rad));
-    offset *= m_pickaxeRadius;
-
-    m_pickaxeSprite.setPosition(playerPos + offset);
-    m_pickaxeSprite.setRotation(sf::degrees(angle + 45));
-
-    sf::Vector2f tipOffset(std::cos(rad) * m_pickaxeTipDistance, std::sin(rad) * m_pickaxeTipDistance);
-    m_pickaxeTip = m_pickaxeSprite.getPosition() + tipOffset;
-
-}
-  
-void Player::checkPickaxeHit(const sf::RenderWindow& window, Map& map, const sf::View& cameraView)
-{
-    if (!m_isSwinging) return;
-
-    float radius = getPickaxeRadius();
-
-    const sf::Vector2f tip = m_pickaxeTip;
-    float tileSize = map.getTileSize();
-
-    sf::Vector2f bodyCentre = m_sprite.getPosition() - sf::Vector2f(0.f, tileSize * 0.8f);
-    sf::Vector2i playerTile = worldToTile(bodyCentre, map);
-
-    auto circleIntersectsRect = [](sf::Vector2f c, float r, const sf::FloatRect& rect)
-        {
-            float cx = std::clamp(c.x, rect.position.x, rect.position.x + rect.size.x);
-            float cy = std::clamp(c.y, rect.position.y, rect.position.y + rect.size.y);
-            float dx = c.x - cx;
-            float dy = c.y - cy;
-            return (dx * dx + dy * dy) <= (r * r);
-        };
-
-    int range = static_cast<int>(std::ceil(radius / tileSize)) + 1;
-
-    for (int r = playerTile.y - range; r <= playerTile.y + range; r++)
-    {
-        for (int c = playerTile.x - range; c <= playerTile.x + range; c++)
-        {
-            if (r < 0 || c < 0 || r >= map.getRowCount() || c >= map.getColumnCount())
-                continue;
-
-            sf::Vector2f tilePos = map.tileToWorld({ c, r });
-
-            sf::FloatRect tileRect({ tilePos.x - tileSize / 2.f, tilePos.y - tileSize / 2.f }, { tileSize, tileSize });
-
-            if (circleIntersectsRect(tip, radius, tileRect))
-            {
-                if (map.getTileCurrentHP(r, c) > 0)
-                {
-                    int dmg = getPickaxeDamage();
-                    map.damageTile(r, c, dmg);
-                    // no return → can hit multiple tiles
-                }
-            }
-        }
-    }
-
-    float debugRadius = getPickaxeRadius();
-    m_pickaxeDebugCircle.setRadius(debugRadius);
-    m_pickaxeDebugCircle.setOrigin(sf::Vector2f(debugRadius, debugRadius));
-    m_pickaxeDebugCircle.setPosition(m_pickaxeTip);
-
+    return m_rayBaseLength * (1.0f + pickaxeRadiusLevel * 0.25f);
 }
 
-void Player::updatePickaxeAnimation(sf::Time dt)
-{
-    m_pickaxeAnimationTimer += dt.asSeconds();
-
-    if (m_pickaxeAnimationTimer >= m_pickaxeFrameTime)
-    {
-        m_pickaxeAnimationTimer = 0.f;
-
-        m_pickaxeCurrentFrame++;
-
-        if (m_pickaxeCurrentFrame >= m_pickaxeTotalFrames)
-        {
-            m_pickaxeCurrentFrame = 0;
-        }
-    }
-
-    int frameWidth = static_cast<int>(m_pickaxeTexture.getSize().x / m_pickaxeTotalFrames);
-    int frameHeight = static_cast<int>(m_pickaxeTexture.getSize().y);
-
-    int left = m_pickaxeCurrentFrame * frameWidth;
-    int top = 0;
-
-    m_pickaxeSprite.setTextureRect(sf::IntRect({ left, top }, { frameWidth, frameHeight }));
-}
-
-float Player::getPickaxeRadius() const
-{
-    return m_pickaxeTipRadius * (1.0f + pickaxeRadiusLevel * 0.25f);
-}
-
-int Player::getPickaxeDamage() const
+int Player::getRayDamage() const
 {
     return 1 + damageLevel; 
 }
