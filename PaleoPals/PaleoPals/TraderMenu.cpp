@@ -219,7 +219,7 @@ void TraderMenu::draw(sf::RenderWindow& window)
     sf::View prev = window.getView();
     window.setView(window.getDefaultView());
 
-    m_upgrade1Text.setString("Radius +" + std::to_string(upgrade1Level) +" ($" + std::to_string(getUpgrade1Cost()) + ")");
+    m_upgrade1Text.setString("Length +" + std::to_string(upgrade1Level) +" ($" + std::to_string(getUpgrade1Cost()) + ")");
 
     m_upgrade2Text.setString("Damage +" + std::to_string(upgrade2Level) +" ($" + std::to_string(getUpgrade2Cost()) + ")");
 

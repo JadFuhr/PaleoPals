@@ -61,33 +61,66 @@ void NPC::drawNPC(sf::RenderWindow& window)
 
 void NPC::updateMining(sf::Time dt, Map& map)
 {
-	if (m_miningPath.empty())
+
+	//returning to surface , loop back through path
+	if (m_returningToSurface)
 	{
-		// Mining complete return to surface
-		m_state = NPCState::WANDERTHESURFACE;
+		if (m_miningIndex <= 0)
+		{
+			m_state = NPCState::WANDERTHESURFACE;
+			m_returningToSurface = false;
+			return;
+		 }
+
+		sf::Vector2i targetTile = m_miningPath[m_miningIndex - 1];
+		sf::Vector2f targetPos = tileToWorld(targetTile, map);
+		sf::Vector2f pos = m_sprite.getPosition();
+		sf::Vector2f dir = targetPos - pos;
+
+		float dist = std::sqrt(dir.x * dir.x + dir.y * dir.y);
+
+		if (dist < 4.f)
+		{
+			m_miningIndex--;
+			return;
+		}
+
+		dir /= dist;
+		m_velocity = dir * m_moveSpeed;
+		m_sprite.move(m_velocity * dt.asSeconds());
+		m_facingRight = (dir.x >= 0);
 		return;
+
 	}
 
-	if (m_miningIndex >= (int)m_miningPath.size())
+	//normal mining
+	if (m_miningIndex >= m_miningPath.size())
 	{
-		m_state = NPCState::WANDERTHESURFACE;
-		return;
-	}
-
-	if (m_miningIndex < 0 || m_miningIndex >= m_miningPath.size())
-	{
-		m_state = NPCState::WANDERTHESURFACE;
+		// Finished mining → start returning
+		m_returningToSurface = true;
 		return;
 	}
 
 	sf::Vector2i targetTile = m_miningPath[m_miningIndex];
 	sf::Vector2f targetPos = tileToWorld(targetTile, map);
-
 	sf::Vector2f pos = m_sprite.getPosition();
 	sf::Vector2f dir = targetPos - pos;
 
 	float dist = std::sqrt(dir.x * dir.x + dir.y * dir.y);
 
+	// If tile is still solid damage it over time
+	if (map.getTileHardness(targetTile.y, targetTile.x) > 0)
+	{
+		npcMiningDamageCooldown -= dt.asSeconds();
+		if (npcMiningDamageCooldown <= 0.f)
+		{
+			mineTile(map, targetTile);
+			npcMiningDamageCooldown = npcMiningTickDelay;
+		}
+		return; // stay until tile breaks
+	}
+
+	// Tile is broken move toward it
 	if (dist < 4.f)
 	{
 		m_miningIndex++;
@@ -95,11 +128,22 @@ void NPC::updateMining(sf::Time dt, Map& map)
 	}
 
 	dir /= dist;
-
 	m_velocity = dir * m_moveSpeed;
 	m_sprite.move(m_velocity * dt.asSeconds());
-
 	m_facingRight = (dir.x >= 0);
+}	
+
+void NPC::mineTile(Map& map, sf::Vector2i tile)
+{
+	if (tile.y < 0 || tile.x < 0 || tile.y >= map.getRowCount() || tile.x >= map.getColumnCount())
+	{
+		return;
+	}
+
+	if (map.getTileHardness(tile.y, tile.x) > 0)
+	{
+		map.damageTile(tile.y, tile.x, m_npcMiningDamage);
+	}
 }
 
 void NPC::generateMiningPath(Map& map)
@@ -155,7 +199,7 @@ void NPC::generateMiningPath(Map& map)
 
 		m_miningPath.push_back(currentTile);	// Add tile to path
 
-		//map.colourTile(currentTile.y, currentTile.x, sf::Color::Red);	// Colour tile red
+		map.colourTile(currentTile.y, currentTile.x, sf::Color::Red);	// Colour tile red
 
 		auto neigh = neighbours(currentTile);
 		std::shuffle(neigh.begin(), neigh.end(), std::mt19937(std::random_device{}()));	// sshuffe to make pathing feel more organic 
@@ -169,7 +213,6 @@ void NPC::generateMiningPath(Map& map)
 
 	std::cout << "NPC mining path generated: " << m_miningPath.size() << " tiles\n";
 }
-
 
 void NPC::updateSurfaceWandering(sf::Time dt, Map& map)
 {
@@ -255,7 +298,6 @@ void NPC::setNPCFrames(int frame)
 	m_sprite.setScale(scale);
 
 }
-
 
 sf::Vector2i NPC::worldToTile(sf::Vector2f pos, Map& map)
 {

@@ -24,8 +24,15 @@ public:
     std::vector<sf::Vector2i> m_miningPath;   // DFS/BFS result
     int m_miningIndex = 0;
     bool m_useDFS = true;
+    bool m_returningToSurface = false; 
+
+    float npcMiningDamageCooldown = 0.0f;
+    float npcMiningTickDelay = 0.12f;
+    int m_npcMiningDamage = 1;
+
 
     void updateMining(sf::Time dt, Map& map);
+    void mineTile(Map& map, sf::Vector2i tile);
     void generateMiningPath(Map& map);
 
     sf::Vector2i worldToTile(sf::Vector2f pos, Map& map);
