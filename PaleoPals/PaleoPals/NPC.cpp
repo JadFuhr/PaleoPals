@@ -96,7 +96,7 @@ void NPC::updateMining(sf::Time dt, Map& map)
 	//normal mining
 	if (m_miningIndex >= m_miningPath.size())
 	{
-		// Finished mining → start returning
+		// Finished mining start returning
 		m_returningToSurface = true;
 		return;
 	}
@@ -199,7 +199,7 @@ void NPC::generateMiningPath(Map& map)
 
 		m_miningPath.push_back(currentTile);	// Add tile to path
 
-		map.colourTile(currentTile.y, currentTile.x, sf::Color::Red);	// Colour tile red
+		//map.colourTile(currentTile.y, currentTile.x, sf::Color::Red);	// Colour tile red
 
 		auto neigh = neighbours(currentTile);
 		std::shuffle(neigh.begin(), neigh.end(), std::mt19937(std::random_device{}()));	// sshuffe to make pathing feel more organic 

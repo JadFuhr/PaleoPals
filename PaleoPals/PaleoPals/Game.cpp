@@ -1,4 +1,4 @@
-/// author Jad Fuhr
+﻿/// author Jad Fuhr
 
 #include "Game.h"
 #include "Map.h"
@@ -372,7 +372,7 @@ void Game::setupMap()
     }
 
     int cols = 75;
-    int totalRows = 100;
+    int totalRows = 215;
 
     float tileSize = 24.0f; 
 
