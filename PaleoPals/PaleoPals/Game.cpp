@@ -18,11 +18,20 @@ Game::Game() :
     m_pause.initPauseMenu();
 
     m_uiFont.openFromFile("ASSETS/FONTS/Jersey20-Regular.ttf");
+
     m_moneyText.setFont(m_uiFont);
     m_moneyText.setCharacterSize(28);
     m_moneyText.setFillColor(sf::Color::Yellow);
 
+    m_traderTutText.setFont(m_uiFont);
+    m_traderTutText.setCharacterSize(28);
+    m_traderTutText.setFillColor(sf::Color::Yellow);
+    m_traderTutText.setPosition(sf::Vector2f(WINDOW_X / 2.0f - 400, 0.0f));
 
+    m_museumTutText.setFont(m_uiFont);
+    m_museumTutText.setCharacterSize(28);
+    m_museumTutText.setFillColor(sf::Color::Yellow);
+    m_museumTutText.setPosition(sf::Vector2f(WINDOW_X / 2.0f, 0.0f));
 }
 
 Game::~Game()
@@ -261,7 +270,8 @@ void Game::update(sf::Time t_deltaTime)
         m_map.updateTrader(m_window);
 
         m_moneyText.setString("Money: " + std::to_string(m_player.getMoney()));
-
+        m_traderTutText.setString("Open Trader: Press T");
+        m_museumTutText.setString("Open Museum: Press M");
 
         if (m_museumInterior.isOpen())
         {
@@ -339,8 +349,10 @@ void Game::render()
         m_map.drawMap(m_window);
 
 		m_window.setView(m_window.getDefaultView());
-        m_window.draw(m_moneyText);
 
+        m_window.draw(m_moneyText);
+        m_window.draw(m_traderTutText);
+        m_window.draw(m_museumTutText);
 
 		m_window.setView(m_cameraView);
 
@@ -368,8 +380,10 @@ void Game::render()
         m_map.drawDebug(m_window);
 
         m_window.setView(m_window.getDefaultView());
-        m_window.draw(m_moneyText);
 
+        m_window.draw(m_moneyText);
+        m_window.draw(m_traderTutText);
+        m_window.draw(m_museumTutText);
 
 
         m_pause.drawPauseMenu(m_window);

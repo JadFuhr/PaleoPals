@@ -44,8 +44,9 @@ private:
     bool upgradeDamage = false;
 
     sf::Font m_uiFont;
+    sf::Text m_traderTutText{ m_uiFont };
+    sf::Text m_museumTutText{ m_uiFont };
     sf::Text m_moneyText{ m_uiFont };
-
 
     Map m_map;
     Menu m_menu;
