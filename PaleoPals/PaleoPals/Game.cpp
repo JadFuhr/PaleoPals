@@ -154,20 +154,19 @@ void Game::processEvents()
                         continue;
                     }
 
-                    // Click on museum building - open interior
-                    if (m_map.getMuseum().containsPoint(worldPos))
-                    {
-                        
-                        m_museumInterior.open();
-                        continue;
-                    }
+                    // Click on museum open interior
+                    //if (m_map.getMuseum().getSprite().getGlobalBounds().contains(screenPos))
+                    //{
+                    //    m_museumInterior.open();
+                    //    continue;
+                    //}
 
-                    // Click on trader building - open trader menu
-                    if (m_map.getTrader().containsPoint(worldPos))
-                    {
-                        m_traderMenu.openAt(worldPos);
-                        continue;
-                    }
+                    // Click on trader open trader menu
+                    //if (m_map.getTrader().getSprite().getGlobalBounds().contains(screenPos))
+                    //{
+                    //    m_traderMenu.openAt(worldPos);
+                    //    continue;
+                    //}
                 }
 
             }
@@ -203,6 +202,30 @@ void Game::processKeys(const std::optional<sf::Event> t_event)
         {
             m_map.toggleDebugMode();
         }
+
+        if (newKeypress->code == sf::Keyboard::Key::T)
+        {
+            if (m_traderMenu.isOpen())
+            {
+                m_traderMenu.close();
+            }
+            else
+            {
+                m_traderMenu.openAt(m_player.getPosition());;
+            }
+        }
+        if (newKeypress->code == sf::Keyboard::Key::M)
+        {
+            if (m_museumInterior.isOpen())
+            {
+                m_museumInterior.close();
+            }
+            else
+            {
+                m_museumInterior.open();
+            }
+        }
+
     }
 }
 
@@ -213,13 +236,6 @@ void Game::checkKeyboardState()
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Escape))
         {
             m_currentState = GameState::Exit;
-        }
-    }
-    if (m_currentState == GameState::Gameplay)
-    {
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::M))
-        {
-            m_currentState = GameState::MainMenu;
         }
     }
 
