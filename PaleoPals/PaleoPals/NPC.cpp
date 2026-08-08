@@ -171,7 +171,7 @@ void NPC::generateMiningPath(Map& map)
 
 	while (!stackAndQueue.empty())
 	{
-		if (m_miningPath.size() >= 20) // depth of search is 20
+		if (m_miningPath.size() >= 100) // depth of search is 20
 		{
 			break;
 		}
@@ -182,14 +182,8 @@ void NPC::generateMiningPath(Map& map)
 		{
 			currentTile = stackAndQueue.back();
 			stackAndQueue.pop_back();
-			std::cout << "dfs used \n"; 
+			//std::cout << "dfs used \n"; 
 		}
-		//else	// bfs treat as queue (frst in frst out)
-		//{
-		//	currentTile = stackAndQueue.front();
-		//	stackAndQueue.erase(stackAndQueue.begin());
-		//	std::cout << "bfs used \n"; 
-		//}
 
 		if (!inBounds(currentTile)) continue;		// not ibounds = skip
 
@@ -199,7 +193,7 @@ void NPC::generateMiningPath(Map& map)
 
 		m_miningPath.push_back(currentTile);	// Add tile to path
 
-		//map.colourTile(currentTile.y, currentTile.x, sf::Color::Red);	// Colour tile red
+		map.colourTile(currentTile.y, currentTile.x, sf::Color::Red);	// Colour tile red
 
 		auto neigh = neighbours(currentTile);
 		std::shuffle(neigh.begin(), neigh.end(), std::mt19937(std::random_device{}()));	// sshuffe to make pathing feel more organic 
