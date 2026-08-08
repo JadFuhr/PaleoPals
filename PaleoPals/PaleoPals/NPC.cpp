@@ -2,6 +2,8 @@
 #include <iostream>
 #include <cmath>
 #include <random>
+#include <queue>
+#include <algorithm>
 
 NPC::NPC()
 {
@@ -65,15 +67,18 @@ void NPC::updateMining(sf::Time dt, Map& map)
 	//returning to surface , loop back through path
 	if (m_returningToSurface)
 	{
-		if (m_miningIndex <= 0)
+		if (m_returnIndex >= m_returnPath.size())
 		{
 			m_state = NPCState::WANDERTHESURFACE;
 			m_returningToSurface = false;
+			m_returnPath.clear();
+			m_returnIndex = 0;
 			return;
 		 }
 
-		sf::Vector2i targetTile = m_miningPath[m_miningIndex - 1];
+		sf::Vector2i targetTile = m_returnPath[m_returnIndex ];
 		sf::Vector2f targetPos = tileToWorld(targetTile, map);
+
 		sf::Vector2f pos = m_sprite.getPosition();
 		sf::Vector2f dir = targetPos - pos;
 
@@ -81,14 +86,16 @@ void NPC::updateMining(sf::Time dt, Map& map)
 
 		if (dist < 4.f)
 		{
-			m_miningIndex--;
+			m_returnIndex++;
 			return;
 		}
 
 		dir /= dist;
+
 		m_velocity = dir * m_moveSpeed;
 		m_sprite.move(m_velocity * dt.asSeconds());
 		m_facingRight = (dir.x >= 0);
+
 		return;
 
 	}
@@ -97,6 +104,7 @@ void NPC::updateMining(sf::Time dt, Map& map)
 	if (m_miningIndex >= m_miningPath.size())
 	{
 		// Finished mining start returning
+		generateReturnPath(map);
 		m_returningToSurface = true;
 		return;
 	}
@@ -171,12 +179,16 @@ void NPC::generateMiningPath(Map& map)
 
 	auto neighbours = [&](sf::Vector2i t)	// returns a tiles 4 neighbors (R,L.D,U)
 		{
-			return std::vector<sf::Vector2i>{{t.x + 1, t.y}, { t.x - 1, t.y }, { t.x, t.y + 1 }, { t.x, t.y - 1 }};
+			return std::vector<sf::Vector2i>{
+				{t.x + 1, t.y},
+				{ t.x - 1, t.y },
+				{ t.x, t.y + 1 },
+				{ t.x, t.y - 1 }};
 		};
-
+	
 	while (!stack.empty())
 	{
-		if (m_miningPath.size() >= 100) // depth of search is 20
+		if (m_miningPath.size() >= 20) // depth of search is 20
 		{
 			break;
 		}
@@ -215,9 +227,102 @@ void NPC::generateMiningPath(Map& map)
 
 void NPC::generateReturnPath(Map& map)
 {
+	m_returnPath.clear();
+	m_returnIndex = 0;
+
+	sf::Vector2i start = worldToTile(m_sprite.getPosition(), map);
+	sf::Vector2i goal = m_miningStartTile;
+
+	int rows = map.getRowCount();
+	int cols = map.getColumnCount();
+
+	auto inBounds = [&](sf::Vector2i t)		// check if in bounds
+		{
+			return t.x >= 0 && t.x < map.getColumnCount() && t.y >= 0 && t.y < map.getRowCount();
+		};
 
 
+	auto isWalkable = [&](sf::Vector2i t)	// only walk on already broken tiles
+		{
+			if (!inBounds(t))
+			{
+				return false;
+			}
 
+			return map.getTileHardness(t.y, t.x) <= 0;
+		};
+
+
+	auto neighbours = [&](sf::Vector2i t)		// return neighbours in 4 directions
+		{
+			return std::vector<sf::Vector2i>{
+				{t.x + 1, t.y},
+				{ t.x - 1, t.y },
+				{ t.x, t.y + 1 },
+				{ t.x, t.y - 1 }};
+		};
+
+	std::queue<sf::Vector2i> queue;
+	std::vector<std::vector<bool>> visited(rows, std::vector<bool>(cols, false));
+	std::vector<std::vector<sf::Vector2i>> parent(rows, std::vector<sf::Vector2i>(cols, sf::Vector2i(-1, -1)));
+
+	if (!inBounds(start) || !inBounds(goal))
+	{
+		return;
+	}
+
+	queue.push(start);
+	visited[start.y][start.x] = true;
+	bool found = false;
+
+	while (!queue.empty())
+	{
+		sf::Vector2i current = queue.front();
+		queue.pop();
+
+		if (current == goal)
+		{
+			found = true;
+			break;
+		}
+
+		for (sf::Vector2i next : neighbours(current))
+		{
+			if (!isWalkable(next))
+			{
+				continue;
+			}
+
+			if (visited[next.y][next.x])
+			{
+				continue;
+			}
+
+			visited[next.y][next.x] = true;
+			parent[next.y][next.x] = current;
+			queue.push(next);
+		}
+	}
+
+	if (!found)
+	{
+		std::cout << "npc cant find return path \n";
+		return;
+	}
+
+	sf::Vector2i current = goal;
+
+	while (current != start)
+	{
+		m_returnPath.push_back(current);
+		current = parent[current.y][current.x];
+
+	}
+
+		std::reverse(m_returnPath.begin(), m_returnPath.end());
+
+		std::cout << "return path generated \n";
+	
 }
 
 void NPC::updateSurfaceWandering(sf::Time dt, Map& map)

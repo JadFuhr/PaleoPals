@@ -21,19 +21,24 @@ public:
     void updateNPC(sf::Time dt, Map& map);
 	void drawNPC(sf::RenderWindow& window);
 
-    std::vector<sf::Vector2i> m_miningPath;   // DFS/BFS result
+    std::vector<sf::Vector2i> m_miningPath;   // DFS result
+    sf::Vector2i m_miningStartTile;     // npc rememberrs where it starts 
+    std::vector<sf::Vector2i> m_returnPath;
+
     int m_miningIndex = 0;
-    bool m_useDFS = true;
-    bool m_returningToSurface = false; 
+    int m_returnIndex = 0;  
 
     float npcMiningDamageCooldown = 0.0f;
     float npcMiningTickDelay = 0.12f;
     int m_npcMiningDamage = 1;
 
+    bool m_useDFS = true;
+    bool m_returningToSurface = false; 
 
     void updateMining(sf::Time dt, Map& map);
     void mineTile(Map& map, sf::Vector2i tile);
     void generateMiningPath(Map& map);
+    void generateReturnPath(Map& map);
 
     sf::Vector2i worldToTile(sf::Vector2f pos, Map& map);
     sf::Vector2f tileToWorld(sf::Vector2i tile, Map& map);
