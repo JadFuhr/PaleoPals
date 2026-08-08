@@ -149,13 +149,18 @@ void NPC::mineTile(Map& map, sf::Vector2i tile)
 void NPC::generateMiningPath(Map& map)
 {
 	m_miningPath.clear();	// remove old path 
+	m_returnPath.clear();	
+
 	m_miningIndex = 0;	// start on index 0
+	m_returnIndex = 0;
+
+	m_returningToSurface = false;
 
 	sf::Vector2i start = worldToTile(m_sprite.getPosition(), map);	// convert npc world coords to grid coords
+	m_miningStartTile = start;
 
-	std::vector<sf::Vector2i> stackAndQueue;
-
-	stackAndQueue.push_back(start);	// push start pos onto S/Q
+	std::vector<sf::Vector2i> stack;
+	stack.push_back(start);	// push start pos onto S/Q
 
 	std::vector<std::vector<bool>> visited(map.getRowCount(), std::vector<bool>(map.getColumnCount(), false));	// array matching map size, tells me whether tile was visited
 
@@ -169,7 +174,7 @@ void NPC::generateMiningPath(Map& map)
 			return std::vector<sf::Vector2i>{{t.x + 1, t.y}, { t.x - 1, t.y }, { t.x, t.y + 1 }, { t.x, t.y - 1 }};
 		};
 
-	while (!stackAndQueue.empty())
+	while (!stack.empty())
 	{
 		if (m_miningPath.size() >= 100) // depth of search is 20
 		{
@@ -180,8 +185,8 @@ void NPC::generateMiningPath(Map& map)
 
 		if (m_useDFS) // dfs, treat as stack (lst in frst out)
 		{
-			currentTile = stackAndQueue.back();
-			stackAndQueue.pop_back();
+			currentTile = stack.back();
+			stack.pop_back();
 			//std::cout << "dfs used \n"; 
 		}
 
@@ -201,11 +206,18 @@ void NPC::generateMiningPath(Map& map)
 		for (auto& n : neigh)	// Explore neighbours
 		{
 			if (inBounds(n) && !visited[n.y][n.x])
-				stackAndQueue.push_back(n);
+				stack.push_back(n);
 		}
 	}
 
 	std::cout << "NPC mining path generated: " << m_miningPath.size() << " tiles\n";
+}
+
+void NPC::generateReturnPath(Map& map)
+{
+
+
+
 }
 
 void NPC::updateSurfaceWandering(sf::Time dt, Map& map)
