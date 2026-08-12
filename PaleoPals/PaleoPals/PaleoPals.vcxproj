@@ -33,6 +33,9 @@
     <ClCompile Include="TraderMenu.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BTNode.h" />
+    <ClInclude Include="BTSelectorNode.h" />
+    <ClInclude Include="BTSequenceNode.h" />
     <ClInclude Include="constants.h" />
     <ClInclude Include="Fossil.h" />
     <ClInclude Include="Game.h" />
