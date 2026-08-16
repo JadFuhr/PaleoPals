@@ -273,7 +273,7 @@ void Game::update(sf::Time t_deltaTime)
         m_traderTutText.setString("Open Trader: Press T");
         m_museumTutText.setString("Open Museum: Press M");
 
-        if (m_museumInterior.isOpen())
+        if (m_museumInterior.isOpen() || m_traderMenu.isOpen())
         {
             m_museumInterior.update(m_window);
         }

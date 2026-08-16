@@ -246,6 +246,7 @@ void MuseumInterior::draw(sf::RenderWindow& window)
         m_dinoNameText.setPosition(sf::Vector2f(WINDOW_X / 2.f, 190.f));
 		
         sf::Vector2u bgSize = dino.backgroundTex.getSize();
+
         if (bgSize.x > 0 && bgSize.y > 0)
         {
             auto settings = getDisplaySettings(dino.name, bgSize);
