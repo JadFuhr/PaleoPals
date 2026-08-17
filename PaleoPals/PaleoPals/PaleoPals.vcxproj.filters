@@ -125,6 +125,15 @@
     <ClInclude Include="BTSelectorNode.h">
       <Filter>Header Files\BehaviourTree</Filter>
     </ClInclude>
+    <ClInclude Include="BTMiningNode.h">
+      <Filter>Header Files\BehaviourTree</Filter>
+    </ClInclude>
+    <ClInclude Include="BTReturnToSurfaceNode.h">
+      <Filter>Header Files\BehaviourTree</Filter>
+    </ClInclude>
+    <ClInclude Include="BTWanderSurfaceNode.h">
+      <Filter>Header Files\BehaviourTree</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="ASSETS\IMAGES\SFML-LOGO.png">

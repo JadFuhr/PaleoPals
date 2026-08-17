@@ -33,9 +33,12 @@
     <ClCompile Include="TraderMenu.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BTMiningNode.h" />
     <ClInclude Include="BTNode.h" />
+    <ClInclude Include="BTReturnToSurfaceNode.h" />
     <ClInclude Include="BTSelectorNode.h" />
     <ClInclude Include="BTSequenceNode.h" />
+    <ClInclude Include="BTWanderSurfaceNode.h" />
     <ClInclude Include="constants.h" />
     <ClInclude Include="Fossil.h" />
     <ClInclude Include="Game.h" />
