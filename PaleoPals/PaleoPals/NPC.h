@@ -5,6 +5,14 @@
 #include <SFML/Graphics.hpp>
 #include "constants.h"
 #include "Map.h"
+#include "BTNode.h"
+#include "BTSelectorNode.h"
+#include "BTSequenceNode.h"
+#include "BTWanderSurfaceNode.h"
+#include "BTMiningNode.h"
+#include "BTReturnToSurfaceNode.h"
+
+BTNode* m_root = nullptr;
 
 enum class NPCState
 {
