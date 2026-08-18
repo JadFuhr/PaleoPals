@@ -19,6 +19,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="BTMiningNode.cpp" />
+    <ClCompile Include="BTReturnToSurfaceNode.cpp" />
+    <ClCompile Include="BTWanderSurfaceNode.cpp" />
     <ClCompile Include="Fossil.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="main.cpp" />
@@ -29,6 +32,8 @@
     <ClCompile Include="NPC.cpp" />
     <ClCompile Include="Paused.cpp" />
     <ClCompile Include="Player.cpp" />
+    <ClCompile Include="BTSelectorNode.cpp" />
+    <ClCompile Include="BTSequenceNode.cpp" />
     <ClCompile Include="Trader.cpp" />
     <ClCompile Include="TraderMenu.cpp" />
   </ItemGroup>

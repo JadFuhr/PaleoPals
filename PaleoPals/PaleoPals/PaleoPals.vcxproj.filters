@@ -43,6 +43,9 @@
     <Filter Include="Header Files\BehaviourTree">
       <UniqueIdentifier>{42124a80-2368-4bfd-b42a-95f4921448b7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\BehaviourTree">
+      <UniqueIdentifier>{3c6aba4c-f0a3-409d-b778-755851322ac2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Game.cpp">
@@ -80,6 +83,21 @@
     </ClCompile>
     <ClCompile Include="NPC.cpp">
       <Filter>Source Files\Workers</Filter>
+    </ClCompile>
+    <ClCompile Include="BTMiningNode.cpp">
+      <Filter>Source Files\BehaviourTree</Filter>
+    </ClCompile>
+    <ClCompile Include="BTWanderSurfaceNode.cpp">
+      <Filter>Source Files\BehaviourTree</Filter>
+    </ClCompile>
+    <ClCompile Include="BTReturnToSurfaceNode.cpp">
+      <Filter>Source Files\BehaviourTree</Filter>
+    </ClCompile>
+    <ClCompile Include="BTSelectorNode.cpp">
+      <Filter>Source Files\BehaviourTree</Filter>
+    </ClCompile>
+    <ClCompile Include="BTSequenceNode.cpp">
+      <Filter>Source Files\BehaviourTree</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

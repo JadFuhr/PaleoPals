@@ -12,8 +12,6 @@
 #include "BTMiningNode.h"
 #include "BTReturnToSurfaceNode.h"
 
-BTNode* m_root = nullptr;
-
 enum class NPCState
 {
 	WANDERTHESURFACE,
@@ -25,6 +23,9 @@ class NPC
 {
 public:
 	NPC();
+
+    void setRoot(BTNode* root) { m_root = root; }
+    BTNode* getRoot() const { return m_root; }
 
     void updateNPC(sf::Time dt, Map& map);
 	void drawNPC(sf::RenderWindow& window);
@@ -47,17 +48,19 @@ public:
     void mineTile(Map& map, sf::Vector2i tile);
     void generateMiningPath(Map& map);
     void generateReturnPath(Map& map);
+    void updateSurfaceWandering(sf::Time dt, Map& map);
 
     sf::Vector2i worldToTile(sf::Vector2f pos, Map& map);
     sf::Vector2f tileToWorld(sf::Vector2i tile, Map& map);
 	sf::Vector2f getNPCPosition() const { return m_sprite.getPosition(); }
+
 private:
+    BTNode* m_root = nullptr;
 
     sf::Texture m_texture;
     sf::Sprite  m_sprite{ m_texture };
 
     NPCState m_state = NPCState::WANDERTHESURFACE;
-
     sf::Vector2f m_velocity;
     float m_moveSpeed = 80.0f; // slower speed
 
@@ -70,7 +73,6 @@ private:
     const int m_frameHeight = 192;
     const int m_totalFrames = 4;
 
-    void updateSurfaceWandering(sf::Time dt, Map& map);
     void updateNPCAnimation(sf::Time dt);
     void setNPCFrames(int frame);
 };

@@ -29,29 +29,11 @@ NPC::NPC()
 
 void NPC::updateNPC(sf::Time dt, Map& map)
 {
-	switch (m_state)
+	if (m_root)
 	{
-	case NPCState::WANDERTHESURFACE:
-		updateSurfaceWandering(dt, map);
-		
-		//generateMiningPath((map));
-		//m_state = NPCState::MINING;
-
-		if (std::abs(m_sprite.getPosition().x - WINDOW_X / 2.f) < 10.f) // for now triggering mining when NPC reaches center
-		{
-			generateMiningPath(map);
-			m_state = NPCState::MINING;
-		}
-		break;
-	case NPCState::MINING:
-		updateMining(dt, map);
-		break;
-	case NPCState::SEARCHING:
-		break;
+		m_root->tick(dt.asSeconds());
 	}
 	updateNPCAnimation(dt);
-
-
 }
 
 void NPC::drawNPC(sf::RenderWindow& window)

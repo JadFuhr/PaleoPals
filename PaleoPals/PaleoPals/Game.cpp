@@ -412,6 +412,20 @@ void Game::setupMap()
    
     m_player.setPosition(sf::Vector2f(WINDOW_X / 2.0f + 100.0f, WINDOW_Y / 2.0f));
 
+
+
+    // Building Behaviour tree
+
+    auto miningSequence = new SequenceNode();
+
+    miningSequence->addChildNode(new BTWanderSurfaceNode(m_npc, m_map));
+    miningSequence->addChildNode(new BTMiningNode(m_npc, m_map));
+    miningSequence->addChildNode(new BTReturnToSurfaceNode(m_npc, m_map));
+
+    auto rootSelector = new SelectorNode();
+
+    rootSelector->addChildNode(miningSequence);
+    m_npc.setRoot(rootSelector);
 }
 
 void Game::moveCamera(sf::Time t_deltaTime)
