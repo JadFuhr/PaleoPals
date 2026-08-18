@@ -6,22 +6,42 @@ BTReturnToSurfaceNode::BTReturnToSurfaceNode(NPC& npc, Map& map) : m_npc(npc), m
 
 BTStatus BTReturnToSurfaceNode::tick(float dt)
 {
-	std::cout << "ticking return to surface node" << std::endl;
-
+	// not in return state, fail to move to next behaviour
 	if (!m_npc.m_returningToSurface)
 	{
-		std::cout << "Return returning FAILURE (not returning)" << std::endl;
+		m_timeoutTimer = 0.0f;
 		return BTStatus::Failure;
 	}
 
-	m_npc.updateMining(sf::seconds(dt), m_map);
+	m_timeoutTimer += dt;
 
-	if (!m_npc.m_returningToSurface)
+	if (m_timeoutTimer > 10.0f && m_npc.m_returnPath.empty())
 	{
-		std::cout << "Return returning SUCCESS (finished returning)" << std::endl;
+		std::cout << "Return node TIMEOUT - NPC trapped underground for 10+ seconds!\n";
+
+		// Reset NPC state completely
+		m_npc.m_returningToSurface = false;
+		m_npc.m_miningPath.clear();
+		m_npc.m_returnPath.clear();
+		m_npc.m_miningIndex = 0;
+		m_npc.m_returnIndex = 0;
+		m_timeoutTimer = 0.f;
+
+		return BTStatus::Failure;  // Force tree to reset then try again
+	}
+
+	m_npc.updateReturn(sf::seconds(dt), m_map);
+
+	if (m_npc.m_returnIndex >= m_npc.m_returnPath.size())
+	{
+		m_npc.m_returningToSurface = false; 
+		m_npc.m_miningPath.clear();
+		m_npc.m_returnPath.clear();
+		m_npc.m_miningIndex = 0;
+		m_npc.m_returnIndex = 0;
+		m_timeoutTimer = 0.f;
 		return BTStatus::Success;
 	}
-	std::cout << "Return returning RUNNING" << std::endl;
 	return BTStatus::Running;
 
 }

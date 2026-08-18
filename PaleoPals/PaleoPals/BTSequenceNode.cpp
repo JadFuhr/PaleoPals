@@ -10,7 +10,7 @@ BTStatus SequenceNode::tick(float dt)
 	while (m_index < m_children.size())
 	{
 		BTStatus status = m_children[m_index]->tick(dt);	//store running, failuure or success in status
-		std::cout << "Sequence child " << m_index << " returned " << (int)status << std::endl;
+		//std::cout << "Sequence child " << m_index << " returned " << (int)status << std::endl;
 
 		if (status == BTStatus::Running)	// return running if still busy
 		{

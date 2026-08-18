@@ -14,4 +14,5 @@ private:
 
 	NPC& m_npc;
 	Map& m_map;
+	float m_timer = 0.0f;
 };

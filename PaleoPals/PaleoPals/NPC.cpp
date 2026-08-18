@@ -43,45 +43,36 @@ void NPC::drawNPC(sf::RenderWindow& window)
 
 }
 
-void NPC::updateMining(sf::Time dt, Map& map)
+void NPC::updateReturn(sf::Time dt, Map& map)
 {
-
-	//returning to surface , loop back through path
-	if (m_returningToSurface)
-	{
-		if (m_returnIndex >= m_returnPath.size())
-		{
-			m_state = NPCState::WANDERTHESURFACE;
-			m_returningToSurface = false;
-			m_returnPath.clear();
-			m_returnIndex = 0;
-			return;
-		 }
-
-		sf::Vector2i targetTile = m_returnPath[m_returnIndex ];
-		sf::Vector2f targetPos = tileToWorld(targetTile, map);
-
-		sf::Vector2f pos = m_sprite.getPosition();
-		sf::Vector2f dir = targetPos - pos;
-
-		float dist = std::sqrt(dir.x * dir.x + dir.y * dir.y);
-
-		if (dist < 4.f)
-		{
-			m_returnIndex++;
-			return;
-		}
-
-		dir /= dist;
-
-		m_velocity = dir * m_moveSpeed;
-		m_sprite.move(m_velocity * dt.asSeconds());
-		m_facingRight = (dir.x >= 0);
-
+	if (m_returnIndex >= m_returnPath.size()) {
+		m_state = NPCState::WANDERTHESURFACE;
+		m_returningToSurface = false;
+		m_returnPath.clear();
+		m_returnIndex = 0;
 		return;
-
 	}
 
+	sf::Vector2i targetTile = m_returnPath[m_returnIndex];
+	sf::Vector2f targetPos = tileToWorld(targetTile, map);
+	sf::Vector2f pos = m_sprite.getPosition();
+	sf::Vector2f dir = targetPos - pos;
+
+	float dist = std::sqrt(dir.x * dir.x + dir.y * dir.y);
+
+	if (dist < 4.f) {
+		m_returnIndex++;
+		return;
+	}
+
+	dir /= dist;
+	m_velocity = dir * m_moveSpeed;
+	m_sprite.move(m_velocity * dt.asSeconds());
+	m_facingRight = (dir.x >= 0);
+}
+
+void NPC::updateMining(sf::Time dt, Map& map)
+{
 	//normal mining
 	if (m_miningIndex >= m_miningPath.size())
 	{
@@ -170,7 +161,7 @@ void NPC::generateMiningPath(Map& map)
 	
 	while (!stack.empty())
 	{
-		if (m_miningPath.size() >= 20) // depth of search is 20
+		if (m_miningPath.size() >= 8) // depth of search is 8
 		{
 			break;
 		}

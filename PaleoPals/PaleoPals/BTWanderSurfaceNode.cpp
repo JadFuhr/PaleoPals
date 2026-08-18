@@ -6,18 +6,32 @@ BTWanderSurfaceNode::BTWanderSurfaceNode(NPC& npc, Map& map) :m_npc(npc), m_map(
 
 BTStatus BTWanderSurfaceNode::tick(float dt)
 {
-	std::cout << "ticking surface wandering node" << std::endl;
+	if (m_npc.m_returningToSurface)
+	{
+		return BTStatus::Failure;	// dont trigger mining while returning
+	}
+	//std::cout << "ticking surface wandering node" << std::endl;
 
-		m_npc.updateSurfaceWandering(sf::seconds(dt), m_map);
+	m_npc.updateSurfaceWandering(sf::seconds(dt), m_map);
 
-		if (m_npc.m_returningToSurface)
+	m_timer += dt;
+	//std::cout << "Wander timer=" << m_timer << std::endl;
+
+	if (m_timer > 1.0f)
+	{
+		m_timer = 0.0f;
+		int roll = std::rand() % 100;
+
+		if (roll< 50)
 		{
-			std::cout << "Wander returning SUCCESS (because returningToSurface)" << std::endl;
+			std::cout << "Wander returning SUCCESS (roll=" << roll << ")" << std::endl;
 			return BTStatus::Success;
 		}
-
-		std::cout << "Wander returning RUNNING" << std::endl;
-		return BTStatus::Running;
 	}
+
+
+	//std::cout << "Wander returning RUNNING" << std::endl;
+	return BTStatus::Running;
+}
 
 

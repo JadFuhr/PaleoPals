@@ -30,6 +30,7 @@ public:
 
     void updateNPC(sf::Time dt, Map& map);
 	void drawNPC(sf::RenderWindow& window);
+    void updateReturn(sf::Time dt, Map& map);
 
     std::vector<sf::Vector2i> m_miningPath;   // DFS result
     sf::Vector2i m_miningStartTile;     // npc rememberrs where it starts 
