@@ -418,13 +418,16 @@ void Game::setupMap()
 
     auto miningSequence = new SequenceNode();
 
-    miningSequence->addChildNode(new BTWanderSurfaceNode(m_npc, m_map));
+    miningSequence->addChildNode(new BTImTiredOfWanderingNode(m_npc));
     miningSequence->addChildNode(new BTMiningNode(m_npc, m_map));
     miningSequence->addChildNode(new BTReturnToSurfaceNode(m_npc, m_map));
+
+    // mining sequence first otherwise wander
 
     auto rootSelector = new SelectorNode();
 
     rootSelector->addChildNode(miningSequence);
+    rootSelector->addChildNode(new BTWanderSurfaceNode(m_npc, m_map)); // wander fallabck
     m_npc.setRoot(rootSelector);
 }
 

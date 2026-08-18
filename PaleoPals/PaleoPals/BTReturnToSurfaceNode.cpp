@@ -10,6 +10,7 @@ BTStatus BTReturnToSurfaceNode::tick(float dt)
 
 	if (!m_npc.m_returningToSurface)
 	{
+		std::cout << "Return returning FAILURE (not returning)" << std::endl;
 		return BTStatus::Failure;
 	}
 
@@ -17,9 +18,10 @@ BTStatus BTReturnToSurfaceNode::tick(float dt)
 
 	if (!m_npc.m_returningToSurface)
 	{
+		std::cout << "Return returning SUCCESS (finished returning)" << std::endl;
 		return BTStatus::Success;
 	}
-
+	std::cout << "Return returning RUNNING" << std::endl;
 	return BTStatus::Running;
 
 }

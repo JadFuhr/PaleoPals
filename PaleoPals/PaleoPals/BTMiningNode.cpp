@@ -12,9 +12,11 @@ BTStatus BTMiningNode::tick(float dt)
 
 	if (m_npc.m_returningToSurface)
 	{
+		std::cout << "Mining returning SUCCESS (switching to return)" << std::endl;
 		return BTStatus::Success;
 	}
 
+	std::cout << "Mining returning RUNNING" << std::endl;
 	return BTStatus::Running;
 }
 

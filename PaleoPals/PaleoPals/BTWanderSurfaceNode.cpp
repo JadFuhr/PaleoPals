@@ -12,9 +12,11 @@ BTStatus BTWanderSurfaceNode::tick(float dt)
 
 		if (m_npc.m_returningToSurface)
 		{
+			std::cout << "Wander returning SUCCESS (because returningToSurface)" << std::endl;
 			return BTStatus::Success;
 		}
 
+		std::cout << "Wander returning RUNNING" << std::endl;
 		return BTStatus::Running;
 	}
 
