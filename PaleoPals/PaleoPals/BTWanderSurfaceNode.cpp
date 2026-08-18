@@ -6,6 +6,8 @@ BTWanderSurfaceNode::BTWanderSurfaceNode(NPC& npc, Map& map) :m_npc(npc), m_map(
 
 BTStatus BTWanderSurfaceNode::tick(float dt)
 {
+	std::cout << "ticking surface wandering node" << std::endl;
+
 		m_npc.updateSurfaceWandering(sf::seconds(dt), m_map);
 
 		if (m_npc.m_returningToSurface)

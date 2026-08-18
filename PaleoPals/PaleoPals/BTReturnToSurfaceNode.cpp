@@ -6,6 +6,8 @@ BTReturnToSurfaceNode::BTReturnToSurfaceNode(NPC& npc, Map& map) : m_npc(npc), m
 
 BTStatus BTReturnToSurfaceNode::tick(float dt)
 {
+	std::cout << "ticking return to surface node" << std::endl;
+
 	if (!m_npc.m_returningToSurface)
 	{
 		return BTStatus::Failure;
