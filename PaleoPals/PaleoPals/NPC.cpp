@@ -76,8 +76,6 @@ void NPC::updateMining(sf::Time dt, Map& map)
 	//normal mining
 	if (m_miningIndex >= m_miningPath.size())
 	{
-		// Finished mining start returning
-		generateReturnPath(map);
 		m_returningToSurface = true;
 		return;
 	}
@@ -161,7 +159,7 @@ void NPC::generateMiningPath(Map& map)
 	
 	while (!stack.empty())
 	{
-		if (m_miningPath.size() >= 8) // depth of search is 8
+		if (m_miningPath.size() >= 20) // depth of search is 20
 		{
 			break;
 		}

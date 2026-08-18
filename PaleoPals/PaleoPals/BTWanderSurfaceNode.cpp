@@ -22,7 +22,7 @@ BTStatus BTWanderSurfaceNode::tick(float dt)
 		m_timer = 0.0f;
 		int roll = std::rand() % 100;
 
-		if (roll< 50)
+		if (roll< 30)
 		{
 			std::cout << "Wander returning SUCCESS (roll=" << roll << ")" << std::endl;
 			return BTStatus::Success;
