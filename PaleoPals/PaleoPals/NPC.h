@@ -9,7 +9,6 @@
 #include "BTSelectorNode.h"
 #include "BTSequenceNode.h"
 #include "BTWanderSurfaceNode.h"
-#include "BTImTiredOfWanderingNode.h"
 #include "BTMiningNode.h"
 #include "BTReturnToSurfaceNode.h"
 #include "BTCollectFossilNode.h"

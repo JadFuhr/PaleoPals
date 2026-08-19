@@ -20,7 +20,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BTCollectFossilNode.cpp" />
-    <ClCompile Include="BTImTiredOfWanderingNode.cpp" />
     <ClCompile Include="BTMiningNode.cpp" />
     <ClCompile Include="BTReturnToSurfaceNode.cpp" />
     <ClCompile Include="BTWanderSurfaceNode.cpp" />
@@ -41,7 +40,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BTCollectFossilNode.h" />
-    <ClInclude Include="BTImTiredOfWanderingNode.h" />
     <ClInclude Include="BTMiningNode.h" />
     <ClInclude Include="BTNode.h" />
     <ClInclude Include="BTReturnToSurfaceNode.h" />
