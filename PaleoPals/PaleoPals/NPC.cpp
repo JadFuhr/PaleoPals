@@ -296,6 +296,11 @@ void NPC::generateReturnPath(Map& map)
 	
 }
 
+void NPC::generateFossilPath(Map& map, sf::Vector2i goal)
+{
+
+}
+
 void NPC::updateSurfaceWandering(sf::Time dt, Map& map)
 {
 
