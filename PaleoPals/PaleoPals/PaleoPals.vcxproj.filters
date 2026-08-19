@@ -102,6 +102,9 @@
     <ClCompile Include="BTImTiredOfWanderingNode.cpp">
       <Filter>Source Files\BehaviourTree</Filter>
     </ClCompile>
+    <ClCompile Include="BTCollectFossilNode.cpp">
+      <Filter>Source Files\BehaviourTree</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="constants.h">
@@ -156,6 +159,9 @@
       <Filter>Header Files\BehaviourTree</Filter>
     </ClInclude>
     <ClInclude Include="BTImTiredOfWanderingNode.h">
+      <Filter>Header Files\BehaviourTree</Filter>
+    </ClInclude>
+    <ClInclude Include="BTCollectFossilNode.h">
       <Filter>Header Files\BehaviourTree</Filter>
     </ClInclude>
   </ItemGroup>

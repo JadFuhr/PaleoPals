@@ -12,6 +12,7 @@
 #include "BTImTiredOfWanderingNode.h"
 #include "BTMiningNode.h"
 #include "BTReturnToSurfaceNode.h"
+#include "BTCollectFossilNode.h"
 
 enum class NPCState
 {

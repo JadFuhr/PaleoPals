@@ -10,7 +10,7 @@ BTStatus BTImTiredOfWanderingNode::tick(float dt)
 	m_timer += dt;
 
 	//roll rand chance
-	if (m_timer > 1.0f)
+	if (m_timer > 5.0f)
 	{
 		m_timer = 0.0f;
 
@@ -18,12 +18,12 @@ BTStatus BTImTiredOfWanderingNode::tick(float dt)
 
 		if (roll < 100) // always succeed
 		{
-			std::cout << "NPC: Im tired of wandering, lemme dig a hole" << std::endl;
-			std::cout << "Condition SUCCESS (roll=" << roll << ")" << std::endl;
+			/*std::cout << "NPC: Im tired of wandering, lemme dig a hole" << std::endl;
+			std::cout << "Condition SUCCESS (roll=" << roll << ")" << std::endl;*/
 
 			return BTStatus::Success;
 		}
-		std::cout << "Condition FAILURE (roll=" << roll << ")" << std::endl;
+	/*	std::cout << "Condition FAILURE (roll=" << roll << ")" << std::endl;*/
 	}
 
 	return BTStatus::Failure;
