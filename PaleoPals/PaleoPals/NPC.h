@@ -54,6 +54,7 @@ public:
     void generateMiningPath(Map& map);  //DFS
     void generateReturnPath(Map& map);
     void generateFossilPath(Map& map, sf::Vector2i goal);   // Astar
+	void updateFossilPath(sf::Time dt, Map& map);
     void updateSurfaceWandering(sf::Time dt, Map& map);
 
     sf::Vector2i worldToTile(sf::Vector2f pos, Map& map);

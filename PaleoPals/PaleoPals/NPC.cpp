@@ -159,7 +159,7 @@ void NPC::generateMiningPath(Map& map)
 	
 	while (!stack.empty())
 	{
-		if (m_miningPath.size() >= 25) // depth of search is 20
+		if (m_miningPath.size() >= 10) // depth of search is 20
 		{
 			break;
 		}
@@ -384,7 +384,7 @@ void NPC::generateFossilPath(Map& map, sf::Vector2i goal)
 		{
 			if (!isWalkable(n))
 			{
-				return; 
+				continue; 
 			}
 
 			int g = allNodes[current.pos].gCost + 1;
@@ -418,6 +418,44 @@ void NPC::generateFossilPath(Map& map, sf::Vector2i goal)
 	std::reverse(m_fossilPath.begin(), m_fossilPath.end());
 
 	std::cout << "fossil path generated: " << m_fossilPath.size() << " tiles " << std::endl;
+}
+
+void NPC::updateFossilPath(sf::Time dt, Map& map)
+{
+	if (m_fossilIndex >= m_fossilPath.size())
+	{
+		// Finished fossil path
+		m_fossilPath.clear();
+		m_fossilIndex = 0;
+		return;
+	}
+
+	sf::Vector2i targetTile = m_fossilPath[m_fossilIndex];
+	sf::Vector2f targetPos = tileToWorld(targetTile, map);
+	sf::Vector2f pos = m_sprite.getPosition();
+	sf::Vector2f dir = targetPos - pos;
+
+	float dist = std::sqrt(dir.x * dir.x + dir.y * dir.y);
+
+	if (dist < 4.f)
+	{
+		m_fossilIndex++;
+
+		if (m_fossilIndex >= m_fossilPath.size())
+		{
+			m_fossilPath.clear();
+			m_fossilIndex = 0;
+		}
+
+		return;
+	}
+
+	dir /= dist;
+	m_velocity = dir * m_moveSpeed;
+	m_sprite.move(m_velocity * dt.asSeconds());
+	m_facingRight = (dir.x >= 0);
+
+	std::cout << "NPC moving towards fossil tile " << targetTile.x << "," << targetTile.y << " index " << m_fossilIndex << "/" << m_fossilPath.size() << std::endl;
 }
 
 void NPC::updateSurfaceWandering(sf::Time dt, Map& map)

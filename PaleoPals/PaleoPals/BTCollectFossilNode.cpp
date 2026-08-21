@@ -1,4 +1,4 @@
-#include "BTCollectFossilNode.h"
+﻿#include "BTCollectFossilNode.h"
 #include "NPC.h"
 #include "Map.h"
 
@@ -6,33 +6,67 @@ BTCollectFossilNode::BTCollectFossilNode(NPC& npc, Map& map) : m_npc(npc), m_map
 
 BTStatus BTCollectFossilNode::tick(float dt)
 {
-	auto& fossils = m_map.getFossilManager().getAllCollectibles();
+    auto& fossils = m_map.getFossilManager().getAllCollectibles();
 
-	for (auto& c : fossils)
-	{
-		if (!c.isPickedUp)
-		{
-			if (m_npc.m_fossilPath.empty())
-			{
-				m_npc.generateFossilPath(m_map, { c.gridCol, c.gridRow });
-			}
+    // Pick a target if none or if the old one was collected
+    if (!m_currentTarget || m_currentTarget->isPickedUp)
+    {
+        m_currentTarget = nullptr;
 
-			//m_npc.updateFossilPath() function to be added
+        float bestDistanceSq = std::numeric_limits<float>::max();
+        sf::Vector2f npcPos = m_npc.getNPCPosition();
 
-			if(m_npc.m_fossilIndex >= m_npc.m_fossilPath.size())
-			{
-				//reached fossil
+        for (auto& c : fossils)
+        {
+            if (!c.isPickedUp)
+            {
+                sf::Vector2f diff = c.sprite.getPosition() - npcPos;
+                float distSq = diff.x * diff.x + diff.y * diff.y;
 
-				c.isPickedUp = true;
+                if (distSq < bestDistanceSq)
+                {
+                    bestDistanceSq = distSq;
+                    m_currentTarget = &c;
+                }
+            }
+        }
 
-				std::cout << "npc chose to go for fossil: " << c.collectibleIndex << " at tile: " << c.gridRow << ", " << c.gridCol << std::endl;
+        // Generate path to new target
+        if (m_currentTarget)
+        {
+            m_npc.generateFossilPath(m_map, { m_currentTarget->gridCol, m_currentTarget->gridRow });
+        }
+    }
 
-				return BTStatus::Success;
-			}
-			
-			return BTStatus::Running;
-		}
-	}
+    // No fossils left → Success
+    if (!m_currentTarget)
+    {
+        return BTStatus::Success;
+    }
 
-	return BTStatus::Success;
+    // Walk the path
+    m_npc.updateFossilPath(sf::seconds(dt), m_map);
+
+    // Check proximity to fossil
+    sf::Vector2f npcPos = m_npc.getNPCPosition();
+    sf::Vector2f fossilPos = m_currentTarget->sprite.getPosition();
+    sf::Vector2f diff = fossilPos - npcPos;
+    float distSq = diff.x * diff.x + diff.y * diff.y;
+
+    if (distSq < 16.0f * 16.0f)
+    {
+        // Reached fossil
+        m_currentTarget->isPickedUp = true;
+        m_currentTarget->sprite.setPosition(sf::Vector2f(-10000.f, -10000.f));
+        std::cout << "NPC collected fossil: " << m_currentTarget->collectibleIndex << std::endl;
+
+        // Reset path so next tick generates a new one
+        m_npc.m_fossilPath.clear();
+        m_npc.m_fossilIndex = 0;
+        m_currentTarget = nullptr;
+    }
+
+    return BTStatus::Running; // keep running until all fossils are gone
 }
+
+
