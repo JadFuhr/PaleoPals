@@ -159,7 +159,7 @@ void NPC::generateMiningPath(Map& map)
 	
 	while (!stack.empty())
 	{
-		if (m_miningPath.size() >= 5) // depth of search is 20
+		if (m_miningPath.size() >= 25) // depth of search is 20
 		{
 			break;
 		}

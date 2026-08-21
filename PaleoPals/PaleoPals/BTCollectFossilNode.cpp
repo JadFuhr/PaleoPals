@@ -6,16 +6,29 @@ BTCollectFossilNode::BTCollectFossilNode(NPC& npc, Map& map) : m_npc(npc), m_map
 
 BTStatus BTCollectFossilNode::tick(float dt)
 {
-	//std::cout << "collect fossil ticked" << std::endl;
-
 	auto& fossils = m_map.getFossilManager().getAllCollectibles();
 
 	for (auto& c : fossils)
 	{
-		m_npc.generateFossilPath(m_map, sf::Vector2i(c.gridCol, c.gridRow));
 		if (!c.isPickedUp)
 		{
-			//std::cout << "looking for collectible" << c.collectibleIndex << " at tile: << " << c.gridRow << ", " << c.gridCol << "with value of: " << c.monetaryValue << std::endl;
+			if (m_npc.m_fossilPath.empty())
+			{
+				m_npc.generateFossilPath(m_map, { c.gridCol, c.gridRow });
+			}
+
+			//m_npc.updateFossilPath() function to be added
+
+			if(m_npc.m_fossilIndex >= m_npc.m_fossilPath.size())
+			{
+				//reached fossil
+
+				c.isPickedUp = true;
+
+				std::cout << "npc chose to go for fossil: " << c.collectibleIndex << " at tile: " << c.gridRow << ", " << c.gridCol << std::endl;
+
+				return BTStatus::Success;
+			}
 			
 			return BTStatus::Running;
 		}
