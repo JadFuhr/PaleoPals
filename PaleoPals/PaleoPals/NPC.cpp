@@ -159,7 +159,7 @@ void NPC::generateMiningPath(Map& map)
 	
 	while (!stack.empty())
 	{
-		if (m_miningPath.size() >= 20) // depth of search is 20
+		if (m_miningPath.size() >= 5) // depth of search is 20
 		{
 			break;
 		}
@@ -298,7 +298,126 @@ void NPC::generateReturnPath(Map& map)
 
 void NPC::generateFossilPath(Map& map, sf::Vector2i goal)
 {
+	m_fossilPath.clear();
+	m_fossilIndex = 0;
 
+	sf::Vector2i start = worldToTile(m_sprite.getPosition(), map);
+
+	auto inBounds = [&](sf::Vector2i t)		// check if in bounds
+		{
+			return t.x >= 0 && t.x < map.getColumnCount() &&
+				   t.y >= 0 && t.y < map.getRowCount();
+		};
+
+	auto isWalkable = [&](sf::Vector2i t)	// only walk on already broken tiles
+		{
+			if (!inBounds(t))
+			{
+				return false;
+			}
+			return map.getTileHardness(t.y, t.x) <= 0;
+		};
+
+	auto heuristic = [&](sf::Vector2i a, sf::Vector2i b)	// Manhattan distance heuristic  
+		{
+			return std::abs(a.x - b.x) + std::abs(a.y - b.y);
+		};
+
+
+	struct Node
+	{
+		sf::Vector2i pos;
+		int gCost;
+		int hCost;
+		sf::Vector2i parent;
+	};
+
+
+	struct Vector2iCompare
+	{
+		bool operator()(const sf::Vector2i& a, const sf::Vector2i& b) const
+		{
+			if (a.y == b.y) return a.x < b.x;
+			return a.y < b.y;
+		}
+	};
+
+	struct NodeCompare
+	{
+		bool operator()(const std::pair<int, Node>& a, const std::pair<int, Node>& b) const
+		{
+			return a.first > b.first; // min-heap based on f score
+		}
+	};
+
+	std::priority_queue<std::pair<int, Node>, std::vector<std::pair<int, Node>>, NodeCompare>open;
+
+	// tile position comparison lambda for map 
+	std::map<sf::Vector2i, Node, Vector2iCompare> allNodes;
+
+	open.push({ heuristic(start, goal), { start, 0, heuristic(start, goal), sf::Vector2i(-1, -1) } });
+
+	allNodes[start] = { start, 0, heuristic(start, goal), sf::Vector2i(-1, -1) };
+
+	bool found = false;
+
+	while (!open.empty())
+	{
+		auto [f, current] = open.top();
+
+		open.pop();
+
+		if(current.pos == goal)
+		{
+			found = true;
+			break;
+		}
+
+		std::vector<sf::Vector2i> neighbours = {
+			{current.pos.x + 1, current.pos.y},
+			{current.pos.x - 1, current.pos.y},
+			{current.pos.x, current.pos.y + 1},
+			{current.pos.x, current.pos.y - 1}
+		};
+
+		for (auto& n : neighbours)
+		{
+			if (!isWalkable(n))
+			{
+				return; 
+			}
+
+			int g = allNodes[current.pos].gCost + 1;
+			int h = heuristic(n, goal);
+			int f = g + h;
+
+			if(!allNodes.count(n)|| g<allNodes[n].gCost)
+			{
+				allNodes[n] = { n, g, h, current.pos };
+				open.push({ f, allNodes[n] });
+			}
+		}
+	}
+
+	if (!found)
+	{
+		std::cout << "npc cant find fossil path \n";
+		return;
+	}
+
+	// Reconstruct path
+
+	sf::Vector2i current = goal;
+	
+	while (current != start)
+	{
+		m_fossilPath.push_back(current);
+		current = allNodes[current].parent;
+	}
+
+	std::reverse(m_fossilPath.begin(), m_fossilPath.end());
+
+	std::cout << "fossil path generated: " << m_fossilPath.size() << " tiles " << std::endl;
 }
 
 void NPC::updateSurfaceWandering(sf::Time dt, Map& map)

@@ -27,7 +27,6 @@ public:
 
     void setRoot(BTNode* root) { m_root = root; }
     BTNode* getRoot() const { return m_root; }
-    void generateFossilPath(Map& map, sf::Vector2i goal);
 
 
     void updateNPC(sf::Time dt, Map& map);
@@ -37,8 +36,8 @@ public:
     std::vector<sf::Vector2i> m_miningPath;   // DFS result
     sf::Vector2i m_miningStartTile;     // npc rememberrs where it starts 
     std::vector<sf::Vector2i> m_returnPath;
-	std::vector<sf::Vector2i> m_fossilPath;
-	int m_fossilIndex = 0;
+	std::vector<sf::Vector2i> m_fossilPath; // path to fossil (for Astar)
+	int m_fossilIndex = 0;  
 
     int m_miningIndex = 0;
     int m_returnIndex = 0;  
@@ -52,8 +51,9 @@ public:
 
     void updateMining(sf::Time dt, Map& map);
     void mineTile(Map& map, sf::Vector2i tile);
-    void generateMiningPath(Map& map);
+    void generateMiningPath(Map& map);  //DFS
     void generateReturnPath(Map& map);
+    void generateFossilPath(Map& map, sf::Vector2i goal);   // Astar
     void updateSurfaceWandering(sf::Time dt, Map& map);
 
     sf::Vector2i worldToTile(sf::Vector2f pos, Map& map);
