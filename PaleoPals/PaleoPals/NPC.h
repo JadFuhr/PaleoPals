@@ -27,6 +27,8 @@ public:
 
     void setRoot(BTNode* root) { m_root = root; }
     BTNode* getRoot() const { return m_root; }
+    void generateFossilPath(Map& map, sf::Vector2i goal);
+
 
     void updateNPC(sf::Time dt, Map& map);
 	void drawNPC(sf::RenderWindow& window);
@@ -35,6 +37,8 @@ public:
     std::vector<sf::Vector2i> m_miningPath;   // DFS result
     sf::Vector2i m_miningStartTile;     // npc rememberrs where it starts 
     std::vector<sf::Vector2i> m_returnPath;
+	std::vector<sf::Vector2i> m_fossilPath;
+	int m_fossilIndex = 0;
 
     int m_miningIndex = 0;
     int m_returnIndex = 0;  

@@ -14,7 +14,7 @@ BTStatus BTCollectFossilNode::tick(float dt)
 	{
 		if (!c.isPickedUp)
 		{
-			std::cout << "looking for collectible" << c.collectibleIndex << " at tile: << " << c.gridRow << ", " << c.gridCol << "with value of: " << c.monetaryValue << std::endl;
+			//std::cout << "looking for collectible" << c.collectibleIndex << " at tile: << " << c.gridRow << ", " << c.gridCol << "with value of: " << c.monetaryValue << std::endl;
 
 			return BTStatus::Running;
 		}
