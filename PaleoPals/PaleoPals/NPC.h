@@ -30,7 +30,7 @@ public:
 
 
     void updateNPC(sf::Time dt, Map& map);
-	void drawNPC(sf::RenderWindow& window);
+	void drawNPC(sf::RenderWindow& window, Map& map);
     void updateReturn(sf::Time dt, Map& map);
 
     std::vector<sf::Vector2i> m_miningPath;   // DFS result
@@ -56,6 +56,8 @@ public:
     void generateFossilPath(Map& map, sf::Vector2i goal);   // Astar
 	void updateFossilPath(sf::Time dt, Map& map);
     void updateSurfaceWandering(sf::Time dt, Map& map);
+
+    void drawPath(sf::RenderWindow& window, Map& map);
 
     sf::Vector2i worldToTile(sf::Vector2f pos, Map& map);
     sf::Vector2f tileToWorld(sf::Vector2i tile, Map& map);

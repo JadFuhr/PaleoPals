@@ -36,9 +36,9 @@ void NPC::updateNPC(sf::Time dt, Map& map)
 	updateNPCAnimation(dt);
 }
 
-void NPC::drawNPC(sf::RenderWindow& window)
+void NPC::drawNPC(sf::RenderWindow& window, Map& map)
 {
-
+	drawPath(window, map);
 	window.draw(m_sprite);
 
 }
@@ -159,7 +159,7 @@ void NPC::generateMiningPath(Map& map)
 	
 	while (!stack.empty())
 	{
-		if (m_miningPath.size() >= 10) // depth of search is 20
+		if (m_miningPath.size() >= 20) // depth of search is 20
 		{
 			break;
 		}
@@ -504,6 +504,27 @@ void NPC::updateSurfaceWandering(sf::Time dt, Map& map)
 	pos.y = surfaceY;
 
 	m_sprite.setPosition(pos);
+}
+
+void NPC::drawPath(sf::RenderWindow& window, Map& map)
+{
+	if (m_fossilPath.empty())
+	{
+		return;
+	}
+
+	float tileSize = map.getTileSize();
+	sf::RectangleShape tileOverlay(sf::Vector2f(tileSize, tileSize));
+	tileOverlay.setFillColor(sf::Color(255, 255, 0, 100)); // transparent-ish yellow
+
+	for (size_t i = m_fossilIndex; i < m_fossilPath.size(); ++i)
+	{
+		sf::Vector2f centerPos = tileToWorld(m_fossilPath[i], map);
+
+		// align shape with top left of tile
+		tileOverlay.setPosition(sf::Vector2f(centerPos.x - tileSize / 2.0f, centerPos.y - tileSize / 2.0f));
+		window.draw(tileOverlay);
+	}
 }
 
 void NPC::updateNPCAnimation(sf::Time dt)

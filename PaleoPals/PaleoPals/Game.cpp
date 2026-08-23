@@ -363,7 +363,7 @@ void Game::render()
 
 
             m_player.draw(m_window);
-            m_npc.drawNPC(m_window);
+            m_npc.drawNPC(m_window, m_map);
         }
 
 		m_window.setView(m_window.getDefaultView());
