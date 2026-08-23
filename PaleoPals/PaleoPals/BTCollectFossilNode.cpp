@@ -1,6 +1,7 @@
 ﻿#include "BTCollectFossilNode.h"
 #include "NPC.h"
-#include "Map.h"
+#include "Map.h""
+#include "Player.h"
 
 BTCollectFossilNode::BTCollectFossilNode(NPC& npc, Map& map) : m_npc(npc), m_map(map) {}
 

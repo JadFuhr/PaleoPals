@@ -53,7 +53,6 @@ public:
     const std::vector<CollectedItem>& getNewPickups() const { return m_newPickups; }
 
     void clearNewPickups() { m_newPickups.clear(); }
-    int getMoney() const { return m_money; }
 
     float getRayLength() const;
 
@@ -82,6 +81,8 @@ public:
     bool m_isGrounded = false;
     bool m_canJump = true;
 
+	//void addMoney(int amount) { m_money += amount; }    // purely for npc to add money to player
+    int getMoney() const { return m_money; }
     void spendMoney(int amount) { m_money -= amount; }
     float getPickupRadius();
     float getJumpForce();

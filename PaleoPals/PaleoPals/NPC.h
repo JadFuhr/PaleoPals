@@ -13,6 +13,7 @@
 #include "BTReturnToSurfaceNode.h"
 #include "BTCollectFossilNode.h"
 
+
 enum class NPCState
 {
 	WANDERTHESURFACE,
@@ -27,7 +28,6 @@ public:
 
     void setRoot(BTNode* root) { m_root = root; }
     BTNode* getRoot() const { return m_root; }
-
 
     void updateNPC(sf::Time dt, Map& map);
 	void drawNPC(sf::RenderWindow& window, Map& map);
@@ -62,6 +62,7 @@ public:
     sf::Vector2i worldToTile(sf::Vector2f pos, Map& map);
     sf::Vector2f tileToWorld(sf::Vector2i tile, Map& map);
 	sf::Vector2f getNPCPosition() const { return m_sprite.getPosition(); }
+
 
 private:
     BTNode* m_root = nullptr;
