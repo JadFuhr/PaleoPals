@@ -75,7 +75,18 @@ BTStatus BTCollectFossilNode::tick(float dt)
 				item.name = m_currentTarget->assignedPieceId + " of " + m_currentTarget->assignedDinosaurName;
 				m_npc.m_player->addMoney(m_currentTarget->monetaryValue);
             }
-
+            else if(m_currentTarget->collectibleIndex <= 8) //amber
+            {
+                item.type = "amber";
+				item.name = (m_currentTarget->monetaryValue == 75) ? "Small Amber" : "Large Amber";
+                m_npc.m_player->addMoney(m_currentTarget->monetaryValue);
+            }
+            else //trash
+            {
+                item.type = "trash";
+                item.name = "Trash";
+                m_npc.m_player->addMoney(m_currentTarget->monetaryValue);
+            }
 
 			//add to inventory
 
