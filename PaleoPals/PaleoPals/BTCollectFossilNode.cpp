@@ -59,10 +59,33 @@ BTStatus BTCollectFossilNode::tick(float dt)
 
     if (distSq < 16.0f * 16.0f)
     {
+        // create collected item like player does 
+        if (m_npc.m_player)
+        {
+			CollectedItem item;
+			item.collectibleIndex = m_currentTarget->collectibleIndex;
+			item.monetaryValue = m_currentTarget->monetaryValue;
+
+            if (m_currentTarget->collectibleIndex <= 6) //fossils
+            {
+                item.type = "fossil";
+				item.dinosaurName = m_currentTarget->assignedDinosaurName;
+                item.pieceId = m_currentTarget->assignedPieceId;
+				item.category = m_currentTarget->assignedCategory;
+				item.name = m_currentTarget->assignedPieceId + " of " + m_currentTarget->assignedDinosaurName;
+				m_npc.m_player->addMoney(m_currentTarget->monetaryValue);
+            }
+
+
+			//add to inventory
+
+			m_npc.m_player->addCollectedItem(item);
+        }
+
         // Reached fossil
         m_currentTarget->isPickedUp = true;
         m_currentTarget->sprite.setPosition(sf::Vector2f(-10000.f, -10000.f));
-        std::cout << "NPC collected fossil: " << m_currentTarget->collectibleIndex << std::endl;
+        std::cout << "npc pickup fossil index" << m_currentTarget->collectibleIndex << std::endl;
 
         // Reset path, next tick generates another
         m_npc.m_fossilPath.clear();

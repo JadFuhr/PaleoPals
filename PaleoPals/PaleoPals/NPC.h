@@ -13,6 +13,7 @@
 #include "BTReturnToSurfaceNode.h"
 #include "BTCollectFossilNode.h"
 
+class Player;
 
 enum class NPCState
 {
@@ -28,6 +29,8 @@ public:
 
     void setRoot(BTNode* root) { m_root = root; }
     BTNode* getRoot() const { return m_root; }
+
+	void setPlayer(Player* player) { m_player = player; }
 
     void updateNPC(sf::Time dt, Map& map);
 	void drawNPC(sf::RenderWindow& window, Map& map);
@@ -63,6 +66,7 @@ public:
     sf::Vector2f tileToWorld(sf::Vector2i tile, Map& map);
 	sf::Vector2f getNPCPosition() const { return m_sprite.getPosition(); }
 
+	Player* m_player = nullptr; // Pointer to the player object
 
 private:
     BTNode* m_root = nullptr;

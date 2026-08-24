@@ -488,6 +488,11 @@ void Player::updateMiningRay(sf::Time dt, Map& map, const sf::RenderWindow& wind
 
 }
 
+void Player::addMoney(int amount)
+{
+	m_money += amount;
+}
+
 float Player::getPickupRadius()
 {
     return pickupRadius * (1.0f + pickupRadiusLevel * 0.15f);
@@ -496,7 +501,13 @@ float Player::getPickupRadius()
 float Player::getJumpForce()
 {
     return m_jumpForce + (jumpLevel * -40.0f);
-}   
+}
+
+void Player::addCollectedItem(const CollectedItem& item)
+{
+    m_inventory.push_back(item);
+	m_newPickups.push_back(item);
+}
 
 float Player::getRayLength() const
 {

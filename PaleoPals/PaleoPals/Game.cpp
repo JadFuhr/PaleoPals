@@ -411,7 +411,7 @@ void Game::setupMap()
 	m_museumInterior.loadAssets(m_map.getFossilManager().getDinosaurData());
    
     m_player.setPosition(sf::Vector2f(WINDOW_X / 2.0f + 100.0f, WINDOW_Y / 2.0f));
-
+	m_npc.setPlayer(&m_player);
 
 
     // Building Behaviour tree

@@ -81,12 +81,13 @@ public:
     bool m_isGrounded = false;
     bool m_canJump = true;
 
-	//void addMoney(int amount) { m_money += amount; }    // purely for npc to add money to player
+    void addMoney(int amount); // purely for npc to add money to player
     int getMoney() const { return m_money; }
     void spendMoney(int amount) { m_money -= amount; }
     float getPickupRadius();
     float getJumpForce();
 
+    void addCollectedItem(const CollectedItem& item);
 
 
 private:
