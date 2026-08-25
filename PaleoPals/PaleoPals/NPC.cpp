@@ -159,7 +159,9 @@ void NPC::generateMiningPath(Map& map)
 	
 	while (!stack.empty())
 	{
-		if (m_miningPath.size() >= 20) // depth of search is 40
+		int maxDepth = 20 + m_miningDepthLevel * 10; // max depth of search, can be upgraded
+
+		if (m_miningPath.size() >= maxDepth) 
 		{
 			break;
 		}

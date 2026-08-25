@@ -8,7 +8,7 @@ TraderMenu::TraderMenu()
     m_overlay.setFillColor(sf::Color(0, 0, 0, 100));
     m_overlay.setPosition(sf::Vector2f(0.0f, 0.0f));
 
-    m_background.setSize(sf::Vector2f(600.0f, 450.0f));
+    m_background.setSize(sf::Vector2f(600.0f, 550.0f));
     m_background.setFillColor(sf::Color(40, 40, 50, 240));
     m_background.setOutlineColor(sf::Color(200, 200, 200));
     m_background.setOutlineThickness(3.0f);
@@ -54,6 +54,11 @@ TraderMenu::TraderMenu()
     m_upgrade4_JumpHeightButton.setOutlineColor(sf::Color(200, 200, 200));
     m_upgrade4_JumpHeightButton.setOutlineThickness(2.f);
 
+    m_upgradeNPCButton.setSize(sf::Vector2f(250.f, 60.f));
+    m_upgradeNPCButton.setFillColor(sf::Color(180, 150, 100));
+    m_upgradeNPCButton.setOutlineColor(sf::Color(200, 200, 200));
+    m_upgradeNPCButton.setOutlineThickness(2.f);
+
     m_closeButton.setSize(sf::Vector2f(30.0f, 30.0f));
     m_closeButton.setFillColor(sf::Color(200, 80, 80));
     m_closeButton.setOutlineColor(sf::Color(255, 255, 255));
@@ -79,6 +84,7 @@ TraderMenu::TraderMenu()
     setupText(m_upgrade4_JumpHeightText, "Jump Height");
     setupText(m_hiringTabText, "Hiring");
     setupText(m_upgradesTabText, "Upgrades");
+	setupText(m_upgradeNPCText, "Upgrade NPC");
 
 
 }
@@ -127,14 +133,14 @@ void TraderMenu::updateButtonPositions(const sf::RenderWindow& window)
     m_upgrade2_RayDamageButton.setPosition(sf::Vector2f(bgX + 50.0f, bgY + 190.0f));
     m_upgrade3_PickupRadiusButton.setPosition(sf::Vector2f(bgX + 50.f, bgY + 280.f));
     m_upgrade4_JumpHeightButton.setPosition(sf::Vector2f(bgX + 50.f, bgY + 370.f));
-
+	m_upgradeNPCButton.setPosition(sf::Vector2f(bgX + 50.f, bgY + 460.f));
     m_hirePaleoText.setPosition(m_hirePaleontologistButton.getPosition() + sf::Vector2f(20.f, 15.f));
 
     m_upgrade1_RayLengthText.setPosition(m_upgrade1_RayLengthButton.getPosition() + sf::Vector2f(20.f, 15.f));
     m_upgrade2_RayDamageText.setPosition(m_upgrade2_RayDamageButton.getPosition() + sf::Vector2f(20.f, 15.f));
     m_upgrade3_PickupRadiusText.setPosition(m_upgrade3_PickupRadiusButton.getPosition() + sf::Vector2f(20.f, 15.f));
     m_upgrade4_JumpHeightText.setPosition(m_upgrade4_JumpHeightButton.getPosition() + sf::Vector2f(20.f, 15.f));
-
+	m_upgradeNPCText.setPosition(m_upgradeNPCButton.getPosition() + sf::Vector2f(20.f, 15.f));
 
     m_hiringTabText.setPosition(m_hiringTabButton.getPosition() + sf::Vector2f(20.f, 10.f));
     m_upgradesTabText.setPosition(m_upgradesTabButton.getPosition() + sf::Vector2f(20.f, 10.f));
@@ -191,6 +197,10 @@ HireAction TraderMenu::handleClick(const sf::Vector2f& screenPos, const sf::Rend
         {
             return HireAction::UpgradeJumpHeight;
         }
+        if (containsPoint(m_upgradeNPCButton, screenPos))
+        {
+			return HireAction::UpgradeNPC;
+        }
     }
 
     if (!containsPoint(m_background, screenPos))
@@ -214,6 +224,8 @@ void TraderMenu::draw(sf::RenderWindow& window)
     m_upgrade3_PickupRadiusText.setString("Pickup +" + std::to_string(upgrade3Level) + " ($" + std::to_string(getUpgrade3Cost()) + ")");
 
     m_upgrade4_JumpHeightText.setString("Jump +" + std::to_string(upgrade4Level) + " ($" + std::to_string(getUpgrade4Cost()) + ")");
+
+    m_upgradeNPCText.setString("Upgrade NPC ($" + std::to_string(getUpgradeNPCCost()) + ")");
 
     if (!m_open) return;
 
@@ -275,12 +287,13 @@ void TraderMenu::draw(sf::RenderWindow& window)
         window.draw(m_upgrade2_RayDamageButton);
         window.draw(m_upgrade3_PickupRadiusButton);
         window.draw(m_upgrade4_JumpHeightButton);
+        window.draw(m_upgradeNPCButton);
 
         window.draw(m_upgrade1_RayLengthText);
         window.draw(m_upgrade2_RayDamageText);
         window.draw(m_upgrade3_PickupRadiusText);
         window.draw(m_upgrade4_JumpHeightText);
-
+		window.draw(m_upgradeNPCText);
 
     }
 

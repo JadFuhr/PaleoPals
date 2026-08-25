@@ -34,9 +34,6 @@ private:
     void update(sf::Time t_deltaTime);
     void render();
 
-    //void setupTexts();
-    //void setupSprites();
-   //void setupAudio();
     void setupMap(); // loads and generates the map grid
     void moveCamera(sf::Time t_deltaTime);
 
@@ -47,6 +44,7 @@ private:
     sf::Text m_traderTutText{ m_uiFont };
     sf::Text m_museumTutText{ m_uiFont };
     sf::Text m_moneyText{ m_uiFont };
+	sf::Text m_npcDepthText{ m_uiFont };
 
     Map m_map;
     Menu m_menu;

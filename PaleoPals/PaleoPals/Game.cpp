@@ -32,6 +32,12 @@ Game::Game() :
     m_museumTutText.setCharacterSize(28);
     m_museumTutText.setFillColor(sf::Color::Yellow);
     m_museumTutText.setPosition(sf::Vector2f(WINDOW_X / 2.0f, 0.0f));
+
+    m_npcDepthText.setFont(m_uiFont);
+    m_npcDepthText.setCharacterSize(28);
+    m_npcDepthText.setFillColor(sf::Color::Yellow);
+    m_npcDepthText.setPosition(sf::Vector2f(WINDOW_X / 2.0f, 40.0f));
+
 }
 
 Game::~Game()
@@ -155,7 +161,16 @@ void Game::processEvents()
                             }
                         }
 
-
+                        if(action == HireAction::UpgradeNPC)
+                        {
+                            int cost = m_traderMenu.getUpgradeNPCCost();
+                            if (m_player.getMoney() >= cost)
+                            {
+                                m_player.spendMoney(cost);
+                                m_npc.m_miningDepthLevel++;
+								m_traderMenu.m_npc.m_miningDepthLevel++;
+                            }
+						}
 
                         continue;
                     }
@@ -250,6 +265,7 @@ void Game::update(sf::Time t_deltaTime)
         m_moneyText.setString("Money: " + std::to_string(m_player.getMoney()));
         m_traderTutText.setString("Open Trader: Press T");
         m_museumTutText.setString("Open Museum: Press M");
+        m_npcDepthText.setString("NPC Depth Level: " + std::to_string(20 + (m_npc.m_miningDepthLevel * 10)));
 
         if (m_museumInterior.isOpen() || m_traderMenu.isOpen())
         {
@@ -331,6 +347,7 @@ void Game::render()
         m_window.draw(m_moneyText);
         m_window.draw(m_traderTutText);
         m_window.draw(m_museumTutText);
+		m_window.draw(m_npcDepthText);
 
 		m_window.setView(m_cameraView);
 

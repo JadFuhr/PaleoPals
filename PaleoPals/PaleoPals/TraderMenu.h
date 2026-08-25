@@ -3,11 +3,13 @@
 #define TRADERMENU_H
 
 #include <SFML/Graphics.hpp>
+#include "NPC.h"
 
 enum class HireAction
 {
     None,
     HirePaleontologist,
+    UpgradeNPC,
 	UpgradeRayLength,
 	UpgradeRayDamage,
     UpgradePickupRadius,
@@ -20,6 +22,8 @@ class TraderMenu
 {
 public:
     TraderMenu();
+
+    NPC m_npc; 
 
     // position the menu at a point in world coordinates (menu will be centered on screen in screen coords)
     void openAt(const sf::Vector2f& worldPos);
@@ -42,7 +46,7 @@ public:
     int getUpgrade2Cost() const { return 200 + upgrade2Level * 75; }
     int getUpgrade3Cost() const { return 150 + upgrade3Level * 60; }
     int getUpgrade4Cost() const { return 175 + upgrade4Level * 70; }
-
+    int getUpgradeNPCCost() const { return 500 + m_npc.m_miningDepthLevel * 100; }
 private:
     // Helper to update all button positions
     void updateButtonPositions(const sf::RenderWindow& window);
@@ -79,6 +83,7 @@ private:
     sf::RectangleShape m_upgrade2_RayDamageButton;
     sf::RectangleShape m_upgrade3_PickupRadiusButton;
     sf::RectangleShape m_upgrade4_JumpHeightButton;
+	sf::RectangleShape m_upgradeNPCButton;
 
     // Close button
     sf::RectangleShape m_closeButton;
@@ -89,6 +94,7 @@ private:
     sf::Text m_upgrade2_RayDamageText{ m_font };
     sf::Text m_upgrade3_PickupRadiusText{ m_font };
     sf::Text m_upgrade4_JumpHeightText{ m_font };
+	sf::Text m_upgradeNPCText{ m_font };
     sf::Text m_hiringTabText{ m_font };
     sf::Text m_upgradesTabText{ m_font };
 

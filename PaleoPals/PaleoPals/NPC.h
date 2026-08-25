@@ -47,7 +47,8 @@ public:
 
     float npcMiningDamageCooldown = 0.0f;
     float npcMiningTickDelay = 0.12f;
-    int m_npcMiningDamage = 1;
+    int m_npcMiningDamage = 5;
+	int m_miningDepthLevel = 0; // for npc mining upgrade 
 
     bool m_useDFS = true;
     bool m_returningToSurface = false; 
