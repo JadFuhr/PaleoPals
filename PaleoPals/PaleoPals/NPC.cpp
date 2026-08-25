@@ -402,6 +402,8 @@ void NPC::generateFossilPath(Map& map, sf::Vector2i goal)
 	if (!found)
 	{
 		std::cout << "npc cant find fossil path \n";
+		generateReturnPath(map); // gen return path if fossil path not found
+		updateReturn(sf::seconds(0), map); // immediately start returning
 		return;
 	}
 
