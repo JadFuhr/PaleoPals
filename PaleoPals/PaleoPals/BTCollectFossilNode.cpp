@@ -3,7 +3,7 @@
 #include "Map.h""
 #include "Player.h"
 
-BTCollectFossilNode::BTCollectFossilNode(NPC& npc, Map& map) : m_npc(npc), m_map(map) {}
+BTCollectFossilNode::BTCollectFossilNode(NPC& npc, Map& map) : m_npc(npc), m_map(map), m_pathfindingFailedCount(0), m_currentTargetTimeout(0) {}
 
 BTStatus BTCollectFossilNode::tick(float dt)
 {
@@ -13,6 +13,8 @@ BTStatus BTCollectFossilNode::tick(float dt)
     if (!m_currentTarget || m_currentTarget->isPickedUp)
     {
         m_currentTarget = nullptr;
+		m_pathfindingFailedCount = 0;
+		m_currentTargetTimeout = 0.0f;
 
         float bestDistanceSq = std::numeric_limits<float>::max();
         sf::Vector2f npcPos = m_npc.getNPCPosition();
@@ -36,6 +38,13 @@ BTStatus BTCollectFossilNode::tick(float dt)
         if (m_currentTarget)
         {
             m_npc.generateFossilPath(m_map, { m_currentTarget->gridCol, m_currentTarget->gridRow });
+
+            if (m_npc.m_fossilPath.empty())
+            {
+                std::cout << "npc failed to generate path to fossil \n";
+                m_currentTarget = nullptr; // Reset target if pathfinding fails
+                m_pathfindingFailedCount++;
+            }
         }
     }
 
@@ -45,6 +54,19 @@ BTStatus BTCollectFossilNode::tick(float dt)
 		m_npc.m_returningToSurface = true; // Start returning to surface
 		m_npc.generateReturnPath(m_map);
         return BTStatus::Success;
+    }
+
+
+    // Track time on current target - timeout if stuck for 3 seconds
+    m_currentTargetTimeout += dt;
+    if (m_currentTargetTimeout > 3.0f)
+    {
+        std::cout << "NPC timeout on fossil target,  marking as unreachable\n";
+        m_npc.m_fossilPath.clear();
+        m_npc.m_fossilIndex = 0;
+        m_currentTarget = nullptr;
+        m_currentTargetTimeout = 0.0f;
+        return BTStatus::Running; // Try next target next frame
     }
 
     // Walk path

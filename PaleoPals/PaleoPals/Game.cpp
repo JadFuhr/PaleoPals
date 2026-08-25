@@ -110,33 +110,30 @@ void Game::processEvents()
                         {
                            
                         }
-                        else if (action == HireAction::HireResearcher)
-                        {
-                            std::cout << "Researcher hiring not yet implemented\n";
-                        }
-                        if (action == HireAction::Upgrade1)
+  
+                        if (action == HireAction::UpgradeRayLength)
                         {
                             int cost = m_traderMenu.getUpgrade1Cost();
 
                             if (m_player.getMoney() >= cost)
                             {
                                 m_player.spendMoney(cost);
-                                m_player.pickaxeRadiusLevel++;
+                                m_player.RayLengthLevel++;
                                 m_traderMenu.upgrade1Level++;
                             }
                         }
-                        else if (action == HireAction::Upgrade2)
+                        else if (action == HireAction::UpgradeRayDamage)
                         {
                             int cost = m_traderMenu.getUpgrade2Cost();
 
                             if (m_player.getMoney() >= cost)
                             {
                                 m_player.spendMoney(cost);
-                                m_player.damageLevel++;
+                                m_player.rayDamageLevel++;
                                 m_traderMenu.upgrade2Level++;
                             }
                         }
-                        if (action == HireAction::Upgrade3)
+                        if (action == HireAction::UpgradePickupRadius)
                         {
                             int cost = m_traderMenu.getUpgrade3Cost();
                             if (m_player.getMoney() >= cost)
@@ -147,7 +144,7 @@ void Game::processEvents()
                             }
                         }
 
-                        if (action == HireAction::Upgrade4)
+                        if (action == HireAction::UpgradeJumpHeight)
                         {
                             int cost = m_traderMenu.getUpgrade4Cost();
                             if (m_player.getMoney() >= cost)
@@ -163,19 +160,6 @@ void Game::processEvents()
                         continue;
                     }
 
-                    // Click on museum open interior
-                    //if (m_map.getMuseum().getSprite().getGlobalBounds().contains(screenPos))
-                    //{
-                    //    m_museumInterior.open();
-                    //    continue;
-                    //}
-
-                    // Click on trader open trader menu
-                    //if (m_map.getTrader().getSprite().getGlobalBounds().contains(screenPos))
-                    //{
-                    //    m_traderMenu.openAt(worldPos);
-                    //    continue;
-                    //}
                 }
 
             }

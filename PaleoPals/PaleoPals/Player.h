@@ -68,8 +68,8 @@ public:
 
     bool m_isMining = false;
 
-    int pickaxeRadiusLevel = 0; // is now used for ray  radius upgrade
-    int damageLevel = 0;        // is now used for ray damage upgrade
+    int RayLengthLevel = 0; // is now used for ray  radius upgrade
+    int rayDamageLevel = 0;        // is now used for ray damage upgrade
     int pickupRadiusLevel = 0;
     int jumpLevel = 0;
 

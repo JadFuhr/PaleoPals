@@ -8,11 +8,10 @@ enum class HireAction
 {
     None,
     HirePaleontologist,
-    HireResearcher,
-	Upgrade1,
-	Upgrade2,
-    Upgrade3,
-    Upgrade4
+	UpgradeRayLength,
+	UpgradeRayDamage,
+    UpgradePickupRadius,
+    UpgradeJumpHeight
 
 };
 
@@ -50,6 +49,7 @@ private:
 
     // Helper to check if a point is inside a rectangle shape
     bool containsPoint(const sf::RectangleShape& shape, const sf::Vector2f& point) const;
+
     enum class ActiveTab
     {
         Hiring,
@@ -73,9 +73,8 @@ private:
 
     // Hire buttons (in Hiring tab)
     sf::RectangleShape m_hirePaleontologistButton;
-    sf::RectangleShape m_hireResearcherButton;
 
-    // Upgrade buttons (in Upgrades tab) - placeholder for now
+    // Upgrade buttons (in Upgrades tab) 
     sf::RectangleShape m_upgrade1_RayLengthButton;
     sf::RectangleShape m_upgrade2_RayDamageButton;
     sf::RectangleShape m_upgrade3_PickupRadiusButton;
@@ -86,7 +85,6 @@ private:
 
     sf::Font m_font;
     sf::Text m_hirePaleoText{ m_font };
-    sf::Text m_hireResearcherText{ m_font };
     sf::Text m_upgrade1_RayLengthText{ m_font };
     sf::Text m_upgrade2_RayDamageText{ m_font };
     sf::Text m_upgrade3_PickupRadiusText{ m_font };

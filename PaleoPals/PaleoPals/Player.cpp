@@ -403,7 +403,7 @@ void Player::draw(sf::RenderWindow& window)
         float len = std::sqrt(dir.x * dir.x + dir.y * dir.y);
         if (len > 0) dir /= len;
 
-        float rayLength = m_rayBaseLength + pickaxeRadiusLevel * 10.f;
+        float rayLength = m_rayBaseLength + RayLengthLevel * 10.f;
         sf::Vector2f end = start + dir * rayLength;
 
         sf::Vertex line[2];
@@ -466,7 +466,7 @@ void Player::updateMiningRay(sf::Time dt, Map& map, const sf::RenderWindow& wind
     if (len == 0) return;
     dir /= len;
 
-    float rayLength = m_rayBaseLength + pickaxeRadiusLevel * 10.f;
+    float rayLength = m_rayBaseLength + RayLengthLevel * 10.f;
     float tileSize = map.getTileSize();
 
     for (float t = 0; t < rayLength; t += tileSize * 0.5f)
@@ -511,11 +511,11 @@ void Player::addCollectedItem(const CollectedItem& item)
 
 float Player::getRayLength() const
 {
-    return m_rayBaseLength * (1.0f + pickaxeRadiusLevel * 0.25f);
+    return m_rayBaseLength * (1.0f + RayLengthLevel * 0.25f);
 }
 
 int Player::getRayDamage() const
 {
-    return 1 + damageLevel; 
+    return 1 + rayDamageLevel; 
 }
 

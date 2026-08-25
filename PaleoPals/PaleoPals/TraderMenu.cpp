@@ -34,11 +34,6 @@ TraderMenu::TraderMenu()
     m_hirePaleontologistButton.setOutlineColor(sf::Color(200, 200, 200));
     m_hirePaleontologistButton.setOutlineThickness(2.0f);
 
-    m_hireResearcherButton.setSize(sf::Vector2f(250.0f, 60.0f));
-    m_hireResearcherButton.setFillColor(sf::Color(150, 120, 180));
-    m_hireResearcherButton.setOutlineColor(sf::Color(200, 200, 200));
-    m_hireResearcherButton.setOutlineThickness(2.0f);
-
     m_upgrade1_RayLengthButton.setSize(sf::Vector2f(250.0f, 60.0f));
     m_upgrade1_RayLengthButton.setFillColor(sf::Color(180, 150, 100));
     m_upgrade1_RayLengthButton.setOutlineColor(sf::Color(200, 200, 200));
@@ -78,7 +73,6 @@ TraderMenu::TraderMenu()
         };
 
     setupText(m_hirePaleoText, "Hire Paleontologist");
-    setupText(m_hireResearcherText, "Hire Researcher");
     setupText(m_upgrade1_RayLengthText, "Upgrade 1");
     setupText(m_upgrade2_RayDamageText, "Upgrade 2");
     setupText(m_upgrade3_PickupRadiusText, "Pickup Radius");
@@ -128,7 +122,6 @@ void TraderMenu::updateButtonPositions(const sf::RenderWindow& window)
     m_closeButton.setPosition(sf::Vector2f(bgX + bgWidth - 40.0f, bgY + 10.0f));
 
     m_hirePaleontologistButton.setPosition(sf::Vector2f(bgX + 50.0f, bgY + 100.0f));
-    m_hireResearcherButton.setPosition(sf::Vector2f(bgX + 50.0f, bgY + 190.0f));
 
     m_upgrade1_RayLengthButton.setPosition(sf::Vector2f(bgX + 50.0f, bgY + 100.0f));
     m_upgrade2_RayDamageButton.setPosition(sf::Vector2f(bgX + 50.0f, bgY + 190.0f));
@@ -136,7 +129,6 @@ void TraderMenu::updateButtonPositions(const sf::RenderWindow& window)
     m_upgrade4_JumpHeightButton.setPosition(sf::Vector2f(bgX + 50.f, bgY + 370.f));
 
     m_hirePaleoText.setPosition(m_hirePaleontologistButton.getPosition() + sf::Vector2f(20.f, 15.f));
-    m_hireResearcherText.setPosition(m_hireResearcherButton.getPosition() + sf::Vector2f(20.f, 15.f));
 
     m_upgrade1_RayLengthText.setPosition(m_upgrade1_RayLengthButton.getPosition() + sf::Vector2f(20.f, 15.f));
     m_upgrade2_RayDamageText.setPosition(m_upgrade2_RayDamageButton.getPosition() + sf::Vector2f(20.f, 15.f));
@@ -179,29 +171,25 @@ HireAction TraderMenu::handleClick(const sf::Vector2f& screenPos, const sf::Rend
         {
             return HireAction::HirePaleontologist;
         }
-        if (containsPoint(m_hireResearcherButton, screenPos))
-        {
-            return HireAction::HireResearcher;
-        }
     }
     else if (m_activeTab == ActiveTab::Upgrades)
     {
         // Upgrades 
-        if (containsPoint(m_upgrade1_RayLengthButton, screenPos) && !m_upgrade1Purchased)
+        if (containsPoint(m_upgrade1_RayLengthButton, screenPos))
         {
-            return HireAction::Upgrade1;
+            return HireAction::UpgradeRayLength;
         }
-        if (containsPoint(m_upgrade2_RayDamageButton, screenPos) && !m_upgrade2Purchased)
+        if (containsPoint(m_upgrade2_RayDamageButton, screenPos))
         {
-            return HireAction::Upgrade2;
+            return HireAction::UpgradeRayDamage;
         }
         if (containsPoint(m_upgrade3_PickupRadiusButton, screenPos))
         {
-            return HireAction::Upgrade3;
+            return HireAction::UpgradePickupRadius;
         }
         if (containsPoint(m_upgrade4_JumpHeightButton, screenPos))
         {
-            return HireAction::Upgrade4;
+            return HireAction::UpgradeJumpHeight;
         }
     }
 
@@ -273,10 +261,7 @@ void TraderMenu::draw(sf::RenderWindow& window)
     if (m_activeTab == ActiveTab::Hiring)
     {
         window.draw(m_hirePaleontologistButton);
-        window.draw(m_hireResearcherButton);
-
         window.draw(m_hirePaleoText);
-        window.draw(m_hireResearcherText);
 
 
     }
