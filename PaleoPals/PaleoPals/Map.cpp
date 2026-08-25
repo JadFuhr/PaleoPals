@@ -23,7 +23,7 @@ bool Map::loadMapFromConfig(const std::string& filepath)
         json config;
         file >> config;
 
-        // --- Terrain layers ---
+        //  Terrain layers
         for (auto& layerNode : config["map"]["layers"])
         {
             LayerType layer;
@@ -38,7 +38,7 @@ bool Map::loadMapFromConfig(const std::string& filepath)
             m_layerTypes.push_back(std::move(layer));
         }
 
-        // --- Buildings ---
+        //  Buildings 
         if (config.contains("museum"))
         {
             if (!m_museum.loadMuseumFromConfig(config["museum"]))
@@ -56,7 +56,7 @@ bool Map::loadMapFromConfig(const std::string& filepath)
             }
         }
 
-        // --- Collectible + dinosaur config ---
+        //  Collectible + dinosaur config 
         if (!m_fossilManager.loadFossilsFromConfig(filepath))
         {
             std::cerr << "Failed to load fossil config\n";
@@ -384,20 +384,6 @@ void Map::drawMap(sf::RenderWindow& window)
     }
 }
 
-void Map::toggleDebugMode()
-{
-    m_debugMode = !m_debugMode;
-
-    if (m_debugMode)
-    {
-        std::cout << "Debug mode ON\n";
-    }
-    else
-    {
-        std::cout << "Debug mode OFF\n";
-    }
-}
-
 void Map::updateHover(const sf::RenderWindow& window, float tileSize, int cols)
 {
     if (!m_debugMode) return; 
@@ -499,21 +485,6 @@ void Map::handleMouseHold(const sf::RenderWindow& window, float tileSize, int co
     }
 }
 
-void Map::drawDebug(sf::RenderWindow& window)
-{
-    if (m_debugMode && m_hoveredIndex != -1)
-    {
-        window.draw(m_hoverOutline);
-    }
-}
-
-sf::Vector2f Map::tileToWorld(sf::Vector2i tilePos) const
-{
-    float x = tilePos.x * m_tileSize + (m_windowWidth - m_cols * m_tileSize) / 2.0f + m_tileSize / 2.0f;
-    float y = tilePos.y * m_tileSize + m_windowHeight / 2.0f + m_tileSize / 2.0f;
-    return sf::Vector2f(x, y);
-}
-
 bool Map::isPointOnTrader(const sf::Vector2f& worldPos) const
 {
     return m_trader.containsPoint(worldPos);
@@ -527,43 +498,6 @@ void Map::updateMuseum(sf::RenderWindow& window)
 void Map::updateTrader(sf::RenderWindow& window)
 {
     m_trader.updateTraderHover(window);
-}
-
-void Map::addLadder(int row, int col)
-{
-    if (row < 0 || col < 0 || row >= m_rows || col >= m_cols)
-        return;
-
-    int index = row * m_cols + col;
-    if (index >= 0 && index < static_cast<int>(m_ladders.size()))
-    {
-        m_ladders[index] = true;
-    }
-}
-
-void Map::removeLadder(int row, int col)
-{
-    if (row < 0 || col < 0 || row >= m_rows || col >= m_cols)
-        return;
-
-    int index = row * m_cols + col;
-    if (index >= 0 && index < static_cast<int>(m_ladders.size()))
-    {
-        m_ladders[index] = false;
-    }
-}
-
-bool Map::hasLadder(int row, int col) const
-{
-    if (row < 0 || col < 0 || row >= m_rows || col >= m_cols)
-        return false;
-
-    int index = row * m_cols + col;
-    if (index >= 0 && index < static_cast<int>(m_ladders.size()))
-    {
-        return m_ladders[index];
-    }
-    return false;
 }
 
 bool Map::isWalkable(int row, int col) const
@@ -598,4 +532,11 @@ sf::Vector2i Map::worldToTile(sf::Vector2f worldPos) const
     int row = static_cast<int>((localY / m_tileSize));
 
     return sf::Vector2i(col, row);
+}
+
+sf::Vector2f Map::tileToWorld(sf::Vector2i tilePos) const
+{
+    float x = tilePos.x * m_tileSize + (m_windowWidth - m_cols * m_tileSize) / 2.0f + m_tileSize / 2.0f;
+    float y = tilePos.y * m_tileSize + m_windowHeight / 2.0f + m_tileSize / 2.0f;
+    return sf::Vector2f(x, y);
 }

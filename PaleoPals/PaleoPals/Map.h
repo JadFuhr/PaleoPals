@@ -70,10 +70,9 @@ public:
     void damageTile(int row, int col, int dmg);
 
     void drawMap(sf::RenderWindow& window);
-    void drawDebug(sf::RenderWindow& window);
 
     void updateHover(const sf::RenderWindow& window, float tileSize, int cols);
-    void toggleDebugMode();
+   
     void handleMouseHold(const sf::RenderWindow& window, float tileSize, int cols);
 
     sf::Vector2f tileToWorld(sf::Vector2i tilePos) const;
@@ -92,10 +91,6 @@ public:
     FossilManager& getFossilManager() { return m_fossilManager; }
     Museum& getMuseum() { return m_museum; }
     Trader& getTrader() { return m_trader; }
-
-    void addLadder(int row, int col);
-    void removeLadder(int row, int col);
-    bool hasLadder(int row, int col) const;
 
     bool isWalkable(int row, int col) const;
     sf::Vector2i worldToTile(sf::Vector2f worldPos) const;

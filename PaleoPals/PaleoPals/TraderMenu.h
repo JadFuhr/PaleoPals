@@ -76,10 +76,10 @@ private:
     sf::RectangleShape m_hireResearcherButton;
 
     // Upgrade buttons (in Upgrades tab) - placeholder for now
-    sf::RectangleShape m_upgrade1Button;
-    sf::RectangleShape m_upgrade2Button;
-    sf::RectangleShape m_upgrade3Button;
-    sf::RectangleShape m_upgrade4Button;
+    sf::RectangleShape m_upgrade1_RayLengthButton;
+    sf::RectangleShape m_upgrade2_RayDamageButton;
+    sf::RectangleShape m_upgrade3_PickupRadiusButton;
+    sf::RectangleShape m_upgrade4_JumpHeightButton;
 
     // Close button
     sf::RectangleShape m_closeButton;
@@ -87,10 +87,10 @@ private:
     sf::Font m_font;
     sf::Text m_hirePaleoText{ m_font };
     sf::Text m_hireResearcherText{ m_font };
-    sf::Text m_upgrade1Text{ m_font };
-    sf::Text m_upgrade2Text{ m_font };
-    sf::Text m_upgrade3Text{ m_font };
-    sf::Text m_upgrade4Text{ m_font };
+    sf::Text m_upgrade1_RayLengthText{ m_font };
+    sf::Text m_upgrade2_RayDamageText{ m_font };
+    sf::Text m_upgrade3_PickupRadiusText{ m_font };
+    sf::Text m_upgrade4_JumpHeightText{ m_font };
     sf::Text m_hiringTabText{ m_font };
     sf::Text m_upgradesTabText{ m_font };
 

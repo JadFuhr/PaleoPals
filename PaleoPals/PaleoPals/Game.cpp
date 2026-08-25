@@ -206,12 +206,6 @@ void Game::processKeys(const std::optional<sf::Event> t_event)
             }
         }
 
-        // Keep F3 toggle for debug mode
-        if (m_currentState == GameState::Gameplay && newKeypress->code == sf::Keyboard::Key::F3)
-        {
-            m_map.toggleDebugMode();
-        }
-
         if (newKeypress->code == sf::Keyboard::Key::T)
         {
             if (m_traderMenu.isOpen())
@@ -370,14 +364,11 @@ void Game::render()
         m_traderMenu.draw(m_window);
         m_museumInterior.draw(m_window);
 
-        m_map.drawDebug(m_window);
-
         break;
     case GameState::Paused:
         m_window.setView(m_cameraView);
 
         m_map.drawMap(m_window);
-        m_map.drawDebug(m_window);
 
         m_window.setView(m_window.getDefaultView());
 
