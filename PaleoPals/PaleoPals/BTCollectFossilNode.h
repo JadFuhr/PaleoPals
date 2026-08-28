@@ -1,5 +1,6 @@
 #pragma once
 #include "BTNode.h"
+#include <map>
 class NPC;
 class Map;
 struct Collectible;
@@ -17,7 +18,8 @@ private:
 	Map& m_map;
 
 	Collectible* m_currentTarget = nullptr;
+	float m_targetTimeout = 0.0f;	// tracking time spent on target
 
-	int m_pathfindingFailedCount = 0;		// tracking how many times pathfinding has failed 
-	float m_currentTargetTimeout = 0.0f;	// tracking time spent on current target
+	std::map<Collectible*, int> m_failedAttempts; 
+	static const int MAX_ATTEMPTS_PER_FOSSIL = 3;
 };
