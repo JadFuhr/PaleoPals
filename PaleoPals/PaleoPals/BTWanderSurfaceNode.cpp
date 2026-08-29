@@ -18,6 +18,7 @@ BTStatus BTWanderSurfaceNode::tick(float dt)
 	if (m_timer > 1.0f)
 	{
 		m_timer = 0.0f;
+
 		int roll = std::rand() % 100;
 
 		if (roll< 30)

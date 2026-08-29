@@ -10,7 +10,7 @@ BTStatus BTCollectFossilNode::tick(float dt)
     auto& fossils = m_map.getFossilManager().getAllCollectibles();
 
 
-    // A fossil is worth trying if it is still on the ground and has attempts left
+    // A fossil has to be tried if it is still on the ground and has attempts left
     auto isSelectable = [&](Collectible& c)
         {
             if (c.isPickedUp)
