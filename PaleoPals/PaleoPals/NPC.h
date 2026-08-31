@@ -15,13 +15,6 @@
 
 class Player;
 
-enum class NPCState
-{
-	WANDERTHESURFACE,
-	MINING,
-	SEARCHING
-};
-
 class NPC
 {
 public:
@@ -75,7 +68,6 @@ private:
     sf::Texture m_texture;
     sf::Sprite  m_sprite{ m_texture };
 
-    NPCState m_state = NPCState::WANDERTHESURFACE;
     sf::Vector2f m_velocity;
     float m_moveSpeed = 80.0f; // slower speed
 

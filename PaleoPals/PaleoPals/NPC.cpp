@@ -46,7 +46,6 @@ void NPC::drawNPC(sf::RenderWindow& window, Map& map)
 void NPC::updateReturn(sf::Time dt, Map& map)
 {
 	if (m_returnIndex >= m_returnPath.size()) {
-		m_state = NPCState::WANDERTHESURFACE;
 		m_returningToSurface = false;
 		m_returnPath.clear();
 		m_returnIndex = 0;
@@ -159,7 +158,7 @@ void NPC::generateMiningPath(Map& map)
 	
 	while (!stack.empty())
 	{
-		int maxDepth = 20 + m_miningDepthLevel * 10; // max depth of search, can be upgraded
+		int maxDepth = 10 + m_miningDepthLevel * 10; // max depth of search, can be upgraded
 
 		if (m_miningPath.size() >= maxDepth) 
 		{

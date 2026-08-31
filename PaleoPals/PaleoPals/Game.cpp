@@ -265,7 +265,7 @@ void Game::update(sf::Time t_deltaTime)
         m_moneyText.setString("Money: " + std::to_string(m_player.getMoney()));
         m_traderTutText.setString("Open Trader: Press T");
         m_museumTutText.setString("Open Museum: Press M");
-        m_npcDepthText.setString("NPC Depth Level: " + std::to_string(20 + (m_npc.m_miningDepthLevel * 10)));
+        m_npcDepthText.setString("NPC Depth Level: " + std::to_string(10 + (m_npc.m_miningDepthLevel * 10)));
 
         if (m_museumInterior.isOpen() || m_traderMenu.isOpen())
         {
