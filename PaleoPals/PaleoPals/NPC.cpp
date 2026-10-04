@@ -167,12 +167,10 @@ void NPC::generateMiningPath(Map& map)
 
 		sf::Vector2i currentTile;
 
-		if (m_useDFS) // dfs, treat as stack (lst in frst out)
-		{
-			currentTile = stack.back();
-			stack.pop_back();
-			//std::cout << "dfs used \n"; 
-		}
+	
+		currentTile = stack.back();
+		stack.pop_back();
+		
 
 		if (!inBounds(currentTile)) continue;		// not ibounds = skip
 
@@ -184,6 +182,7 @@ void NPC::generateMiningPath(Map& map)
 
 
 		auto neigh = neighbours(currentTile);
+
 		std::shuffle(neigh.begin(), neigh.end(), std::mt19937(std::random_device{}()));	// sshuffe to make pathing feel more organic 
 
 		for (auto& n : neigh)	// Explore neighbours

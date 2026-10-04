@@ -21,7 +21,7 @@ public:
 	NPC();
 
     void setRoot(BTNode* root) { m_root = root; }
-    BTNode* getRoot() const { return m_root; }
+    //BTNode* getRoot() const { return m_root; }
 
 	void setPlayer(Player* player) { m_player = player; }
 
